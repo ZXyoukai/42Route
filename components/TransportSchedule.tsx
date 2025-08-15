@@ -117,8 +117,9 @@ export const TransportSchedule = ({ onBack }: TransportScheduleProps) => {
               Partida - Chegada
             </Text>
             <Text className={`font-bold text-xl ${
-              schedule.isActive ? 'text-purple-400' : 'text-slate-400'
-            }`}>
+              schedule.isActive ? 'text-cyan-400' : 'text-slate-400'
+            }`}
+            style={schedule.isActive ? { color: '#00babc' } : {}}>
               {schedule.departureTime} - {schedule.arrivalTime}
             </Text>
           </View>
@@ -156,15 +157,15 @@ export const TransportSchedule = ({ onBack }: TransportScheduleProps) => {
       <StatusBar style="light" backgroundColor="#0f172a" />
       
       {/* Header */}
-      <View className="bg-gradient-to-br from-cyan-500 to-teal-600 pt-12 pb-6 px-6" style={{ backgroundColor: '#00babc' }}>
-        <View className="flex-row items-center justify-between mb-4">
+      <View className="bg-gradient-to-br from-cyan-500 to-teal-600 mt-14 pt-3 pb-3 px-6" style={{ backgroundColor: '#00babc' }}>
+        <View className="flex-row items-center justify-between ">
           <TouchableOpacity onPress={onBack} className="flex-row items-center">
-            <Ionicons name="arrow-back" size={24} color="white" />
+            <Ionicons name="arrow-back" size={24} color="white" />  
             <Text className="text-white text-lg font-medium ml-2">Voltar</Text>
           </TouchableOpacity>
           <Image
             source={require('../assets/route_logo-w.png')}
-            className="h-8"
+            className="h-12 top-3 right-20"
             resizeMode="contain"
           />
         </View>
@@ -241,7 +242,7 @@ export const TransportSchedule = ({ onBack }: TransportScheduleProps) => {
           
           <TouchableOpacity className="flex-row items-center justify-between mb-3 p-3 bg-slate-700 rounded-lg">
             <View className="flex-row items-center">
-              <MaterialIcons name="phone" size={20} color="#a855f7" />
+              <MaterialIcons name="phone" size={20} color="#00babc" />
               <View className="ml-3">
                 <Text className="text-white font-medium">Central de Transportes</Text>
                 <Text className="text-slate-400 text-sm">+244 222 123 456</Text>
@@ -252,7 +253,7 @@ export const TransportSchedule = ({ onBack }: TransportScheduleProps) => {
           
           <TouchableOpacity className="flex-row items-center justify-between mb-3 p-3 bg-slate-700 rounded-lg">
             <View className="flex-row items-center">
-              <MaterialIcons name="email" size={20} color="#6366f1" />
+              <MaterialIcons name="email" size={20} color="#00babc" />
               <View className="ml-3">
                 <Text className="text-white font-medium">Email de Suporte</Text>
                 <Text className="text-slate-400 text-sm">transport@42luanda.ao</Text>
@@ -263,7 +264,7 @@ export const TransportSchedule = ({ onBack }: TransportScheduleProps) => {
           
           <TouchableOpacity className="flex-row items-center justify-between p-3 bg-slate-700 rounded-lg">
             <View className="flex-row items-center">
-              <MaterialIcons name="language" size={20} color="#10b981" />
+              <MaterialIcons name="language" size={20} color="#00babc" />
               <View className="ml-3">
                 <Text className="text-white font-medium">Portal do Estudante</Text>
                 <Text className="text-slate-400 text-sm">portal.42luanda.ao</Text>

@@ -164,7 +164,7 @@ export const LoginScreen = ({ onLogin }: LoginScreenProps) => {
               {/* Links auxiliares */}
               <View className="items-center">
                 <TouchableOpacity className="mb-2">
-                  <Text className="text-cyan-400 text-sm font-medium" style={{ color: '#00babc' }}>
+                  <Text className="text-purple-400 text-sm font-medium">
                     Esqueceu a palavra-passe?
                   </Text>
                 </TouchableOpacity>
@@ -176,8 +176,8 @@ export const LoginScreen = ({ onLogin }: LoginScreenProps) => {
                 </View>
 
                 <TouchableOpacity className="mt-3 flex-row items-center">
-                  <MaterialIcons name="help-outline" size={16} color="#00babc" />
-                  <Text className="text-cyan-400 text-sm font-medium ml-2" style={{ color: '#00babc' }}>
+                  <MaterialIcons name="help-outline" size={16} color="#8b5cf6" />
+                  <Text className="text-purple-400 text-sm font-medium ml-2">
                     Precisa de ajuda? Contacte o suporte
                   </Text>
                 </TouchableOpacity>

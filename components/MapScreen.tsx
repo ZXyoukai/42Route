@@ -32,7 +32,7 @@ export const MapScreen = ({ studentName = "Estudante" }: MapScreenProps) => {
       <StatusBar style="light" backgroundColor="#0f172a" />
       
       {/* Header */}
-      <View className="bg-gradient-to-br from-cyan-500 to-teal-600 pt-12 pb-6 px-6" style={{ backgroundColor: '#00babc' }}>
+      <View className="bg-gradient-to-br from-cyan-500 to-teal-600 mt-14 pt-3 pb-3 px-6" style={{ backgroundColor: '#00babc' }}>
         <View className="flex-row items-center justify-between">
           <View>
             <Text className="text-white text-xl font-bold">Mapa em Tempo Real</Text>

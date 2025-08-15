@@ -27,7 +27,7 @@ export const StudentProfile = ({ onBack }: StudentProfileProps) => {
       <StatusBar style="light" backgroundColor="#0f172a" />
       
       {/* Header */}
-      <View className="bg-gradient-to-br from-cyan-500 to-teal-600 pt-12 pb-6 px-6" style={{ backgroundColor: '#00babc' }}>
+      <View className="bg-gradient-to-br  from-cyan-500 to-teal-600 mt-14 pb-2 px-6" style={{ backgroundColor: '#00babc' }}>
         <View className="flex-row items-center justify-between mb-4">
           <TouchableOpacity onPress={onBack} className="flex-row items-center">
             <Ionicons name="arrow-back" size={24} color="white" />
@@ -35,7 +35,7 @@ export const StudentProfile = ({ onBack }: StudentProfileProps) => {
           </TouchableOpacity>
           <Image
             source={require('../assets/route_logo-w.png')}
-            className="h-10"
+            className="h-14 top-5 right-24"
             resizeMode="contain"
           />
         </View>
