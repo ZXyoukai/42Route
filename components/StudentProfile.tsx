@@ -53,7 +53,7 @@ export const StudentProfile = ({ onBack }: StudentProfileProps) => {
 
       <ScrollView className="flex-1 px-6 py-4">
         {/* Informações Pessoais */}
-        <View className="bg-slate-800 rounded-2xl p-6 mb-6 shadow-lg border border-slate-700">
+        <View className="bg-slate-800 rounded-2xl p-6 mb-6 shadow-lg space-y-4 border border-slate-700">
           <Text className="text-white text-xl font-bold mb-4">Informações Pessoais</Text>
           
           <View className="space-y-4">

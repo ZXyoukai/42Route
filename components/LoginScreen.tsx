@@ -56,7 +56,7 @@ export const LoginScreen = ({ onLogin }: LoginScreenProps) => {
         >
           {/* Header com Logo */}
           <View className="pt-20 pb-12 px-6 items-center">
-            <View className="bg-gradient-to-br from-purple-600 to-indigo-600 rounded-3xl p-4 mb-6 shadow-2xl">
+            <View className="bg-gradient-to-br from-cyan-500 to-teal-600 rounded-3xl p-4 mb-6 shadow-2xl" style={{ backgroundColor: '#00babc' }}>
               <Image
                 source={require('../assets/route_logo-w.png')}
                 className="h-24"
@@ -131,24 +131,32 @@ export const LoginScreen = ({ onLogin }: LoginScreenProps) => {
 
               {/* Botão Login */}
               <TouchableOpacity
-                className={`rounded-xl py-4 px-6 items-center mb-4 ${
+                className={`rounded-2xl py-5 px-6 items-center mb-4 shadow-2xl ${
                   isLoading 
                     ? 'bg-slate-600' 
-                    : 'bg-gradient-to-r from-purple-600 to-indigo-600'
+                    : 'bg-gradient-to-r from-cyan-500 via-cyan-600 to-teal-600'
                 }`}
                 onPress={handleLogin}
                 disabled={isLoading}
                 activeOpacity={0.8}
+                style={{
+                  backgroundColor: isLoading ? '#475569' : '#00babc',
+                  shadowColor: '#00babc',
+                  shadowOffset: { width: 0, height: 4 },
+                  shadowOpacity: 0.3,
+                  shadowRadius: 8,
+                  elevation: 8,
+                }}
               >
                 {isLoading ? (
                   <View className="flex-row items-center">
                     <View className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-3" />
-                    <Text className="text-white font-bold text-lg">A entrar...</Text>
+                    <Text className="text-white font-bold text-xl">A entrar...</Text>
                   </View>
                 ) : (
                   <View className="flex-row items-center">
-                    <Ionicons name="log-in" size={20} color="white" />
-                    <Text className="text-white font-bold text-lg ml-2">Entrar</Text>
+                    <Ionicons name="log-in" size={24} color="white" />
+                    <Text className="text-white font-bold text-xl ml-2">Entrar</Text>
                   </View>
                 )}
               </TouchableOpacity>
@@ -156,7 +164,7 @@ export const LoginScreen = ({ onLogin }: LoginScreenProps) => {
               {/* Links auxiliares */}
               <View className="items-center">
                 <TouchableOpacity className="mb-2">
-                  <Text className="text-purple-400 text-sm font-medium">
+                  <Text className="text-cyan-400 text-sm font-medium" style={{ color: '#00babc' }}>
                     Esqueceu a palavra-passe?
                   </Text>
                 </TouchableOpacity>
@@ -168,8 +176,8 @@ export const LoginScreen = ({ onLogin }: LoginScreenProps) => {
                 </View>
 
                 <TouchableOpacity className="mt-3 flex-row items-center">
-                  <MaterialIcons name="help-outline" size={16} color="#8b5cf6" />
-                  <Text className="text-purple-400 text-sm font-medium ml-2">
+                  <MaterialIcons name="help-outline" size={16} color="#00babc" />
+                  <Text className="text-cyan-400 text-sm font-medium ml-2" style={{ color: '#00babc' }}>
                     Precisa de ajuda? Contacte o suporte
                   </Text>
                 </TouchableOpacity>

@@ -157,8 +157,9 @@ export const TransportSchedule = ({ onBack }: TransportScheduleProps) => {
       {/* Header */}
       <View className="bg-gradient-to-br from-purple-600 to-indigo-700 pt-12 pb-6 px-6">
         <View className="flex-row items-center justify-between mb-4">
-          <TouchableOpacity onPress={onBack}>
-            <Text className="text-white text-lg">← Voltar</Text>
+          <TouchableOpacity onPress={onBack} className="flex-row items-center">
+            <Ionicons name="arrow-back" size={24} color="white" />
+            <Text className="text-white text-lg font-medium ml-2">Voltar</Text>
           </TouchableOpacity>
           <Image
             source={require('../assets/route_logo-w.png')}
@@ -175,12 +176,12 @@ export const TransportSchedule = ({ onBack }: TransportScheduleProps) => {
 
       <ScrollView className="flex-1 px-6 py-4">
         {/* Informações Importantes */}
-        <View className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-4">
+        <View className="bg-slate-800 border border-slate-700 rounded-xl p-4 mb-4 shadow-lg">
           <View className="flex-row items-start">
-            <Text className="text-blue-600 mr-2">ℹ️</Text>
-            <View className="flex-1">
-              <Text className="text-blue-800 font-medium text-sm mb-1">Informações Importantes</Text>
-              <Text className="text-blue-700 text-xs">
+            <Ionicons name="information-circle" size={20} color="#06b6d4" />
+            <View className="flex-1 ml-3">
+              <Text className="text-cyan-400 font-medium text-sm mb-1">Informações Importantes</Text>
+              <Text className="text-slate-300 text-xs">
                 • Chegue à paragem 5 minutos antes{'\n'}
                 • Tenha sempre o seu cartão de estudante{'\n'}
                 • Horários podem variar em caso de trânsito intenso
@@ -202,70 +203,79 @@ export const TransportSchedule = ({ onBack }: TransportScheduleProps) => {
         </View>
 
         {/* Horários Especiais */}
-        <View className="bg-white rounded-xl p-4 mb-4 shadow-sm">
-          <Text className="text-gray-800 text-lg font-semibold mb-3">Horários Especiais</Text>
+        <View className="bg-slate-800 rounded-xl p-4 mb-4 shadow-lg border border-slate-700">
+          <Text className="text-white text-lg font-semibold mb-3">Horários Especiais</Text>
           
           <View className="mb-3">
-            <Text className="text-gray-800 font-medium">🎄 Época Natalícia (Dezembro)</Text>
-            <Text className="text-gray-600 text-sm">Horários reduzidos - apenas Rota Central</Text>
-            <Text className="text-cyan-600 font-medium">09:00 - 17:00 (a cada 2 horas)</Text>
+            <View className="flex-row items-center mb-1">
+              <Ionicons name="snow" size={16} color="#ef4444" />
+              <Text className="text-white font-medium ml-2">Época Natalícia (Dezembro)</Text>
+            </View>
+            <Text className="text-slate-400 text-sm">Horários reduzidos - apenas Rota Central</Text>
+            <Text className="text-purple-400 font-medium">09:00 - 17:00 (a cada 2 horas)</Text>
           </View>
           
           <View className="mb-3">
-            <Text className="text-gray-800 font-medium">📚 Período de Exames</Text>
-            <Text className="text-gray-600 text-sm">Horários alargados durante as avaliações</Text>
-            <Text className="text-cyan-600 font-medium">07:00 - 22:00 (a cada 20 min)</Text>
+            <View className="flex-row items-center mb-1">
+              <MaterialIcons name="book" size={16} color="#10b981" />
+              <Text className="text-white font-medium ml-2">Período de Exames</Text>
+            </View>
+            <Text className="text-slate-400 text-sm">Horários alargados durante as avaliações</Text>
+            <Text className="text-purple-400 font-medium">07:00 - 22:00 (a cada 20 min)</Text>
           </View>
           
           <View>
-            <Text className="text-gray-800 font-medium">🏖️ Férias de Verão</Text>
-            <Text className="text-gray-600 text-sm">Serviço limitado apenas para atividades especiais</Text>
-            <Text className="text-gray-500 font-medium">Mediante marcação prévia</Text>
+            <View className="flex-row items-center mb-1">
+              <Ionicons name="sunny" size={16} color="#f59e0b" />
+              <Text className="text-white font-medium ml-2">Férias de Verão</Text>
+            </View>
+            <Text className="text-slate-400 text-sm">Serviço limitado apenas para atividades especiais</Text>
+            <Text className="text-slate-500 font-medium">Mediante marcação prévia</Text>
           </View>
         </View>
 
         {/* Contactos para Mais Informações */}
-        <View className="bg-white rounded-xl p-4 mb-6 shadow-sm">
-          <Text className="text-gray-800 text-lg font-semibold mb-3">Mais Informações</Text>
+        <View className="bg-slate-800 rounded-xl p-4 mb-6 shadow-lg border border-slate-700">
+          <Text className="text-white text-lg font-semibold mb-3">Mais Informações</Text>
           
-          <TouchableOpacity className="flex-row items-center justify-between mb-3 p-2 bg-gray-50 rounded-lg">
+          <TouchableOpacity className="flex-row items-center justify-between mb-3 p-3 bg-slate-700 rounded-lg">
             <View className="flex-row items-center">
-              <Text className="mr-3">📞</Text>
-              <View>
-                <Text className="text-gray-800 font-medium">Central de Transportes</Text>
-                <Text className="text-gray-600 text-sm">+244 222 123 456</Text>
+              <MaterialIcons name="phone" size={20} color="#a855f7" />
+              <View className="ml-3">
+                <Text className="text-white font-medium">Central de Transportes</Text>
+                <Text className="text-slate-400 text-sm">+244 222 123 456</Text>
               </View>
             </View>
-            <Text className="text-gray-400">›</Text>
+            <Ionicons name="chevron-forward" size={16} color="#64748b" />
           </TouchableOpacity>
           
-          <TouchableOpacity className="flex-row items-center justify-between mb-3 p-2 bg-gray-50 rounded-lg">
+          <TouchableOpacity className="flex-row items-center justify-between mb-3 p-3 bg-slate-700 rounded-lg">
             <View className="flex-row items-center">
-              <Text className="mr-3">✉️</Text>
-              <View>
-                <Text className="text-gray-800 font-medium">Email de Suporte</Text>
-                <Text className="text-gray-600 text-sm">transport@42luanda.ao</Text>
+              <MaterialIcons name="email" size={20} color="#6366f1" />
+              <View className="ml-3">
+                <Text className="text-white font-medium">Email de Suporte</Text>
+                <Text className="text-slate-400 text-sm">transport@42luanda.ao</Text>
               </View>
             </View>
-            <Text className="text-gray-400">›</Text>
+            <Ionicons name="chevron-forward" size={16} color="#64748b" />
           </TouchableOpacity>
           
-          <TouchableOpacity className="flex-row items-center justify-between p-2 bg-gray-50 rounded-lg">
+          <TouchableOpacity className="flex-row items-center justify-between p-3 bg-slate-700 rounded-lg">
             <View className="flex-row items-center">
-              <Text className="mr-3">🌐</Text>
-              <View>
-                <Text className="text-gray-800 font-medium">Portal do Estudante</Text>
-                <Text className="text-gray-600 text-sm">portal.42luanda.ao</Text>
+              <MaterialIcons name="language" size={20} color="#10b981" />
+              <View className="ml-3">
+                <Text className="text-white font-medium">Portal do Estudante</Text>
+                <Text className="text-slate-400 text-sm">portal.42luanda.ao</Text>
               </View>
             </View>
-            <Text className="text-gray-400">›</Text>
+            <Ionicons name="chevron-forward" size={16} color="#64748b" />
           </TouchableOpacity>
         </View>
 
         {/* Atualização dos Horários */}
         <View className="items-center py-4">
-          <Text className="text-gray-500 text-sm">Última atualização: 15 Ago 2025</Text>
-          <Text className="text-gray-400 text-xs">Os horários estão sujeitos a alterações</Text>
+          <Text className="text-slate-500 text-sm">Última atualização: 15 Ago 2025</Text>
+          <Text className="text-slate-600 text-xs">Os horários estão sujeitos a alterações</Text>
         </View>
       </ScrollView>
     </View>
