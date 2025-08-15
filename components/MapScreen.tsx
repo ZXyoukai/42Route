@@ -32,11 +32,11 @@ export const MapScreen = ({ studentName = "Estudante" }: MapScreenProps) => {
       <StatusBar style="light" backgroundColor="#0f172a" />
       
       {/* Header */}
-      <View className="bg-gradient-to-br from-purple-600 to-indigo-700 pt-12 pb-6 px-6">
+      <View className="bg-gradient-to-br from-cyan-500 to-teal-600 pt-12 pb-6 px-6" style={{ backgroundColor: '#00babc' }}>
         <View className="flex-row items-center justify-between">
           <View>
             <Text className="text-white text-xl font-bold">Mapa em Tempo Real</Text>
-            <Text className="text-purple-100 text-sm">Acompanhe os autocarros ao vivo</Text>
+            <Text className="text-cyan-100 text-sm">Acompanhe os autocarros ao vivo</Text>
           </View>
           <Image
             source={require('../assets/route_logo-w.png')}
@@ -51,7 +51,7 @@ export const MapScreen = ({ studentName = "Estudante" }: MapScreenProps) => {
         <View className="bg-slate-800 rounded-2xl p-6 mb-6 shadow-lg border border-slate-700 h-64">
           <View className="flex-1 bg-slate-700 rounded-xl items-center justify-center">
             <View className="items-center">
-              <View className="w-20 h-20 bg-purple-900/50 rounded-full items-center justify-center mb-4 border border-purple-600">
+              <View className="w-20 h-20 bg-cyan-900/50 rounded-full items-center justify-center mb-4 border border-cyan-600" style={{ backgroundColor: 'rgba(0, 186, 188, 0.1)', borderColor: '#00babc' }}>
                 <MaterialIcons name="map" size={32} color="#a855f7" />
               </View>
               <Text className="text-white font-bold text-lg mb-2">Mapa Interativo</Text>
@@ -100,8 +100,9 @@ export const MapScreen = ({ studentName = "Estudante" }: MapScreenProps) => {
                   </Text>
                   <View className="bg-slate-600 rounded-full h-1.5 w-16 ml-3">
                     <View
-                      className="bg-gradient-to-r from-purple-500 to-indigo-500 h-1.5 rounded-full"
+                      className="bg-gradient-to-r from-cyan-500 to-teal-500 h-1.5 rounded-full"
                       style={{
+                        backgroundColor: '#00babc',
                         width: `${(bus.passengers / bus.capacity) * 100}%`
                       }}
                     />
@@ -109,7 +110,7 @@ export const MapScreen = ({ studentName = "Estudante" }: MapScreenProps) => {
                 </View>
                 <View className="items-end">
                   <Text className="text-slate-400 text-xs">ETA</Text>
-                  <Text className="text-purple-400 font-bold">{bus.eta}</Text>
+                  <Text className="text-cyan-400 font-bold" style={{ color: '#00babc' }}>{bus.eta}</Text>
                 </View>
               </View>
             </TouchableOpacity>

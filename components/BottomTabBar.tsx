@@ -61,17 +61,20 @@ export const BottomTabBar = ({ activeTab, onTabPress }: BottomTabBarProps) => {
           <TouchableOpacity
             key={tab.name}
             className={`flex-1 items-center py-2 px-1 rounded-xl mx-1 ${
-              isActive ? 'bg-purple-900/30' : ''
+              isActive ? 'bg-cyan-900/30' : ''
             }`}
             onPress={() => onTabPress(tab.name)}
             activeOpacity={0.7}
           >
-            <View className={`p-1 rounded-lg ${isActive ? 'bg-purple-600/20' : ''}`}>
+            <View className={`p-1 rounded-lg ${isActive ? 'bg-cyan-600/20' : ''}`} style={isActive ? { backgroundColor: 'rgba(0, 186, 188, 0.2)' } : {}}>
               {renderIcon(tab.iconType, tab.icon, isActive)}
             </View>
-            <Text className={`text-xs font-medium mt-1 ${
-              isActive ? 'text-purple-400' : 'text-slate-400'
-            }`}>
+            <Text 
+              className={`text-xs font-medium mt-1 ${
+                isActive ? 'text-cyan-400' : 'text-slate-400'
+              }`}
+              style={isActive ? { color: '#00babc' } : {}}
+            >
               {tab.label}
             </Text>
           </TouchableOpacity>

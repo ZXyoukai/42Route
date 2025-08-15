@@ -66,7 +66,7 @@ export const RouteDetail = ({
       <StatusBar style="light" backgroundColor="#0f172a" />
       
       {/* Header */}
-      <View className="bg-gradient-to-br from-purple-600 to-indigo-700 pt-12 pb-6 px-6">
+      <View className="bg-gradient-to-br from-cyan-500 to-teal-600 pt-12 pb-6 px-6" style={{ backgroundColor: '#00babc' }}>
         <View className="flex-row items-center justify-between mb-4">
           <TouchableOpacity onPress={onBack} className="flex-row items-center">
             <Ionicons name="arrow-back" size={24} color="white" />
@@ -81,7 +81,7 @@ export const RouteDetail = ({
         
         <View>
           <Text className="text-white text-xl font-bold">{routeName}</Text>
-          <Text className="text-purple-100 text-sm">Acompanhe a rota em tempo real</Text>
+          <Text className="text-cyan-100 text-sm">Acompanhe a rota em tempo real</Text>
         </View>
       </View>
 
@@ -109,7 +109,7 @@ export const RouteDetail = ({
                 <MaterialIcons name="access-time" size={16} color="#94a3b8" />
                 <Text className="text-slate-300 font-medium ml-3">Hora Atual:</Text>
               </View>
-              <Text className="text-purple-400 font-bold text-lg">{currentTime}</Text>
+              <Text className="text-cyan-400 font-bold text-lg" style={{ color: '#00babc' }}>{currentTime}</Text>
             </View>
             <View className="flex-row justify-between items-center p-3 bg-slate-700 rounded-xl">
               <View className="flex-row items-center">
@@ -136,7 +136,7 @@ export const RouteDetail = ({
                       stop.isCompleted 
                         ? 'bg-emerald-500 border-emerald-500' 
                         : stop.isCurrent 
-                        ? 'bg-purple-500 border-purple-500' 
+                        ? 'bg-cyan-500 border-cyan-500' 
                         : 'bg-slate-700 border-slate-600'
                     }`}
                   >
@@ -161,27 +161,29 @@ export const RouteDetail = ({
                 <View className="flex-1 bg-slate-700 rounded-xl p-4">
                   <View className="flex-row justify-between items-start mb-2">
                     <Text className={`font-bold text-base ${
-                      stop.isCurrent ? 'text-purple-400' : 'text-white'
-                    }`}>
+                      stop.isCurrent ? 'text-cyan-400' : 'text-white'
+                    }`}
+                    style={stop.isCurrent ? { color: '#00babc' } : {}}>
                       {stop.name}
                     </Text>
                     <Text className={`text-sm font-bold ${
                       stop.isCompleted 
                         ? 'text-emerald-400' 
                         : stop.isCurrent 
-                        ? 'text-purple-400' 
+                        ? 'text-cyan-400' 
                         : 'text-slate-400'
-                    }`}>
+                    }`}
+                    style={stop.isCurrent ? { color: '#00babc' } : {}}>
                       {stop.estimatedTime}
                     </Text>
                   </View>
                   <Text className="text-slate-300 text-sm">{stop.address}</Text>
                   
                   {stop.isCurrent && (
-                    <View className="mt-3 p-3 bg-purple-900/50 rounded-lg border border-purple-600">
+                    <View className="mt-3 p-3 bg-cyan-900/50 rounded-lg border border-cyan-600" style={{ backgroundColor: 'rgba(0, 186, 188, 0.1)', borderColor: '#00babc' }}>
                       <View className="flex-row items-center">
-                        <FontAwesome5 name="bus" size={14} color="#a855f7" />
-                        <Text className="text-purple-300 text-sm font-bold ml-2">
+                        <FontAwesome5 name="bus" size={14} color="#00babc" />
+                        <Text className="text-cyan-300 text-sm font-bold ml-2" style={{ color: '#00babc' }}>
                           Próxima paragem - Chegada estimada em 20 min
                         </Text>
                       </View>
@@ -223,7 +225,7 @@ export const RouteDetail = ({
 
         {/* Ações */}
         <View className="flex-row justify-between mb-6">
-          <TouchableOpacity className="bg-gradient-to-br from-purple-600 to-indigo-600 rounded-xl p-4 flex-1 mr-3 items-center shadow-lg">
+          <TouchableOpacity className="bg-gradient-to-br from-cyan-500 to-teal-600 rounded-xl p-4 flex-1 mr-3 items-center shadow-lg" style={{ backgroundColor: '#00babc' }}>
             <View className="flex-row items-center">
               <MaterialIcons name="notifications" size={20} color="white" />
               <Text className="text-white font-bold text-sm ml-2">Notificar Chegada</Text>

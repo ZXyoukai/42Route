@@ -90,9 +90,10 @@ export const TransportSchedule = ({ onBack }: TransportScheduleProps) => {
           }`}>
             {schedule.routeName}
           </Text>
-          <Text className={`text-sm font-medium ${
-            schedule.isActive ? 'text-slate-300' : 'text-slate-500'
-          }`}>
+          <Text               className={`text-sm font-medium ${
+              schedule.isActive ? 'text-cyan-400' : 'text-slate-400'
+            }`}
+            style={schedule.isActive ? { color: '#00babc' } : {}}>
             {schedule.routeId} • {schedule.stops} paragens
           </Text>
         </View>
@@ -155,7 +156,7 @@ export const TransportSchedule = ({ onBack }: TransportScheduleProps) => {
       <StatusBar style="light" backgroundColor="#0f172a" />
       
       {/* Header */}
-      <View className="bg-gradient-to-br from-purple-600 to-indigo-700 pt-12 pb-6 px-6">
+      <View className="bg-gradient-to-br from-cyan-500 to-teal-600 pt-12 pb-6 px-6" style={{ backgroundColor: '#00babc' }}>
         <View className="flex-row items-center justify-between mb-4">
           <TouchableOpacity onPress={onBack} className="flex-row items-center">
             <Ionicons name="arrow-back" size={24} color="white" />
@@ -170,7 +171,7 @@ export const TransportSchedule = ({ onBack }: TransportScheduleProps) => {
         
         <View>
           <Text className="text-white text-xl font-bold">Horários de Transporte</Text>
-          <Text className="text-purple-100 text-sm">Consulte todos os horários disponíveis</Text>
+          <Text className="text-cyan-100 text-sm">Consulte todos os horários disponíveis</Text>
         </View>
       </View>
 
@@ -212,7 +213,7 @@ export const TransportSchedule = ({ onBack }: TransportScheduleProps) => {
               <Text className="text-white font-medium ml-2">Época Natalícia (Dezembro)</Text>
             </View>
             <Text className="text-slate-400 text-sm">Horários reduzidos - apenas Rota Central</Text>
-            <Text className="text-purple-400 font-medium">09:00 - 17:00 (a cada 2 horas)</Text>
+            <Text className="text-cyan-400 font-medium" style={{ color: '#00babc' }}>09:00 - 17:00 (a cada 2 horas)</Text>
           </View>
           
           <View className="mb-3">
@@ -221,7 +222,7 @@ export const TransportSchedule = ({ onBack }: TransportScheduleProps) => {
               <Text className="text-white font-medium ml-2">Período de Exames</Text>
             </View>
             <Text className="text-slate-400 text-sm">Horários alargados durante as avaliações</Text>
-            <Text className="text-purple-400 font-medium">07:00 - 22:00 (a cada 20 min)</Text>
+            <Text className="text-cyan-400 font-medium" style={{ color: '#00babc' }}>07:00 - 22:00 (a cada 20 min)</Text>
           </View>
           
           <View>

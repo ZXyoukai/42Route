@@ -27,7 +27,7 @@ export const StudentProfile = ({ onBack }: StudentProfileProps) => {
       <StatusBar style="light" backgroundColor="#0f172a" />
       
       {/* Header */}
-      <View className="bg-gradient-to-br from-purple-600 to-indigo-700 pt-12 pb-6 px-6">
+      <View className="bg-gradient-to-br from-cyan-500 to-teal-600 pt-12 pb-6 px-6" style={{ backgroundColor: '#00babc' }}>
         <View className="flex-row items-center justify-between mb-4">
           <TouchableOpacity onPress={onBack} className="flex-row items-center">
             <Ionicons name="arrow-back" size={24} color="white" />
@@ -42,12 +42,12 @@ export const StudentProfile = ({ onBack }: StudentProfileProps) => {
         
         <View className="items-center">
           <View className="w-24 h-24 bg-white rounded-full items-center justify-center mb-4 shadow-lg">
-            <Text className="text-purple-600 text-3xl font-bold">
+            <Text className="text-cyan-600 text-3xl font-bold" style={{ color: '#00babc' }}>
               {studentInfo.name.split(' ').map(n => n[0]).join('')}
             </Text>
           </View>
           <Text className="text-white text-2xl font-bold">{studentInfo.name}</Text>
-          <Text className="text-purple-100 text-sm">{studentInfo.studentId}</Text>
+          <Text className="text-cyan-100 text-sm">{studentInfo.studentId}</Text>
         </View>
       </View>
 
@@ -72,9 +72,9 @@ export const StudentProfile = ({ onBack }: StudentProfileProps) => {
               <Text className="text-white font-bold">{studentInfo.level}</Text>
             </View>
             
-            <View className="p-3 bg-purple-900/30 rounded-xl border border-purple-600">
+            <View className="p-3 bg-cyan-900/30 rounded-xl border border-cyan-600">
               <Text className="text-slate-400 text-sm font-medium">Rota Preferida</Text>
-              <Text className="text-purple-400 font-bold">{studentInfo.preferredRoute}</Text>
+              <Text className="text-cyan-400 font-bold" style={{ color: '#00babc' }}>{studentInfo.preferredRoute}</Text>
             </View>
             
             <View className="p-3 bg-slate-700 rounded-xl">
@@ -91,7 +91,7 @@ export const StudentProfile = ({ onBack }: StudentProfileProps) => {
           <View className="flex-row justify-between items-center mb-4 p-3 bg-slate-700 rounded-xl">
             <View className="flex-1">
               <View className="flex-row items-center mb-1">
-                <Ionicons name="notifications" size={16} color="#a855f7" />
+                <Ionicons name="notifications" size={16} color="#00babc" />
                 <Text className="text-white font-medium ml-2">Notificações Push</Text>
               </View>
               <Text className="text-slate-400 text-sm">Receber alertas sobre os autocarros</Text>
@@ -99,7 +99,7 @@ export const StudentProfile = ({ onBack }: StudentProfileProps) => {
             <Switch
               value={notificationsEnabled}
               onValueChange={setNotificationsEnabled}
-              trackColor={{ false: '#374151', true: '#a855f7' }}
+              trackColor={{ false: '#374151', true: '#00babc' }}
               thumbColor={notificationsEnabled ? '#ffffff' : '#64748b'}
             />
           </View>
@@ -107,7 +107,7 @@ export const StudentProfile = ({ onBack }: StudentProfileProps) => {
           <View className="flex-row justify-between items-center mb-4 p-3 bg-slate-700 rounded-xl">
             <View className="flex-1">
               <View className="flex-row items-center mb-1">
-                <Ionicons name="location" size={16} color="#6366f1" />
+                <Ionicons name="location" size={16} color="#00babc" />
                 <Text className="text-white font-medium ml-2">Localização</Text>
               </View>
               <Text className="text-slate-400 text-sm">Permitir acesso à localização</Text>
@@ -115,7 +115,7 @@ export const StudentProfile = ({ onBack }: StudentProfileProps) => {
             <Switch
               value={locationEnabled}
               onValueChange={setLocationEnabled}
-              trackColor={{ false: '#374151', true: '#6366f1' }}
+              trackColor={{ false: '#374151', true: '#00babc' }}
               thumbColor={locationEnabled ? '#ffffff' : '#64748b'}
             />
           </View>
@@ -123,7 +123,7 @@ export const StudentProfile = ({ onBack }: StudentProfileProps) => {
           <View className="flex-row justify-between items-center p-3 bg-slate-700 rounded-xl">
             <View className="flex-1">
               <View className="flex-row items-center mb-1">
-                <MaterialIcons name="alarm" size={16} color="#8b5cf6" />
+                <MaterialIcons name="alarm" size={16} color="#00babc" />
                 <Text className="text-white font-medium ml-2">Alertas Automáticos</Text>
               </View>
               <Text className="text-slate-400 text-sm">Notificação 10 min antes da chegada</Text>
@@ -131,7 +131,7 @@ export const StudentProfile = ({ onBack }: StudentProfileProps) => {
             <Switch
               value={autoAlerts}
               onValueChange={setAutoAlerts}
-              trackColor={{ false: '#374151', true: '#8b5cf6' }}
+              trackColor={{ false: '#374151', true: '#00babc' }}
               thumbColor={autoAlerts ? '#ffffff' : '#64748b'}
             />
           </View>
@@ -143,8 +143,8 @@ export const StudentProfile = ({ onBack }: StudentProfileProps) => {
           
           <View className="flex-row justify-between mb-4">
             <View className="items-center flex-1">
-              <View className="w-16 h-16 bg-purple-900/50 rounded-2xl items-center justify-center mb-2 border border-purple-700">
-                <Text className="text-2xl font-bold text-purple-400">42</Text>
+              <View className="w-16 h-16 bg-cyan-900/50 rounded-2xl items-center justify-center mb-2 border border-cyan-700" style={{ backgroundColor: 'rgba(0, 186, 188, 0.1)', borderColor: '#00babc' }}>
+                <Text className="text-2xl font-bold text-cyan-400" style={{ color: '#00babc' }}>42</Text>
               </View>
               <Text className="text-slate-400 text-sm text-center font-medium">Viagens este mês</Text>
             </View>
@@ -173,7 +173,7 @@ export const StudentProfile = ({ onBack }: StudentProfileProps) => {
         <View className="space-y-3 mb-6">
           <TouchableOpacity className="bg-slate-800 rounded-xl p-4 flex-row items-center justify-between shadow-lg border border-slate-700">
             <View className="flex-row items-center">
-              <MaterialIcons name="route" size={20} color="#a855f7" />
+              <MaterialIcons name="route" size={20} color="#00babc" />
               <Text className="text-white font-medium ml-3">Alterar Rota Preferida</Text>
             </View>
             <Ionicons name="chevron-forward" size={16} color="#64748b" />
@@ -181,7 +181,7 @@ export const StudentProfile = ({ onBack }: StudentProfileProps) => {
           
           <TouchableOpacity className="bg-slate-800 rounded-xl p-4 flex-row items-center justify-between shadow-lg border border-slate-700">
             <View className="flex-row items-center">
-              <MaterialIcons name="schedule" size={20} color="#6366f1" />
+              <MaterialIcons name="schedule" size={20} color="#00babc" />
               <Text className="text-white font-medium ml-3">Horários Personalizados</Text>
             </View>
             <Ionicons name="chevron-forward" size={16} color="#64748b" />
