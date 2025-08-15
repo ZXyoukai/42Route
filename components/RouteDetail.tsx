@@ -61,11 +61,11 @@ export const RouteDetail = ({
   const driverName = 'António Mateus';
 
   return (
-    <View className="flex-1 bg-gray-50">
-      <StatusBar style="light" backgroundColor="#0891b2" />
+    <View className="flex-1 bg-slate-50">
+      <StatusBar style="light" backgroundColor="#7c3aed" />
       
       {/* Header */}
-      <View className="bg-cyan-600 pt-12 pb-6 px-6">
+      <View className="bg-gradient-to-br from-purple-600 to-indigo-700 pt-12 pb-6 px-6">
         <View className="flex-row items-center justify-between mb-4">
           <TouchableOpacity onPress={onBack}>
             <Text className="text-white text-lg">← Voltar</Text>
@@ -79,49 +79,51 @@ export const RouteDetail = ({
         
         <View>
           <Text className="text-white text-xl font-bold">{routeName}</Text>
-          <Text className="text-cyan-100 text-sm">Acompanhe a rota em tempo real</Text>
+          <Text className="text-purple-100 text-sm">Acompanhe a rota em tempo real</Text>
         </View>
       </View>
 
       <ScrollView className="flex-1 px-6 py-4">
         {/* Informações do Autocarro */}
-        <View className="bg-white rounded-xl p-4 mb-4 shadow-sm">
-          <Text className="text-gray-800 text-lg font-semibold mb-3">Informações do Autocarro</Text>
-          <View className="flex-row justify-between items-center mb-2">
-            <Text className="text-gray-600">Matrícula:</Text>
-            <Text className="text-gray-800 font-medium">{busNumber}</Text>
-          </View>
-          <View className="flex-row justify-between items-center mb-2">
-            <Text className="text-gray-600">Motorista:</Text>
-            <Text className="text-gray-800 font-medium">{driverName}</Text>
-          </View>
-          <View className="flex-row justify-between items-center mb-2">
-            <Text className="text-gray-600">Hora Atual:</Text>
-            <Text className="text-cyan-600 font-bold">{currentTime}</Text>
-          </View>
-          <View className="flex-row justify-between items-center">
-            <Text className="text-gray-600">Estado:</Text>
-            <View className="bg-blue-500 px-3 py-1 rounded-full">
-              <Text className="text-white text-xs font-medium">Em Rota</Text>
+        <View className="bg-white rounded-2xl p-6 mb-6 shadow-lg border border-slate-100">
+          <Text className="text-slate-800 text-xl font-bold mb-4">Informações do Autocarro</Text>
+          <View className="space-y-3">
+            <View className="flex-row justify-between items-center p-3 bg-slate-50 rounded-xl">
+              <Text className="text-slate-600 font-medium">Matrícula:</Text>
+              <Text className="text-slate-800 font-bold">{busNumber}</Text>
+            </View>
+            <View className="flex-row justify-between items-center p-3 bg-slate-50 rounded-xl">
+              <Text className="text-slate-600 font-medium">Motorista:</Text>
+              <Text className="text-slate-800 font-bold">{driverName}</Text>
+            </View>
+            <View className="flex-row justify-between items-center p-3 bg-slate-50 rounded-xl">
+              <Text className="text-slate-600 font-medium">Hora Atual:</Text>
+              <Text className="text-purple-600 font-bold text-lg">{currentTime}</Text>
+            </View>
+            <View className="flex-row justify-between items-center p-3 bg-slate-50 rounded-xl">
+              <Text className="text-slate-600 font-medium">Estado:</Text>
+              <View className="bg-indigo-500 px-4 py-2 rounded-full">
+                <Text className="text-white text-sm font-bold">Em Rota</Text>
+              </View>
             </View>
           </View>
         </View>
 
         {/* Progresso da Rota */}
-        <View className="bg-white rounded-xl p-4 mb-4 shadow-sm">
-          <Text className="text-gray-800 text-lg font-semibold mb-3">Progresso da Rota</Text>
+        <View className="bg-white rounded-2xl p-6 mb-6 shadow-lg border border-slate-100">
+          <Text className="text-slate-800 text-xl font-bold mb-4">Progresso da Rota</Text>
           <View className="relative">
             {stops.map((stop, index) => (
-              <View key={stop.id} className="flex-row items-start mb-4 last:mb-0">
+              <View key={stop.id} className="flex-row items-start mb-6 last:mb-0">
                 {/* Timeline */}
                 <View className="items-center mr-4">
                   <View 
-                    className={`w-4 h-4 rounded-full border-2 ${
+                    className={`w-5 h-5 rounded-full border-2 ${
                       stop.isCompleted 
-                        ? 'bg-green-500 border-green-500' 
+                        ? 'bg-emerald-500 border-emerald-500' 
                         : stop.isCurrent 
-                        ? 'bg-cyan-500 border-cyan-500' 
-                        : 'bg-white border-gray-300'
+                        ? 'bg-purple-500 border-purple-500' 
+                        : 'bg-white border-slate-300'
                     }`}
                   >
                     {stop.isCompleted && (
@@ -130,36 +132,36 @@ export const RouteDetail = ({
                   </View>
                   {index < stops.length - 1 && (
                     <View 
-                      className={`w-0.5 h-12 ${
-                        stop.isCompleted ? 'bg-green-500' : 'bg-gray-300'
+                      className={`w-0.5 h-16 ${
+                        stop.isCompleted ? 'bg-emerald-500' : 'bg-slate-300'
                       }`} 
                     />
                   )}
                 </View>
 
                 {/* Stop Info */}
-                <View className="flex-1">
-                  <View className="flex-row justify-between items-start mb-1">
-                    <Text className={`font-semibold ${
-                      stop.isCurrent ? 'text-cyan-600' : 'text-gray-800'
+                <View className="flex-1 bg-slate-50 rounded-xl p-4">
+                  <View className="flex-row justify-between items-start mb-2">
+                    <Text className={`font-bold text-base ${
+                      stop.isCurrent ? 'text-purple-600' : 'text-slate-800'
                     }`}>
                       {stop.name}
                     </Text>
-                    <Text className={`text-sm font-medium ${
+                    <Text className={`text-sm font-bold ${
                       stop.isCompleted 
-                        ? 'text-green-600' 
+                        ? 'text-emerald-600' 
                         : stop.isCurrent 
-                        ? 'text-cyan-600' 
-                        : 'text-gray-600'
+                        ? 'text-purple-600' 
+                        : 'text-slate-500'
                     }`}>
                       {stop.estimatedTime}
                     </Text>
                   </View>
-                  <Text className="text-gray-600 text-sm">{stop.address}</Text>
+                  <Text className="text-slate-600 text-sm">{stop.address}</Text>
                   
                   {stop.isCurrent && (
-                    <View className="mt-2">
-                      <Text className="text-cyan-600 text-xs font-medium">
+                    <View className="mt-3 p-3 bg-purple-100 rounded-lg border border-purple-200">
+                      <Text className="text-purple-700 text-sm font-bold">
                         🚌 Próxima paragem - Chegada estimada em 20 min
                       </Text>
                     </View>
@@ -171,26 +173,26 @@ export const RouteDetail = ({
         </View>
 
         {/* Notificações */}
-        <View className="bg-white rounded-xl p-4 mb-4 shadow-sm">
-          <Text className="text-gray-800 text-lg font-semibold mb-3">Notificações</Text>
-          <View className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 mb-2">
+        <View className="bg-white rounded-2xl p-6 mb-6 shadow-lg border border-slate-100">
+          <Text className="text-slate-800 text-xl font-bold mb-4">Notificações</Text>
+          <View className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-3">
             <View className="flex-row items-start">
-              <Text className="text-yellow-600 mr-2">⚠️</Text>
+              <Text className="text-amber-600 mr-3 text-lg">⚠️</Text>
               <View className="flex-1">
-                <Text className="text-yellow-800 font-medium text-sm">Ligeiro atraso</Text>
-                <Text className="text-yellow-700 text-xs mt-1">
+                <Text className="text-amber-800 font-bold text-sm">Ligeiro atraso</Text>
+                <Text className="text-amber-700 text-xs mt-1">
                   Autocarro com 5 minutos de atraso devido ao trânsito na Marginal
                 </Text>
               </View>
             </View>
           </View>
           
-          <View className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+          <View className="bg-indigo-50 border border-indigo-200 rounded-xl p-4">
             <View className="flex-row items-start">
-              <Text className="text-blue-600 mr-2">ℹ️</Text>
+              <Text className="text-indigo-600 mr-3 text-lg">ℹ️</Text>
               <View className="flex-1">
-                <Text className="text-blue-800 font-medium text-sm">Próxima paragem</Text>
-                <Text className="text-blue-700 text-xs mt-1">
+                <Text className="text-indigo-800 font-bold text-sm">Próxima paragem</Text>
+                <Text className="text-indigo-700 text-xs mt-1">
                   O autocarro está a aproximar-se do Centro Comercial Belas
                 </Text>
               </View>
@@ -200,11 +202,11 @@ export const RouteDetail = ({
 
         {/* Ações */}
         <View className="flex-row justify-between mb-6">
-          <TouchableOpacity className="bg-cyan-600 rounded-lg p-4 flex-1 mr-2 items-center">
-            <Text className="text-white font-semibold">📱 Notificar Chegada</Text>
+          <TouchableOpacity className="bg-gradient-to-br from-purple-600 to-indigo-600 rounded-xl p-4 flex-1 mr-3 items-center shadow-lg">
+            <Text className="text-white font-bold text-sm">📱 Notificar Chegada</Text>
           </TouchableOpacity>
-          <TouchableOpacity className="bg-green-600 rounded-lg p-4 flex-1 ml-2 items-center">
-            <Text className="text-white font-semibold">📞 Contactar Motorista</Text>
+          <TouchableOpacity className="bg-gradient-to-br from-emerald-600 to-teal-600 rounded-xl p-4 flex-1 ml-3 items-center shadow-lg">
+            <Text className="text-white font-bold text-sm">📞 Contactar Motorista</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>

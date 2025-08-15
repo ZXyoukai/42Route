@@ -76,83 +76,85 @@ export const TransportSchedule = ({ onBack }: TransportScheduleProps) => {
   const renderScheduleCard = (schedule: ScheduleInfo) => (
     <View
       key={schedule.routeId}
-      className={`rounded-xl p-4 mb-3 border ${
+      className={`rounded-2xl p-5 mb-4 border shadow-lg ${
         schedule.isActive
-          ? 'bg-white border-gray-200 shadow-sm'
-          : 'bg-gray-50 border-gray-300'
+          ? 'bg-white border-slate-100'
+          : 'bg-slate-100 border-slate-200'
       }`}
     >
-      <View className="flex-row justify-between items-start mb-3">
+      <View className="flex-row justify-between items-start mb-4">
         <View className="flex-1">
-          <Text className={`font-semibold text-base ${
-            schedule.isActive ? 'text-gray-800' : 'text-gray-500'
+          <Text className={`font-bold text-lg ${
+            schedule.isActive ? 'text-slate-800' : 'text-slate-500'
           }`}>
             {schedule.routeName}
           </Text>
-          <Text className={`text-sm ${
-            schedule.isActive ? 'text-gray-600' : 'text-gray-400'
+          <Text className={`text-sm font-medium ${
+            schedule.isActive ? 'text-slate-600' : 'text-slate-400'
           }`}>
             {schedule.routeId} • {schedule.stops} paragens
           </Text>
         </View>
-        <View className={`px-3 py-1 rounded-full ${
-          schedule.isActive ? 'bg-green-100' : 'bg-gray-200'
+        <View className={`px-4 py-2 rounded-full ${
+          schedule.isActive ? 'bg-emerald-100' : 'bg-slate-200'
         }`}>
-          <Text className={`text-xs font-medium ${
-            schedule.isActive ? 'text-green-700' : 'text-gray-600'
+          <Text className={`text-sm font-bold ${
+            schedule.isActive ? 'text-emerald-700' : 'text-slate-600'
           }`}>
             {schedule.isActive ? 'Ativo' : 'Inativo'}
           </Text>
         </View>
       </View>
 
-      <View className="flex-row justify-between items-center">
-        <View className="flex-1">
-          <Text className={`text-xs ${
-            schedule.isActive ? 'text-gray-600' : 'text-gray-400'
-          }`}>
-            Partida - Chegada
-          </Text>
-          <Text className={`font-bold text-lg ${
-            schedule.isActive ? 'text-cyan-600' : 'text-gray-500'
-          }`}>
-            {schedule.departureTime} - {schedule.arrivalTime}
-          </Text>
-        </View>
-        <View className="items-center">
-          <Text className={`text-xs ${
-            schedule.isActive ? 'text-gray-600' : 'text-gray-400'
-          }`}>
-            Duração
-          </Text>
-          <Text className={`font-medium ${
-            schedule.isActive ? 'text-gray-800' : 'text-gray-500'
-          }`}>
-            {schedule.duration}
-          </Text>
-        </View>
-        <View className="items-end">
-          <Text className={`text-xs ${
-            schedule.isActive ? 'text-gray-600' : 'text-gray-400'
-          }`}>
-            Frequência
-          </Text>
-          <Text className={`font-medium text-right ${
-            schedule.isActive ? 'text-gray-800' : 'text-gray-500'
-          }`}>
-            {schedule.frequency}
-          </Text>
+      <View className="bg-slate-50 rounded-xl p-4">
+        <View className="flex-row justify-between items-center">
+          <View className="flex-1">
+            <Text className={`text-sm font-medium ${
+              schedule.isActive ? 'text-slate-600' : 'text-slate-400'
+            }`}>
+              Partida - Chegada
+            </Text>
+            <Text className={`font-bold text-xl ${
+              schedule.isActive ? 'text-purple-600' : 'text-slate-500'
+            }`}>
+              {schedule.departureTime} - {schedule.arrivalTime}
+            </Text>
+          </View>
+          <View className="items-center">
+            <Text className={`text-sm font-medium ${
+              schedule.isActive ? 'text-slate-600' : 'text-slate-400'
+            }`}>
+              Duração
+            </Text>
+            <Text className={`font-bold ${
+              schedule.isActive ? 'text-slate-800' : 'text-slate-500'
+            }`}>
+              {schedule.duration}
+            </Text>
+          </View>
+          <View className="items-end">
+            <Text className={`text-sm font-medium ${
+              schedule.isActive ? 'text-slate-600' : 'text-slate-400'
+            }`}>
+              Frequência
+            </Text>
+            <Text className={`font-bold text-right ${
+              schedule.isActive ? 'text-slate-800' : 'text-slate-500'
+            }`}>
+              {schedule.frequency}
+            </Text>
+          </View>
         </View>
       </View>
     </View>
   );
 
   return (
-    <View className="flex-1 bg-gray-50">
-      <StatusBar style="light" backgroundColor="#0891b2" />
+    <View className="flex-1 bg-slate-50">
+      <StatusBar style="light" backgroundColor="#7c3aed" />
       
       {/* Header */}
-      <View className="bg-cyan-600 pt-12 pb-6 px-6">
+      <View className="bg-gradient-to-br from-purple-600 to-indigo-700 pt-12 pb-6 px-6">
         <View className="flex-row items-center justify-between mb-4">
           <TouchableOpacity onPress={onBack}>
             <Text className="text-white text-lg">← Voltar</Text>
@@ -166,7 +168,7 @@ export const TransportSchedule = ({ onBack }: TransportScheduleProps) => {
         
         <View>
           <Text className="text-white text-xl font-bold">Horários de Transporte</Text>
-          <Text className="text-cyan-100 text-sm">Consulte todos os horários disponíveis</Text>
+          <Text className="text-purple-100 text-sm">Consulte todos os horários disponíveis</Text>
         </View>
       </View>
 
@@ -188,13 +190,13 @@ export const TransportSchedule = ({ onBack }: TransportScheduleProps) => {
 
         {/* Horários de Segunda a Sexta */}
         <View className="mb-6">
-          <Text className="text-gray-800 text-lg font-semibold mb-3">Segunda a Sexta-feira</Text>
+          <Text className="text-slate-800 text-xl font-bold mb-4">Segunda a Sexta-feira</Text>
           {weekdays.map(renderScheduleCard)}
         </View>
 
         {/* Horários de Fim de Semana */}
         <View className="mb-6">
-          <Text className="text-gray-800 text-lg font-semibold mb-3">Sábados e Domingos</Text>
+          <Text className="text-slate-800 text-xl font-bold mb-4">Sábados e Domingos</Text>
           {weekends.map(renderScheduleCard)}
         </View>
 

@@ -22,11 +22,11 @@ export const StudentProfile = ({ onBack }: StudentProfileProps) => {
   };
 
   return (
-    <View className="flex-1 bg-gray-50">
-      <StatusBar style="light" backgroundColor="#0891b2" />
+    <View className="flex-1 bg-slate-50">
+      <StatusBar style="light" backgroundColor="#7c3aed" />
       
       {/* Header */}
-      <View className="bg-cyan-600 pt-12 pb-6 px-6">
+      <View className="bg-gradient-to-br from-purple-600 to-indigo-700 pt-12 pb-6 px-6">
         <View className="flex-row items-center justify-between mb-4">
           <TouchableOpacity onPress={onBack}>
             <Text className="text-white text-lg">← Voltar</Text>
@@ -39,44 +39,46 @@ export const StudentProfile = ({ onBack }: StudentProfileProps) => {
         </View>
         
         <View className="items-center">
-          <View className="w-20 h-20 bg-white rounded-full items-center justify-center mb-3">
-            <Text className="text-cyan-600 text-2xl font-bold">
+          <View className="w-24 h-24 bg-white rounded-full items-center justify-center mb-4 shadow-lg">
+            <Text className="text-purple-600 text-3xl font-bold">
               {studentInfo.name.split(' ').map(n => n[0]).join('')}
             </Text>
           </View>
-          <Text className="text-white text-xl font-bold">{studentInfo.name}</Text>
-          <Text className="text-cyan-100 text-sm">{studentInfo.studentId}</Text>
+          <Text className="text-white text-2xl font-bold">{studentInfo.name}</Text>
+          <Text className="text-purple-100 text-sm">{studentInfo.studentId}</Text>
         </View>
       </View>
 
       <ScrollView className="flex-1 px-6 py-4">
         {/* Informações Pessoais */}
-        <View className="bg-white rounded-xl p-4 mb-4 shadow-sm">
-          <Text className="text-gray-800 text-lg font-semibold mb-3">Informações Pessoais</Text>
+        <View className="bg-white rounded-2xl p-6 mb-6 shadow-lg border border-slate-100">
+          <Text className="text-slate-800 text-xl font-bold mb-4">Informações Pessoais</Text>
           
-          <View className="mb-3">
-            <Text className="text-gray-600 text-sm">Email</Text>
-            <Text className="text-gray-800 font-medium">{studentInfo.email}</Text>
-          </View>
-          
-          <View className="mb-3">
-            <Text className="text-gray-600 text-sm">Curso</Text>
-            <Text className="text-gray-800 font-medium">{studentInfo.course}</Text>
-          </View>
-          
-          <View className="mb-3">
-            <Text className="text-gray-600 text-sm">Nível</Text>
-            <Text className="text-gray-800 font-medium">{studentInfo.level}</Text>
-          </View>
-          
-          <View className="mb-3">
-            <Text className="text-gray-600 text-sm">Rota Preferida</Text>
-            <Text className="text-cyan-600 font-medium">{studentInfo.preferredRoute}</Text>
-          </View>
-          
-          <View>
-            <Text className="text-gray-600 text-sm">Contacto de Emergência</Text>
-            <Text className="text-gray-800 font-medium">{studentInfo.emergencyContact}</Text>
+          <View className="space-y-4">
+            <View className="p-3 bg-slate-50 rounded-xl">
+              <Text className="text-slate-500 text-sm font-medium">Email</Text>
+              <Text className="text-slate-800 font-bold">{studentInfo.email}</Text>
+            </View>
+            
+            <View className="p-3 bg-slate-50 rounded-xl">
+              <Text className="text-slate-500 text-sm font-medium">Curso</Text>
+              <Text className="text-slate-800 font-bold">{studentInfo.course}</Text>
+            </View>
+            
+            <View className="p-3 bg-slate-50 rounded-xl">
+              <Text className="text-slate-500 text-sm font-medium">Nível</Text>
+              <Text className="text-slate-800 font-bold">{studentInfo.level}</Text>
+            </View>
+            
+            <View className="p-3 bg-purple-50 rounded-xl border border-purple-200">
+              <Text className="text-slate-500 text-sm font-medium">Rota Preferida</Text>
+              <Text className="text-purple-600 font-bold">{studentInfo.preferredRoute}</Text>
+            </View>
+            
+            <View className="p-3 bg-slate-50 rounded-xl">
+              <Text className="text-slate-500 text-sm font-medium">Contacto de Emergência</Text>
+              <Text className="text-slate-800 font-bold">{studentInfo.emergencyContact}</Text>
+            </View>
           </View>
         </View>
 
@@ -92,7 +94,7 @@ export const StudentProfile = ({ onBack }: StudentProfileProps) => {
             <Switch
               value={notificationsEnabled}
               onValueChange={setNotificationsEnabled}
-              trackColor={{ false: '#d1d5db', true: '#0891b2' }}
+              trackColor={{ false: '#cbd5e1', true: '#a855f7' }}
               thumbColor={notificationsEnabled ? '#ffffff' : '#f4f3f4'}
             />
           </View>
@@ -105,7 +107,7 @@ export const StudentProfile = ({ onBack }: StudentProfileProps) => {
             <Switch
               value={locationEnabled}
               onValueChange={setLocationEnabled}
-              trackColor={{ false: '#d1d5db', true: '#0891b2' }}
+              trackColor={{ false: '#cbd5e1', true: '#a855f7' }}
               thumbColor={locationEnabled ? '#ffffff' : '#f4f3f4'}
             />
           </View>
@@ -118,34 +120,40 @@ export const StudentProfile = ({ onBack }: StudentProfileProps) => {
             <Switch
               value={autoAlerts}
               onValueChange={setAutoAlerts}
-              trackColor={{ false: '#d1d5db', true: '#0891b2' }}
+              trackColor={{ false: '#cbd5e1', true: '#a855f7' }}
               thumbColor={autoAlerts ? '#ffffff' : '#f4f3f4'}
             />
           </View>
         </View>
 
         {/* Estatísticas de Uso */}
-        <View className="bg-white rounded-xl p-4 mb-4 shadow-sm">
-          <Text className="text-gray-800 text-lg font-semibold mb-3">Estatísticas</Text>
+        <View className="bg-white rounded-2xl p-6 mb-6 shadow-lg border border-slate-100">
+          <Text className="text-slate-800 text-xl font-bold mb-4">Estatísticas</Text>
           
           <View className="flex-row justify-between mb-4">
             <View className="items-center flex-1">
-              <Text className="text-2xl font-bold text-cyan-600">42</Text>
-              <Text className="text-gray-600 text-xs text-center">Viagens este mês</Text>
+              <View className="w-16 h-16 bg-purple-100 rounded-2xl items-center justify-center mb-2">
+                <Text className="text-2xl font-bold text-purple-600">42</Text>
+              </View>
+              <Text className="text-slate-600 text-sm text-center font-medium">Viagens este mês</Text>
             </View>
             <View className="items-center flex-1">
-              <Text className="text-2xl font-bold text-green-600">98%</Text>
-              <Text className="text-gray-600 text-xs text-center">Pontualidade</Text>
+              <View className="w-16 h-16 bg-emerald-100 rounded-2xl items-center justify-center mb-2">
+                <Text className="text-2xl font-bold text-emerald-600">98%</Text>
+              </View>
+              <Text className="text-slate-600 text-sm text-center font-medium">Pontualidade</Text>
             </View>
             <View className="items-center flex-1">
-              <Text className="text-2xl font-bold text-blue-600">15.2</Text>
-              <Text className="text-gray-600 text-xs text-center">Tempo médio (min)</Text>
+              <View className="w-16 h-16 bg-blue-100 rounded-2xl items-center justify-center mb-2">
+                <Text className="text-2xl font-bold text-blue-600">15.2</Text>
+              </View>
+              <Text className="text-slate-600 text-sm text-center font-medium">Tempo médio (min)</Text>
             </View>
           </View>
           
-          <View className="border-t border-gray-100 pt-3">
-            <Text className="text-gray-600 text-sm text-center">
-              Você usa o transporte 42Routes há <Text className="font-semibold text-gray-800">6 meses</Text>
+          <View className="border-t border-slate-100 pt-4">
+            <Text className="text-slate-600 text-sm text-center">
+              Você usa o transporte 42Routes há <Text className="font-bold text-slate-800">6 meses</Text>
             </Text>
           </View>
         </View>

@@ -51,11 +51,11 @@ export const TransportDashboard = ({ studentName = "Estudante", onRouteSelect, o
 
   const getStatusColor = (status: RouteInfo['status']) => {
     switch (status) {
-      case 'ativo': return 'bg-green-500';
-      case 'em_rota': return 'bg-blue-500';
-      case 'parado': return 'bg-gray-500';
-      case 'manutencao': return 'bg-red-500';
-      default: return 'bg-gray-500';
+      case 'ativo': return 'bg-emerald-500';
+      case 'em_rota': return 'bg-indigo-500';
+      case 'parado': return 'bg-slate-400';
+      case 'manutencao': return 'bg-rose-500';
+      default: return 'bg-slate-400';
     }
   };
 
@@ -70,15 +70,15 @@ export const TransportDashboard = ({ studentName = "Estudante", onRouteSelect, o
   };
 
   return (
-    <View className="flex-1 bg-gray-50">
-      <StatusBar style="light" backgroundColor="#0891b2" />
+    <View className="flex-1 bg-slate-50">
+      <StatusBar style="light" backgroundColor="#7c3aed" />
       
       {/* Header */}
-      <View className="bg-cyan-600 pt-12 pb-6 px-6">
+      <View className="bg-gradient-to-br from-purple-600 to-indigo-700 pt-12 pb-6 px-6">
         <View className="flex-row items-center justify-between">
           <View>
             <Text className="text-white text-lg font-medium">Bem-vindo, {studentName}!</Text>
-            <Text className="text-cyan-100 text-sm">Monitorize o seu transporte</Text>
+            <Text className="text-purple-100 text-sm">Monitorize o seu transporte</Text>
           </View>
           <View className="flex-row items-center">
             <TouchableOpacity onPress={onProfileSelect} className="mr-3">
@@ -97,68 +97,74 @@ export const TransportDashboard = ({ studentName = "Estudante", onRouteSelect, o
 
       <ScrollView className="flex-1 px-6 py-4">
         {/* Status Geral */}
-        <View className="bg-white rounded-xl p-4 mb-4 shadow-sm">
-          <Text className="text-gray-800 text-lg font-semibold mb-3">Estado Geral do Sistema</Text>
+        <View className="bg-white rounded-2xl p-6 mb-6 shadow-lg border border-slate-100">
+          <Text className="text-slate-800 text-xl font-bold mb-4">Estado Geral do Sistema</Text>
           <View className="flex-row justify-between">
             <View className="items-center">
-              <Text className="text-2xl font-bold text-green-600">2</Text>
-              <Text className="text-gray-600 text-xs">Ativos</Text>
+              <View className="w-12 h-12 bg-emerald-100 rounded-xl items-center justify-center mb-2">
+                <Text className="text-2xl font-bold text-emerald-600">2</Text>
+              </View>
+              <Text className="text-slate-600 text-sm font-medium">Ativos</Text>
             </View>
             <View className="items-center">
-              <Text className="text-2xl font-bold text-blue-600">1</Text>
-              <Text className="text-gray-600 text-xs">Em Rota</Text>
+              <View className="w-12 h-12 bg-blue-100 rounded-xl items-center justify-center mb-2">
+                <Text className="text-2xl font-bold text-blue-600">1</Text>
+              </View>
+              <Text className="text-slate-600 text-sm font-medium">Em Rota</Text>
             </View>
             <View className="items-center">
-              <Text className="text-2xl font-bold text-gray-600">1</Text>
-              <Text className="text-gray-600 text-xs">Parados</Text>
+              <View className="w-12 h-12 bg-amber-100 rounded-xl items-center justify-center mb-2">
+                <Text className="text-2xl font-bold text-amber-600">1</Text>
+              </View>
+              <Text className="text-slate-600 text-sm font-medium">Parados</Text>
             </View>
           </View>
         </View>
 
         {/* Lista de Rotas */}
-        <View className="mb-4">
-          <Text className="text-gray-800 text-lg font-semibold mb-3">Rotas Disponíveis</Text>
+        <View className="mb-6">
+          <Text className="text-slate-800 text-xl font-bold mb-4">Rotas Disponíveis</Text>
           {routes.map((route) => (
             <TouchableOpacity
               key={route.id}
-              className="bg-white rounded-xl p-4 mb-3 shadow-sm"
+              className="bg-white rounded-2xl p-5 mb-4 shadow-lg border border-slate-100"
               activeOpacity={0.7}
               onPress={onRouteSelect}
             >
-              <View className="flex-row justify-between items-start mb-2">
+              <View className="flex-row justify-between items-start mb-3">
                 <View className="flex-1">
-                  <Text className="text-gray-800 font-semibold text-base">{route.name}</Text>
-                  <Text className="text-gray-600 text-sm">ID: {route.id}</Text>
+                  <Text className="text-slate-800 font-bold text-lg">{route.name}</Text>
+                  <Text className="text-slate-500 text-sm font-medium">ID: {route.id}</Text>
                 </View>
-                <View className={`px-3 py-1 rounded-full ${getStatusColor(route.status)}`}>
-                  <Text className="text-white text-xs font-medium">
+                <View className={`px-4 py-2 rounded-full ${getStatusColor(route.status)}`}>
+                  <Text className="text-white text-xs font-bold">
                     {getStatusText(route.status)}
                   </Text>
                 </View>
               </View>
 
-              <View className="border-t border-gray-100 pt-3">
+              <View className="border-t border-slate-100 pt-4">
                 <View className="flex-row justify-between items-center">
                   <View className="flex-1">
-                    <Text className="text-gray-600 text-sm">Próxima paragem:</Text>
-                    <Text className="text-gray-800 font-medium">{route.nextStop}</Text>
+                    <Text className="text-slate-500 text-sm font-medium">Próxima paragem:</Text>
+                    <Text className="text-slate-800 font-bold">{route.nextStop}</Text>
                   </View>
                   <View className="items-end">
-                    <Text className="text-gray-600 text-sm">Chegada em:</Text>
-                    <Text className="text-cyan-600 font-bold text-lg">{route.estimatedTime}</Text>
+                    <Text className="text-slate-500 text-sm font-medium">Chegada em:</Text>
+                    <Text className="text-purple-600 font-bold text-xl">{route.estimatedTime}</Text>
                   </View>
                 </View>
 
-                <View className="mt-3 flex-row justify-between items-center">
+                <View className="mt-4 flex-row justify-between items-center">
                   <View className="flex-row items-center">
-                    <View className="w-2 h-2 bg-cyan-500 rounded-full mr-2"></View>
-                    <Text className="text-gray-600 text-sm">
+                    <View className="w-3 h-3 bg-indigo-500 rounded-full mr-3"></View>
+                    <Text className="text-slate-600 text-sm font-medium">
                       Passageiros: {route.passengers}/{route.capacity}
                     </Text>
                   </View>
-                  <View className="bg-gray-200 rounded-full h-2 flex-1 mx-3">
+                  <View className="bg-slate-200 rounded-full h-2 flex-1 mx-4">
                     <View
-                      className="bg-cyan-500 h-2 rounded-full"
+                      className="bg-gradient-to-r from-purple-500 to-indigo-500 h-2 rounded-full"
                       style={{
                         width: `${(route.passengers / route.capacity) * 100}%`
                       }}
@@ -171,22 +177,25 @@ export const TransportDashboard = ({ studentName = "Estudante", onRouteSelect, o
         </View>
 
         {/* Ações Rápidas */}
-        <View className="bg-white rounded-xl p-4 mb-6">
-          <Text className="text-gray-800 text-lg font-semibold mb-3">Ações Rápidas</Text>
+        <View className="bg-white rounded-2xl p-6 mb-6 shadow-lg border border-slate-100">
+          <Text className="text-slate-800 text-xl font-bold mb-4">Ações Rápidas</Text>
           <View className="flex-row justify-between">
-            <TouchableOpacity className="bg-cyan-100 rounded-lg p-3 flex-1 mr-2 items-center">
-              <Text className="text-cyan-700 font-medium text-sm">📍 Localizar</Text>
-              <Text className="text-cyan-600 text-xs mt-1">Meu Autocarro</Text>
+            <TouchableOpacity className="bg-gradient-to-br from-purple-100 to-indigo-100 rounded-xl p-4 flex-1 mr-2 items-center border border-purple-200">
+              <Text className="text-2xl mb-2">📍</Text>
+              <Text className="text-purple-700 font-bold text-sm">Localizar</Text>
+              <Text className="text-purple-600 text-xs mt-1">Meu Autocarro</Text>
             </TouchableOpacity>
             <TouchableOpacity 
-              className="bg-green-100 rounded-lg p-3 flex-1 mx-1 items-center"
+              className="bg-gradient-to-br from-emerald-100 to-teal-100 rounded-xl p-4 flex-1 mx-1 items-center border border-emerald-200"
               onPress={onScheduleSelect}
             >
-              <Text className="text-green-700 font-medium text-sm">🕐 Horários</Text>
-              <Text className="text-green-600 text-xs mt-1">Ver Todos</Text>
+              <Text className="text-2xl mb-2">🕐</Text>
+              <Text className="text-emerald-700 font-bold text-sm">Horários</Text>
+              <Text className="text-emerald-600 text-xs mt-1">Ver Todos</Text>
             </TouchableOpacity>
-            <TouchableOpacity className="bg-blue-100 rounded-lg p-3 flex-1 ml-2 items-center">
-              <Text className="text-blue-700 font-medium text-sm">📞 Suporte</Text>
+            <TouchableOpacity className="bg-gradient-to-br from-blue-100 to-cyan-100 rounded-xl p-4 flex-1 ml-2 items-center border border-blue-200">
+              <Text className="text-2xl mb-2">📞</Text>
+              <Text className="text-blue-700 font-bold text-sm">Suporte</Text>
               <Text className="text-blue-600 text-xs mt-1">Contactar</Text>
             </TouchableOpacity>
           </View>
