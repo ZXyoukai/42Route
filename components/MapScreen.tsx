@@ -40,7 +40,7 @@ export const MapScreen = ({ studentName = "Estudante" }: MapScreenProps) => {
           </View>
           <Image
             source={require('../assets/route_logo-w.png')}
-            className="h-10"
+            className="h-12 top-0 right-52"
             resizeMode="contain"
           />
         </View>
@@ -52,7 +52,7 @@ export const MapScreen = ({ studentName = "Estudante" }: MapScreenProps) => {
           <View className="flex-1 bg-slate-700 rounded-xl items-center justify-center">
             <View className="items-center">
               <View className="w-20 h-20 bg-cyan-900/50 rounded-full items-center justify-center mb-4 border border-cyan-600" style={{ backgroundColor: 'rgba(0, 186, 188, 0.1)', borderColor: '#00babc' }}>
-                <MaterialIcons name="map" size={32} color="#a855f7" />
+                <MaterialIcons name="map" size={32} color="#00babc" />
               </View>
               <Text className="text-white font-bold text-lg mb-2">Mapa Interativo</Text>
               <Text className="text-slate-300 text-sm text-center">
@@ -67,9 +67,9 @@ export const MapScreen = ({ studentName = "Estudante" }: MapScreenProps) => {
         </View>
 
         {/* Autocarros Ativos */}
-        <View className="bg-slate-800 rounded-2xl p-6 mb-6 shadow-lg border border-slate-700">
+        <View className="bg-slate-800 rounded-2xl p-6 mb-6 gap-y-2 shadow-lg border border-slate-700">
           <View className="flex-row items-center mb-4">
-            <FontAwesome5 name="bus" size={20} color="#a855f7" />
+            <FontAwesome5 name="bus" size={20} color="#00babc" />
             <Text className="text-white text-xl font-bold ml-3">Autocarros Ativos</Text>
           </View>
           
@@ -121,28 +121,28 @@ export const MapScreen = ({ studentName = "Estudante" }: MapScreenProps) => {
         <View className="bg-slate-800 rounded-2xl p-6 mb-6 shadow-lg border border-slate-700">
           <Text className="text-white text-xl font-bold mb-4">Ações do Mapa</Text>
           <View className="flex-row justify-between">
-            <TouchableOpacity className="bg-purple-900/30 rounded-xl p-4 flex-1 mr-2 items-center border border-purple-700">
-              <View className="w-12 h-12 bg-purple-600 rounded-full items-center justify-center mb-2">
+            <TouchableOpacity className="bg-cyan-900/30 rounded-xl p-4 flex-1 mr-2 items-center border border-cyan-700" style={{ borderColor: '#00babc', backgroundColor: 'rgba(0, 186, 188, 0.1)' }}>
+              <View className="w-12 h-12 rounded-full items-center justify-center mb-2" style={{ backgroundColor: '#00babc' }}>
                 <MaterialIcons name="my-location" size={20} color="white" />
               </View>
-              <Text className="text-purple-300 font-bold text-sm">Localizar-me</Text>
-              <Text className="text-purple-400 text-xs mt-1">Minha Posição</Text>
+              <Text className="text-cyan-300 font-bold text-sm" style={{ color: '#00babc' }}>Localizar-me</Text>
+              <Text className="text-cyan-400 text-xs mt-1" style={{ color: '#00babc' }}>Minha Posição</Text>
             </TouchableOpacity>
             
-            <TouchableOpacity className="bg-emerald-900/30 rounded-xl p-4 flex-1 mx-1 items-center border border-emerald-700">
-              <View className="w-12 h-12 bg-emerald-600 rounded-full items-center justify-center mb-2">
+            <TouchableOpacity className="bg-cyan-900/30 rounded-xl p-4 flex-1 mx-1 items-center border border-cyan-700" style={{ borderColor: '#00babc', backgroundColor: 'rgba(0, 186, 188, 0.1)' }}>
+              <View className="w-12 h-12 rounded-full items-center justify-center mb-2" style={{ backgroundColor: '#00babc' }}>
                 <FontAwesome5 name="route" size={16} color="white" />
               </View>
-              <Text className="text-emerald-300 font-bold text-sm">Todas Rotas</Text>
-              <Text className="text-emerald-400 text-xs mt-1">Ver no Mapa</Text>
+              <Text className="text-cyan-300 font-bold text-sm" style={{ color: '#00babc' }}>Todas Rotas</Text>
+              <Text className="text-cyan-400 text-xs mt-1" style={{ color: '#00babc' }}>Ver no Mapa</Text>
             </TouchableOpacity>
             
-            <TouchableOpacity className="bg-blue-900/30 rounded-xl p-4 flex-1 ml-2 items-center border border-blue-700">
-              <View className="w-12 h-12 bg-blue-600 rounded-full items-center justify-center mb-2">
+            <TouchableOpacity className="bg-cyan-900/30 rounded-xl p-4 flex-1 ml-2 items-center border border-cyan-700" style={{ borderColor: '#00babc', backgroundColor: 'rgba(0, 186, 188, 0.1)' }}>
+              <View className="w-12 h-12 rounded-full items-center justify-center mb-2" style={{ backgroundColor: '#00babc' }}>
                 <MaterialIcons name="near-me" size={20} color="white" />
               </View>
-              <Text className="text-blue-300 font-bold text-sm">Mais Próximo</Text>
-              <Text className="text-blue-400 text-xs mt-1">Autocarro</Text>
+              <Text className="text-cyan-300 font-bold text-sm" style={{ color: '#00babc' }}>Mais Próximo</Text>
+              <Text className="text-cyan-400 text-xs mt-1" style={{ color: '#00babc' }}>Autocarro</Text>
             </TouchableOpacity>
           </View>
         </View>
