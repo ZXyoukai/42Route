@@ -51,12 +51,12 @@ export const StudentProfile = ({ onBack }: StudentProfileProps) => {
         </View>
       </View>
 
-      <ScrollView className="flex-1 px-6 py-4">
+      <ScrollView className="flex-1 px-6 py-8">
         {/* Informações Pessoais */}
-        <View className="bg-slate-800 rounded-2xl p-6 mb-6 shadow-lg space-y-4 border border-slate-700">
+        <View className="bg-slate-800 rounded-2xl p-6 mb-6 shadow-lg space-y-4  border border-slate-700">
           <Text className="text-white text-xl font-bold mb-4">Informações Pessoais</Text>
           
-          <View className="space-y-4">
+          <View className="gap-y-2">
             <View className="p-3 bg-slate-700 rounded-xl">
               <Text className="text-slate-400 text-sm font-medium">Email</Text>
               <Text className="text-white font-bold">{studentInfo.email}</Text>
@@ -170,7 +170,7 @@ export const StudentProfile = ({ onBack }: StudentProfileProps) => {
         </View>
 
         {/* Ações */}
-        <View className="space-y-3 mb-6">
+        <View className="gap-y-2 mb-6">
           <TouchableOpacity className="bg-slate-800 rounded-xl p-4 flex-row items-center justify-between shadow-lg border border-slate-700">
             <View className="flex-row items-center">
               <MaterialIcons name="route" size={20} color="#00babc" />
