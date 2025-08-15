@@ -7,11 +7,11 @@ import {
   Image, 
   KeyboardAvoidingView, 
   Platform,
-  ScrollView,
-  Alert
+  ScrollView
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
+import { useCustomAlert } from './CustomAlert';
 
 interface LoginScreenProps {
   onLogin: (userData: { name: string; email: string }) => void;
@@ -22,10 +22,15 @@ export const LoginScreen = ({ onLogin }: LoginScreenProps) => {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  
+  const { AlertComponent, showError, showSuccess } = useCustomAlert();
 
   const handleLogin = async () => {
     if (!email || !password) {
-      Alert.alert('Erro', 'Por favor preencha todos os campos');
+      showError(
+        'Erro de Autenticação', 
+        'Por favor preencha todos os campos para continuar'
+      );
       return;
     }
 
@@ -34,10 +39,16 @@ export const LoginScreen = ({ onLogin }: LoginScreenProps) => {
     // Simular autenticação
     setTimeout(() => {
       setIsLoading(false);
-      onLogin({
-        name: 'João Silva',
-        email: email
-      });
+      showSuccess(
+        'Login Realizado!', 
+        'Bem-vindo ao sistema 42Routes',
+        () => {
+          onLogin({
+            name: 'João Silva',
+            email: email
+          });
+        }
+      );
     }, 2000);
   };
 
@@ -164,7 +175,7 @@ export const LoginScreen = ({ onLogin }: LoginScreenProps) => {
               {/* Links auxiliares */}
               <View className="items-center">
                 <TouchableOpacity className="mb-2">
-                  <Text className="text-purple-400 text-sm font-medium">
+                  <Text className="text-slate-400 text-sm font-medium" style={{ color: '#00babc' }}>
                     Esqueceu a palavra-passe?
                   </Text>
                 </TouchableOpacity>
@@ -176,8 +187,8 @@ export const LoginScreen = ({ onLogin }: LoginScreenProps) => {
                 </View>
 
                 <TouchableOpacity className="mt-3 flex-row items-center">
-                  <MaterialIcons name="help-outline" size={16} color="#8b5cf6" />
-                  <Text className="text-purple-400 text-sm font-medium ml-2">
+                  <MaterialIcons name="help-outline" size={16} color="#00babc" />
+                  <Text className="text-slate-400 text-sm font-medium ml-2" style={{ color: '#00babc' }}>
                     Precisa de ajuda? Contacte o suporte
                   </Text>
                 </TouchableOpacity>
@@ -188,9 +199,9 @@ export const LoginScreen = ({ onLogin }: LoginScreenProps) => {
             <View className="mt-8 px-4 pb-6">
               <View className="bg-slate-800/50 rounded-2xl p-4 border border-slate-700/50">
                 <View className="flex-row items-start mb-3">
-                  <Ionicons name="information-circle" size={20} color="#06b6d4" />
+                  <Ionicons name="information-circle" size={20} color="#00babc" />
                   <View className="flex-1 ml-3">
-                    <Text className="text-cyan-400 font-bold text-sm mb-1">
+                    <Text className="font-bold text-sm mb-1" style={{ color: '#00babc' }}>
                       Primeira vez na aplicação?
                     </Text>
                     <Text className="text-slate-300 text-xs leading-relaxed">
@@ -215,6 +226,9 @@ export const LoginScreen = ({ onLogin }: LoginScreenProps) => {
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
+      
+      {/* Custom Alert Component */}
+      {AlertComponent}
     </View>
   );
 };

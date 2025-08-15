@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Image, Text, View, ScrollView, TouchableOpacity, Switch } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
+import { useCustomAlert } from './CustomAlert';
 
 interface StudentProfileProps {
   onBack?: () => void;
@@ -11,6 +12,8 @@ export const StudentProfile = ({ onBack }: StudentProfileProps) => {
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [locationEnabled, setLocationEnabled] = useState(true);
   const [autoAlerts, setAutoAlerts] = useState(false);
+  
+  const { AlertComponent, showSuccess, showError, showWarning, showInfo } = useCustomAlert();
 
   const studentInfo = {
     name: 'João Silva',
@@ -20,6 +23,85 @@ export const StudentProfile = ({ onBack }: StudentProfileProps) => {
     level: 'Level 3',
     preferredRoute: 'Rota Central',
     emergencyContact: '+244 923 456 789'
+  };
+
+  const handleNotificationChange = (value: boolean) => {
+    setNotificationsEnabled(value);
+    if (value) {
+      showSuccess(
+        'Notificações Ativadas',
+        'Agora receberá alertas sobre os seus autocarros e horários.'
+      );
+    } else {
+      showWarning(
+        'Desativar Notificações',
+        'Não receberá mais alertas sobre os autocarros. Pode perder informações importantes.',
+        () => {
+          showInfo('Notificações Desativadas', 'Pode reativar nas configurações a qualquer momento.');
+        },
+        () => {
+          setNotificationsEnabled(true);
+        }
+      );
+    }
+  };
+
+  const handleLocationChange = (value: boolean) => {
+    setLocationEnabled(value);
+    if (value) {
+      showSuccess(
+        'Localização Ativada',
+        'Agora pode usar funcionalidades baseadas em localização.'
+      );
+    } else {
+      showError(
+        'Localização Desativada',
+        'Algumas funcionalidades podem não funcionar corretamente sem acesso à localização.'
+      );
+    }
+  };
+
+  const handleRouteChange = () => {
+    showInfo(
+      'Alterar Rota Preferida',
+      'Esta funcionalidade estará disponível em breve. Poderá escolher a sua rota preferida.'
+    );
+  };
+
+  const handleScheduleCustom = () => {
+    showInfo(
+      'Horários Personalizados',
+      'Em breve poderá criar horários personalizados com alertas específicos.'
+    );
+  };
+
+  const handleAchievements = () => {
+    showSuccess(
+      'Conquistas Desbloqueadas!',
+      'Você tem 3 badges: Utilizador Frequente, Pontual e Eco-Friendly!'
+    );
+  };
+
+  const handleSupport = () => {
+    showWarning(
+      'Contactar Suporte',
+      'Será redirecionado para o canal de suporte. Pretende continuar?',
+      () => {
+        showSuccess('Suporte Contactado', 'Em breve receberá ajuda da nossa equipa.');
+      }
+    );
+  };
+
+  const handleLogout = () => {
+    showWarning(
+      'Terminar Sessão',
+      'Tem certeza que deseja sair da aplicação?',
+      () => {
+        showSuccess('Sessão Terminada', 'Até breve!', () => {
+          onBack?.();
+        });
+      }
+    );
   };
 
   return (
@@ -98,7 +180,7 @@ export const StudentProfile = ({ onBack }: StudentProfileProps) => {
             </View>
             <Switch
               value={notificationsEnabled}
-              onValueChange={setNotificationsEnabled}
+              onValueChange={handleNotificationChange}
               trackColor={{ false: '#374151', true: '#00babc' }}
               thumbColor={notificationsEnabled ? '#ffffff' : '#64748b'}
             />
@@ -114,7 +196,7 @@ export const StudentProfile = ({ onBack }: StudentProfileProps) => {
             </View>
             <Switch
               value={locationEnabled}
-              onValueChange={setLocationEnabled}
+              onValueChange={handleLocationChange}
               trackColor={{ false: '#374151', true: '#00babc' }}
               thumbColor={locationEnabled ? '#ffffff' : '#64748b'}
             />
@@ -171,7 +253,10 @@ export const StudentProfile = ({ onBack }: StudentProfileProps) => {
 
         {/* Ações */}
         <View className="gap-y-2 mb-6">
-          <TouchableOpacity className="bg-slate-800 rounded-xl p-4 flex-row items-center justify-between shadow-lg border border-slate-700">
+          <TouchableOpacity 
+            className="bg-slate-800 rounded-xl p-4 flex-row items-center justify-between shadow-lg border border-slate-700"
+            onPress={handleRouteChange}
+          >
             <View className="flex-row items-center">
               <MaterialIcons name="route" size={20} color="#00babc" />
               <Text className="text-white font-medium ml-3">Alterar Rota Preferida</Text>
@@ -179,7 +264,10 @@ export const StudentProfile = ({ onBack }: StudentProfileProps) => {
             <Ionicons name="chevron-forward" size={16} color="#64748b" />
           </TouchableOpacity>
           
-          <TouchableOpacity className="bg-slate-800 rounded-xl p-4 flex-row items-center justify-between shadow-lg border border-slate-700">
+          <TouchableOpacity 
+            className="bg-slate-800 rounded-xl p-4 flex-row items-center justify-between shadow-lg border border-slate-700"
+            onPress={handleScheduleCustom}
+          >
             <View className="flex-row items-center">
               <MaterialIcons name="schedule" size={20} color="#00babc" />
               <Text className="text-white font-medium ml-3">Horários Personalizados</Text>
@@ -187,7 +275,10 @@ export const StudentProfile = ({ onBack }: StudentProfileProps) => {
             <Ionicons name="chevron-forward" size={16} color="#64748b" />
           </TouchableOpacity>
           
-          <TouchableOpacity className="bg-slate-800 rounded-xl p-4 flex-row items-center justify-between shadow-lg border border-slate-700">
+          <TouchableOpacity 
+            className="bg-slate-800 rounded-xl p-4 flex-row items-center justify-between shadow-lg border border-slate-700"
+            onPress={handleAchievements}
+          >
             <View className="flex-row items-center">
               <MaterialIcons name="emoji-events" size={20} color="#00babc" />
               <Text className="text-white font-medium ml-3">Conquistas e Badges</Text>
@@ -195,7 +286,10 @@ export const StudentProfile = ({ onBack }: StudentProfileProps) => {
             <Ionicons name="chevron-forward" size={16} color="#64748b" />
           </TouchableOpacity>
           
-          <TouchableOpacity className="bg-slate-800 rounded-xl p-4 flex-row items-center justify-between shadow-lg border border-slate-700">
+          <TouchableOpacity 
+            className="bg-slate-800 rounded-xl p-4 flex-row items-center justify-between shadow-lg border border-slate-700"
+            onPress={handleSupport}
+          >
             <View className="flex-row items-center">
               <MaterialIcons name="help-outline" size={20} color="#00babc" />
               <Text className="text-white font-medium ml-3">Ajuda e Suporte</Text>
@@ -203,7 +297,10 @@ export const StudentProfile = ({ onBack }: StudentProfileProps) => {
             <Ionicons name="chevron-forward" size={16} color="#64748b" />
           </TouchableOpacity>
           
-          <TouchableOpacity className="bg-red-900/30 rounded-xl p-4 flex-row items-center justify-between border border-red-700">
+          <TouchableOpacity 
+            className="bg-red-900/30 rounded-xl p-4 flex-row items-center justify-between border border-red-700"
+            onPress={handleLogout}
+          >
             <View className="flex-row items-center">
               <MaterialIcons name="logout" size={20} color="#ef4444" />
               <Text className="text-red-400 font-medium ml-3">Terminar Sessão</Text>
@@ -218,6 +315,9 @@ export const StudentProfile = ({ onBack }: StudentProfileProps) => {
           <Text className="text-slate-600 text-xs">© 2024 42 Luanda</Text>
         </View>
       </ScrollView>
+      
+      {/* Custom Alert Component */}
+      {AlertComponent}
     </View>
   );
 };

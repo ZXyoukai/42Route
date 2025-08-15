@@ -1,6 +1,7 @@
 import { Image, Text, View, ScrollView, TouchableOpacity } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
+import { useCustomAlert } from './CustomAlert';
 
 interface ScheduleInfo {
   routeName: string;
@@ -18,6 +19,8 @@ interface TransportScheduleProps {
 }
 
 export const TransportSchedule = ({ onBack }: TransportScheduleProps) => {
+  const { AlertComponent, showSuccess, showError, showWarning, showInfo } = useCustomAlert();
+
   const weekdays: ScheduleInfo[] = [
     {
       routeName: 'Rota Central',
@@ -74,82 +77,141 @@ export const TransportSchedule = ({ onBack }: TransportScheduleProps) => {
     }
   ];
 
+  const handleRoutePress = (route: ScheduleInfo) => {
+    if (!route.isActive) {
+      showError(
+        'Rota Indisponível',
+        `A ${route.routeName} está temporariamente fora de serviço. Por favor, consulte as rotas alternativas.`
+      );
+      return;
+    }
+    showInfo(
+      'Informações da Rota',
+      `${route.routeName} - Saída: ${route.departureTime}, Chegada: ${route.arrivalTime}, Duração: ${route.duration}`
+    );
+  };
+
+  const handleSetAlert = (route: ScheduleInfo) => {
+    if (!route.isActive) {
+      showError(
+        'Alerta Indisponível',
+        'Não é possível criar alertas para rotas inativas.'
+      );
+      return;
+    }
+    showSuccess(
+      'Alerta Criado!',
+      `Receberá uma notificação 10 minutos antes da saída da ${route.routeName} (${route.departureTime}).`
+    );
+  };
+
+  const handleEmergencyContact = () => {
+    showWarning(
+      'Contactar Emergência',
+      'Será feita uma chamada de emergência. Use apenas em situações urgentes.',
+      () => {
+        showSuccess('Emergência Contactada', 'A equipa de emergência foi notificada.');
+      }
+    );
+  };
+
+  const handleSupportContact = () => {
+    showInfo(
+      'Suporte Técnico',
+      'Será redirecionado para o WhatsApp do suporte técnico.'
+    );
+  };
+
   const renderScheduleCard = (schedule: ScheduleInfo) => (
-    <View
-      key={schedule.routeId}
-      className={`rounded-2xl p-5 mb-4 border shadow-lg ${
-        schedule.isActive
-          ? 'bg-slate-800 border-slate-700'
-          : 'bg-slate-800/50 border-slate-600'
+    <TouchableOpacity
+      key={`${schedule.routeId}-${schedule.departureTime}`}
+      className={`rounded-2xl p-5 mb-4 shadow-lg border ${
+        schedule.isActive ? 'bg-slate-800 border-slate-700' : 'bg-slate-800/50 border-slate-600'
       }`}
+      activeOpacity={0.7}
+      onPress={() => handleRoutePress(schedule)}
     >
-      <View className="flex-row justify-between items-start mb-4">
+      <View className="flex-row justify-between items-start mb-3">
         <View className="flex-1">
-          <Text className={`font-bold text-lg ${
-            schedule.isActive ? 'text-white' : 'text-slate-400'
-          }`}>
+          <Text className={`font-bold text-lg ${schedule.isActive ? 'text-white' : 'text-slate-400'}`}>
             {schedule.routeName}
           </Text>
-          <Text               className={`text-sm font-medium ${
-              schedule.isActive ? 'text-cyan-400' : 'text-slate-400'
-            }`}
-            style={schedule.isActive ? { color: '#00babc' } : {}}>
-            {schedule.routeId} • {schedule.stops} paragens
+          <Text className={`text-sm ${schedule.isActive ? 'text-slate-400' : 'text-slate-500'}`}>
+            ID: {schedule.routeId}
           </Text>
         </View>
-        <View className={`px-4 py-2 rounded-full ${
-          schedule.isActive ? 'bg-emerald-600' : 'bg-slate-600'
-        }`}>
-          <Text className={`text-sm font-bold ${
-            schedule.isActive ? 'text-white' : 'text-slate-300'
-          }`}>
+        <View className={`px-3 py-1 rounded-full ${schedule.isActive ? 'bg-green-600' : 'bg-slate-600'}`}>
+          <Text className="text-white text-xs font-bold">
             {schedule.isActive ? 'Ativo' : 'Inativo'}
           </Text>
         </View>
       </View>
 
-      <View className="bg-slate-700 rounded-xl p-4">
-        <View className="flex-row justify-between items-center">
-          <View className="flex-1">
-            <Text className={`text-sm font-medium ${
-              schedule.isActive ? 'text-slate-300' : 'text-slate-500'
-            }`}>
-              Partida - Chegada
+      <View className="border-t border-slate-700 pt-4">
+        <View className="flex-row justify-between items-center mb-4">
+          <View>
+            <Text className={`text-sm font-medium ${schedule.isActive ? 'text-slate-400' : 'text-slate-500'}`}>
+              Saída
             </Text>
-            <Text className={`font-bold text-xl ${
-              schedule.isActive ? 'text-cyan-400' : 'text-slate-400'
-            }`}
-            style={schedule.isActive ? { color: '#00babc' } : {}}>
-              {schedule.departureTime} - {schedule.arrivalTime}
+            <Text className={`font-bold text-xl ${schedule.isActive ? 'text-white' : 'text-slate-400'}`}>
+              {schedule.departureTime}
             </Text>
           </View>
-          <View className="items-center">
-            <Text className={`text-sm font-medium ${
-              schedule.isActive ? 'text-slate-300' : 'text-slate-500'
-            }`}>
-              Duração
-            </Text>
-            <Text className={`font-bold ${
-              schedule.isActive ? 'text-white' : 'text-slate-400'
-            }`}>
-              {schedule.duration}
-            </Text>
+          
+          <View className="flex-1 items-center mx-4">
+            <View className="flex-row items-center">
+              <View className={`w-2 h-2 rounded-full ${schedule.isActive ? 'bg-cyan-400' : 'bg-slate-500'}`} 
+                   style={schedule.isActive ? { backgroundColor: '#00babc' } : {}}></View>
+              <View className={`flex-1 h-px mx-2 ${schedule.isActive ? 'bg-cyan-400' : 'bg-slate-600'}`}
+                   style={schedule.isActive ? { backgroundColor: '#00babc' } : {}}></View>
+              <Text className={`text-xs font-medium ${schedule.isActive ? 'text-cyan-400' : 'text-slate-500'}`}
+                    style={schedule.isActive ? { color: '#00babc' } : {}}>
+                {schedule.duration}
+              </Text>
+              <View className={`flex-1 h-px mx-2 ${schedule.isActive ? 'bg-cyan-400' : 'bg-slate-600'}`}
+                   style={schedule.isActive ? { backgroundColor: '#00babc' } : {}}></View>
+              <View className={`w-2 h-2 rounded-full ${schedule.isActive ? 'bg-cyan-400' : 'bg-slate-500'}`}
+                   style={schedule.isActive ? { backgroundColor: '#00babc' } : {}}></View>
+            </View>
           </View>
-          <View className="items-end">
-            <Text className={`text-sm font-medium ${
-              schedule.isActive ? 'text-slate-300' : 'text-slate-500'
-            }`}>
-              Frequência
+          
+          <View>
+            <Text className={`text-sm font-medium text-right ${schedule.isActive ? 'text-slate-400' : 'text-slate-500'}`}>
+              Chegada
             </Text>
-            <Text className={`font-bold text-right ${
-              schedule.isActive ? 'text-white' : 'text-slate-400'
-            }`}>
-              {schedule.frequency}
+            <Text className={`font-bold text-xl text-right ${schedule.isActive ? 'text-white' : 'text-slate-400'}`}>
+              {schedule.arrivalTime}
             </Text>
           </View>
         </View>
+
+        <View className="flex-row justify-between items-center">
+          <View className="flex-row items-center">
+            <MaterialIcons name="location-on" size={16} color={schedule.isActive ? "#00babc" : "#64748b"} />
+            <Text className={`ml-1 text-sm font-medium ${schedule.isActive ? 'text-slate-300' : 'text-slate-500'}`}>
+              {schedule.stops} paragens
+            </Text>
+          </View>
+          
+          <View className="flex-row items-center">
+            <Ionicons name="time" size={16} color={schedule.isActive ? "#00babc" : "#64748b"} />
+            <Text className={`ml-1 text-sm font-medium ${schedule.isActive ? 'text-slate-300' : 'text-slate-500'}`}>
+              {schedule.frequency}
+            </Text>
+          </View>
+
+          {schedule.isActive && (
+            <TouchableOpacity
+              className="bg-cyan-600 px-4 py-2 rounded-full"
+              style={{ backgroundColor: '#00babc' }}
+              onPress={() => handleSetAlert(schedule)}
+            >
+              <Text className="text-white text-xs font-bold">Definir Alerta</Text>
+            </TouchableOpacity>
+          )}
+        </View>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 
   return (
@@ -157,120 +219,79 @@ export const TransportSchedule = ({ onBack }: TransportScheduleProps) => {
       <StatusBar style="light" backgroundColor="#0f172a" />
       
       {/* Header */}
-      <View className="bg-gradient-to-br from-cyan-500 to-teal-600 mt-14 pt-3 pb-3 px-6" style={{ backgroundColor: '#00babc' }}>
-        <View className="flex-row items-center justify-between ">
+      <View className="bg-gradient-to-br from-cyan-500 to-teal-600 pt-12 pb-6 px-6" style={{ backgroundColor: '#00babc' }}>
+        <View className="flex-row items-center justify-between mb-4">
           <TouchableOpacity onPress={onBack} className="flex-row items-center">
-            <Ionicons name="arrow-back" size={24} color="white" />  
+            <Ionicons name="arrow-back" size={24} color="white" />
             <Text className="text-white text-lg font-medium ml-2">Voltar</Text>
           </TouchableOpacity>
           <Image
             source={require('../assets/route_logo-w.png')}
-            className="h-12 top-3 right-20"
+            className="h-8"
             resizeMode="contain"
           />
         </View>
         
-        <View>
-          <Text className="text-white text-xl font-bold">Horários de Transporte</Text>
-          <Text className="text-cyan-100 text-sm">Consulte todos os horários disponíveis</Text>
-        </View>
+        <Text className="text-white text-3xl font-bold mb-2">Horários</Text>
+        <Text className="text-cyan-100 text-base">Consulte os horários de todos os autocarros</Text>
       </View>
 
-      <ScrollView className="flex-1 px-6 py-4">
-        {/* Informações Importantes */}
-        <View className="bg-slate-800 border border-slate-700 rounded-xl p-4 mb-4 shadow-lg">
-          <View className="flex-row items-start">
-            <Ionicons name="information-circle" size={20} color="#06b6d4" />
-            <View className="flex-1 ml-3">
-              <Text className="text-cyan-400 font-medium text-sm mb-1">Informações Importantes</Text>
-              <Text className="text-slate-300 text-xs">
-                • Chegue à paragem 5 minutos antes{'\n'}
-                • Tenha sempre o seu cartão de estudante{'\n'}
-                • Horários podem variar em caso de trânsito intenso
-              </Text>
-            </View>
-          </View>
-        </View>
-
+      <ScrollView className="flex-1 px-6 py-6">
         {/* Horários de Segunda a Sexta */}
-        <View className="mb-6">
-          <Text className="text-white text-xl font-bold mb-4">Segunda a Sexta-feira</Text>
+        <View className="mb-8">
+          <Text className="text-white text-2xl font-bold mb-4">Segunda a Sexta-feira</Text>
           {weekdays.map(renderScheduleCard)}
         </View>
 
         {/* Horários de Fim de Semana */}
-        <View className="mb-6">
-          <Text className="text-white text-xl font-bold mb-4">Sábados e Domingos</Text>
+        <View className="mb-8">
+          <Text className="text-white text-2xl font-bold mb-4">Fins de Semana</Text>
+          <View className="bg-amber-900/30 rounded-2xl p-4 mb-4 border border-amber-700">
+            <View className="flex-row items-center">
+              <MaterialIcons name="warning" size={20} color="#f59e0b" />
+              <Text className="text-amber-400 font-bold ml-2">Serviço Limitado</Text>
+            </View>
+            <Text className="text-amber-200 text-sm mt-1">
+              Aos fins de semana o serviço opera com horários reduzidos
+            </Text>
+          </View>
           {weekends.map(renderScheduleCard)}
         </View>
 
-        {/* Horários Especiais */}
-        <View className="bg-slate-800 rounded-xl p-4 mb-4 shadow-lg border border-slate-700">
-          <Text className="text-white text-lg font-semibold mb-3">Horários Especiais</Text>
+        {/* Contactos de Emergência */}
+        <View className="mb-8">
+          <Text className="text-white text-2xl font-bold mb-4">Contactos Úteis</Text>
           
-          <View className="mb-3">
-            <View className="flex-row items-center mb-1">
-              <Ionicons name="snow" size={16} color="#ef4444" />
-              <Text className="text-white font-medium ml-2">Época Natalícia (Dezembro)</Text>
+          <TouchableOpacity 
+            className="bg-red-900/30 rounded-2xl p-5 mb-4 border border-red-700"
+            onPress={handleEmergencyContact}
+          >
+            <View className="flex-row items-center justify-between">
+              <View className="flex-row items-center">
+                <MaterialIcons name="emergency" size={24} color="#ef4444" />
+                <View className="ml-3">
+                  <Text className="text-red-400 font-bold text-lg">Emergência</Text>
+                  <Text className="text-red-300 text-sm">+244 222 123 456</Text>
+                </View>
+              </View>
+              <Ionicons name="call" size={20} color="#ef4444" />
             </View>
-            <Text className="text-slate-400 text-sm">Horários reduzidos - apenas Rota Central</Text>
-            <Text className="text-cyan-400 font-medium" style={{ color: '#00babc' }}>09:00 - 17:00 (a cada 2 horas)</Text>
-          </View>
-          
-          <View className="mb-3">
-            <View className="flex-row items-center mb-1">
-              <MaterialIcons name="book" size={16} color="#10b981" />
-              <Text className="text-white font-medium ml-2">Período de Exames</Text>
-            </View>
-            <Text className="text-slate-400 text-sm">Horários alargados durante as avaliações</Text>
-            <Text className="text-cyan-400 font-medium" style={{ color: '#00babc' }}>07:00 - 22:00 (a cada 20 min)</Text>
-          </View>
-          
-          <View>
-            <View className="flex-row items-center mb-1">
-              <Ionicons name="sunny" size={16} color="#f59e0b" />
-              <Text className="text-white font-medium ml-2">Férias de Verão</Text>
-            </View>
-            <Text className="text-slate-400 text-sm">Serviço limitado apenas para atividades especiais</Text>
-            <Text className="text-slate-500 font-medium">Mediante marcação prévia</Text>
-          </View>
-        </View>
+          </TouchableOpacity>
 
-        {/* Contactos para Mais Informações */}
-        <View className="bg-slate-800 rounded-xl p-4 mb-6 shadow-lg border border-slate-700">
-          <Text className="text-white text-lg font-semibold mb-3">Mais Informações</Text>
-          
-          <TouchableOpacity className="flex-row items-center justify-between mb-3 p-3 bg-slate-700 rounded-lg">
-            <View className="flex-row items-center">
-              <MaterialIcons name="phone" size={20} color="#00babc" />
-              <View className="ml-3">
-                <Text className="text-white font-medium">Central de Transportes</Text>
-                <Text className="text-slate-400 text-sm">+244 222 123 456</Text>
+          <TouchableOpacity 
+            className="bg-slate-800 rounded-2xl p-5 mb-4 shadow-lg border border-slate-700"
+            onPress={handleSupportContact}
+          >
+            <View className="flex-row items-center justify-between">
+              <View className="flex-row items-center">
+                <MaterialIcons name="support-agent" size={24} color="#00babc" />
+                <View className="ml-3">
+                  <Text className="text-white font-bold text-lg">Suporte Técnico</Text>
+                  <Text className="text-slate-400 text-sm">WhatsApp: +244 923 456 789</Text>
+                </View>
               </View>
+              <Ionicons name="logo-whatsapp" size={20} color="#25d366" />
             </View>
-            <Ionicons name="chevron-forward" size={16} color="#64748b" />
-          </TouchableOpacity>
-          
-          <TouchableOpacity className="flex-row items-center justify-between mb-3 p-3 bg-slate-700 rounded-lg">
-            <View className="flex-row items-center">
-              <MaterialIcons name="email" size={20} color="#00babc" />
-              <View className="ml-3">
-                <Text className="text-white font-medium">Email de Suporte</Text>
-                <Text className="text-slate-400 text-sm">transport@42luanda.ao</Text>
-              </View>
-            </View>
-            <Ionicons name="chevron-forward" size={16} color="#64748b" />
-          </TouchableOpacity>
-          
-          <TouchableOpacity className="flex-row items-center justify-between p-3 bg-slate-700 rounded-lg">
-            <View className="flex-row items-center">
-              <MaterialIcons name="language" size={20} color="#00babc" />
-              <View className="ml-3">
-                <Text className="text-white font-medium">Portal do Estudante</Text>
-                <Text className="text-slate-400 text-sm">portal.42luanda.ao</Text>
-              </View>
-            </View>
-            <Ionicons name="chevron-forward" size={16} color="#64748b" />
           </TouchableOpacity>
         </View>
 
@@ -280,6 +301,9 @@ export const TransportSchedule = ({ onBack }: TransportScheduleProps) => {
           <Text className="text-slate-600 text-xs">Os horários estão sujeitos a alterações</Text>
         </View>
       </ScrollView>
+      
+      {/* Custom Alert Component */}
+      {AlertComponent}
     </View>
   );
 };

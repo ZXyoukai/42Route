@@ -89,7 +89,7 @@ export const RouteDetail = ({
         {/* Informações do Autocarro */}
         <View className="bg-slate-800 rounded-2xl p-6 mb-6 shadow-lg border border-slate-700">
           <Text className="text-white text-xl font-bold mb-4">Informações do Autocarro</Text>
-          <View className="space-y-3">
+          <View className="gap-y-1">
             <View className="flex-row justify-between items-center p-3 bg-slate-700 rounded-xl">
               <View className="flex-row items-center">
                 <FontAwesome5 name="id-card" size={16} color="#94a3b8" />
@@ -128,7 +128,7 @@ export const RouteDetail = ({
           <Text className="text-white text-xl font-bold mb-4">Progresso da Rota</Text>
           <View className="relative">
             {stops.map((stop, index) => (
-              <View key={stop.id} className="flex-row items-start mb-6 last:mb-0">
+              <View key={stop.id} className="flex-row items-start mb-6 last:mb-1">
                 {/* Timeline */}
                 <View className="items-center mr-4">
                   <View 

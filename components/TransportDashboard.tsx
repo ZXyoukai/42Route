@@ -1,6 +1,7 @@
 import { Image, Text, View, ScrollView, TouchableOpacity } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { Ionicons, MaterialIcons, FontAwesome5 } from '@expo/vector-icons';
+import { useCustomAlert } from './CustomAlert';
 
 interface RouteInfo {
   id: string;
@@ -20,6 +21,8 @@ interface TransportDashboardProps {
 }
 
 export const TransportDashboard = ({ studentName = "Estudante", onRouteSelect, onProfileSelect, onScheduleSelect }: TransportDashboardProps) => {
+  const { AlertComponent, showSuccess, showError, showWarning, showInfo } = useCustomAlert();
+  
   const routes: RouteInfo[] = [
     {
       id: 'RT001',
@@ -70,12 +73,53 @@ export const TransportDashboard = ({ studentName = "Estudante", onRouteSelect, o
     }
   };
 
+  const handleLocatePress = () => {
+    showInfo(
+      'Localização de Autocarro',
+      'A funcionalidade de localização estará disponível em breve. Será possível acompanhar a posição do seu autocarro em tempo real.',
+      () => {
+        console.log('Localização info fechada');
+      }
+    );
+  };
+
+  const handleSupportPress = () => {
+    showWarning(
+      'Contactar Suporte',
+      'Deseja contactar o suporte técnico? Será redirecionado para o WhatsApp ou email da equipa.',
+      () => {
+        showSuccess('Suporte Contactado', 'Em breve receberá uma resposta da nossa equipa.');
+      },
+      () => {
+        console.log('Cancelou contacto com suporte');
+      }
+    );
+  };
+
+  const handleRoutePress = (route: RouteInfo) => {
+    if (route.status === 'parado') {
+      showError(
+        'Autocarro Indisponível',
+        `O autocarro da ${route.name} está atualmente parado. Por favor, escolha uma rota alternativa.`
+      );
+      return;
+    }
+    if (route.status === 'manutencao') {
+      showError(
+        'Autocarro em Manutenção',
+        `O autocarro da ${route.name} está em manutenção. Estará disponível em breve.`
+      );
+      return;
+    }
+    onRouteSelect?.();
+  };
+
   return (
     <View className="flex-1 bg-slate-900">
       <StatusBar style="light" backgroundColor="#0f172a" />
       
       {/* Header */}
-      <View className="bg-gradient-to-br from-purple-600 to-indigo-700 pt-12 pb-6 px-6">
+      <View className="bg-gradient-to-br from-purple-600 to-indigo-700 mt-6 pt-12 pb-6 px-6">
         <View className="flex-row items-center justify-between w-full">
           <View>
             <Text className="text-white text-lg font-medium">Bem-vindo, {studentName}!</Text>
@@ -128,7 +172,7 @@ export const TransportDashboard = ({ studentName = "Estudante", onRouteSelect, o
               key={route.id}
               className="bg-slate-800 rounded-2xl p-5 mb-4 shadow-lg border border-slate-700"
               activeOpacity={0.7}
-              onPress={onRouteSelect}
+              onPress={() => handleRoutePress(route)}
             >
               <View className="flex-row justify-between items-start mb-3">
                 <View className="flex-1">
@@ -180,7 +224,11 @@ export const TransportDashboard = ({ studentName = "Estudante", onRouteSelect, o
         <View className="bg-slate-800 rounded-2xl p-6 mb-6 shadow-lg border border-slate-700">
           <Text className="text-white text-xl font-bold mb-4">Ações Rápidas</Text>
           <View className="flex-row justify-between">
-            <TouchableOpacity className="bg-cyan-900/30 rounded-xl p-4 flex-1 mr-2 items-center border border-cyan-700" style={{ borderColor: '#00babc', backgroundColor: 'rgba(0, 186, 188, 0.1)' }}>
+            <TouchableOpacity 
+              className="bg-cyan-900/30 rounded-xl p-4 flex-1 mr-2 items-center border border-cyan-700" 
+              style={{ borderColor: '#00babc', backgroundColor: 'rgba(0, 186, 188, 0.1)' }}
+              onPress={handleLocatePress}
+            >
               <View className="w-12 h-12 rounded-full items-center justify-center mb-2" style={{ backgroundColor: '#00babc' }}>
                 <Ionicons name="location" size={20} color="white" />
               </View>
@@ -197,7 +245,10 @@ export const TransportDashboard = ({ studentName = "Estudante", onRouteSelect, o
               <Text className="text-emerald-300 font-bold text-sm">Horários</Text>
               <Text className="text-emerald-400 text-xs mt-1">Ver Todos</Text>
             </TouchableOpacity>
-            <TouchableOpacity className="bg-blue-900/30 rounded-xl p-4 flex-1 ml-2 items-center border border-blue-700">
+            <TouchableOpacity 
+              className="bg-blue-900/30 rounded-xl p-4 flex-1 ml-2 items-center border border-blue-700"
+              onPress={handleSupportPress}
+            >
               <View className="w-12 h-12 bg-blue-600 rounded-full items-center justify-center mb-2">
                 <MaterialIcons name="support-agent" size={20} color="white" />
               </View>
@@ -207,6 +258,9 @@ export const TransportDashboard = ({ studentName = "Estudante", onRouteSelect, o
           </View>
         </View>
       </ScrollView>
+      
+      {/* Custom Alert Component */}
+      {AlertComponent}
     </View>
   );
 };
