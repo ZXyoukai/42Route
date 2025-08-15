@@ -76,7 +76,7 @@ export const TransportDashboard = ({ studentName = "Estudante", onRouteSelect, o
       
       {/* Header */}
       <View className="bg-gradient-to-br from-purple-600 to-indigo-700 pt-12 pb-6 px-6">
-        <View className="flex-row items-center justify-between">
+        <View className="flex-row items-center justify-between w-full">
           <View>
             <Text className="text-white text-lg font-medium">Bem-vindo, {studentName}!</Text>
             <Text className="text-purple-100 text-sm">Monitorize o seu transporte</Text>
@@ -87,11 +87,6 @@ export const TransportDashboard = ({ studentName = "Estudante", onRouteSelect, o
                 <Ionicons name="person" size={20} color="white" />
               </View>
             </TouchableOpacity>
-            <Image
-              source={require('../assets/route_logo-w.png')}
-              className="h-10"
-              resizeMode="contain"
-            />
           </View>
         </View>
       </View>
