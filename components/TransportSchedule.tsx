@@ -1,5 +1,6 @@
 import { Image, Text, View, ScrollView, TouchableOpacity } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
+import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 
 interface ScheduleInfo {
   routeName: string;
@@ -78,68 +79,68 @@ export const TransportSchedule = ({ onBack }: TransportScheduleProps) => {
       key={schedule.routeId}
       className={`rounded-2xl p-5 mb-4 border shadow-lg ${
         schedule.isActive
-          ? 'bg-white border-slate-100'
-          : 'bg-slate-100 border-slate-200'
+          ? 'bg-slate-800 border-slate-700'
+          : 'bg-slate-800/50 border-slate-600'
       }`}
     >
       <View className="flex-row justify-between items-start mb-4">
         <View className="flex-1">
           <Text className={`font-bold text-lg ${
-            schedule.isActive ? 'text-slate-800' : 'text-slate-500'
+            schedule.isActive ? 'text-white' : 'text-slate-400'
           }`}>
             {schedule.routeName}
           </Text>
           <Text className={`text-sm font-medium ${
-            schedule.isActive ? 'text-slate-600' : 'text-slate-400'
+            schedule.isActive ? 'text-slate-300' : 'text-slate-500'
           }`}>
             {schedule.routeId} • {schedule.stops} paragens
           </Text>
         </View>
         <View className={`px-4 py-2 rounded-full ${
-          schedule.isActive ? 'bg-emerald-100' : 'bg-slate-200'
+          schedule.isActive ? 'bg-emerald-600' : 'bg-slate-600'
         }`}>
           <Text className={`text-sm font-bold ${
-            schedule.isActive ? 'text-emerald-700' : 'text-slate-600'
+            schedule.isActive ? 'text-white' : 'text-slate-300'
           }`}>
             {schedule.isActive ? 'Ativo' : 'Inativo'}
           </Text>
         </View>
       </View>
 
-      <View className="bg-slate-50 rounded-xl p-4">
+      <View className="bg-slate-700 rounded-xl p-4">
         <View className="flex-row justify-between items-center">
           <View className="flex-1">
             <Text className={`text-sm font-medium ${
-              schedule.isActive ? 'text-slate-600' : 'text-slate-400'
+              schedule.isActive ? 'text-slate-300' : 'text-slate-500'
             }`}>
               Partida - Chegada
             </Text>
             <Text className={`font-bold text-xl ${
-              schedule.isActive ? 'text-purple-600' : 'text-slate-500'
+              schedule.isActive ? 'text-purple-400' : 'text-slate-400'
             }`}>
               {schedule.departureTime} - {schedule.arrivalTime}
             </Text>
           </View>
           <View className="items-center">
             <Text className={`text-sm font-medium ${
-              schedule.isActive ? 'text-slate-600' : 'text-slate-400'
+              schedule.isActive ? 'text-slate-300' : 'text-slate-500'
             }`}>
               Duração
             </Text>
             <Text className={`font-bold ${
-              schedule.isActive ? 'text-slate-800' : 'text-slate-500'
+              schedule.isActive ? 'text-white' : 'text-slate-400'
             }`}>
               {schedule.duration}
             </Text>
           </View>
           <View className="items-end">
             <Text className={`text-sm font-medium ${
-              schedule.isActive ? 'text-slate-600' : 'text-slate-400'
+              schedule.isActive ? 'text-slate-300' : 'text-slate-500'
             }`}>
               Frequência
             </Text>
             <Text className={`font-bold text-right ${
-              schedule.isActive ? 'text-slate-800' : 'text-slate-500'
+              schedule.isActive ? 'text-white' : 'text-slate-400'
             }`}>
               {schedule.frequency}
             </Text>
@@ -150,8 +151,8 @@ export const TransportSchedule = ({ onBack }: TransportScheduleProps) => {
   );
 
   return (
-    <View className="flex-1 bg-slate-50">
-      <StatusBar style="light" backgroundColor="#7c3aed" />
+    <View className="flex-1 bg-slate-900">
+      <StatusBar style="light" backgroundColor="#0f172a" />
       
       {/* Header */}
       <View className="bg-gradient-to-br from-purple-600 to-indigo-700 pt-12 pb-6 px-6">
@@ -190,13 +191,13 @@ export const TransportSchedule = ({ onBack }: TransportScheduleProps) => {
 
         {/* Horários de Segunda a Sexta */}
         <View className="mb-6">
-          <Text className="text-slate-800 text-xl font-bold mb-4">Segunda a Sexta-feira</Text>
+          <Text className="text-white text-xl font-bold mb-4">Segunda a Sexta-feira</Text>
           {weekdays.map(renderScheduleCard)}
         </View>
 
         {/* Horários de Fim de Semana */}
         <View className="mb-6">
-          <Text className="text-slate-800 text-xl font-bold mb-4">Sábados e Domingos</Text>
+          <Text className="text-white text-xl font-bold mb-4">Sábados e Domingos</Text>
           {weekends.map(renderScheduleCard)}
         </View>
 

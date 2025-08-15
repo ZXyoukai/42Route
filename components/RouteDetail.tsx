@@ -1,5 +1,6 @@
 import { Image, Text, View, ScrollView, TouchableOpacity } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
+import { Ionicons, MaterialIcons, FontAwesome5 } from '@expo/vector-icons';
 
 interface Stop {
   id: string;
@@ -61,18 +62,19 @@ export const RouteDetail = ({
   const driverName = 'António Mateus';
 
   return (
-    <View className="flex-1 bg-slate-50">
-      <StatusBar style="light" backgroundColor="#7c3aed" />
+    <View className="flex-1 bg-slate-900">
+      <StatusBar style="light" backgroundColor="#0f172a" />
       
       {/* Header */}
       <View className="bg-gradient-to-br from-purple-600 to-indigo-700 pt-12 pb-6 px-6">
         <View className="flex-row items-center justify-between mb-4">
-          <TouchableOpacity onPress={onBack}>
-            <Text className="text-white text-lg">← Voltar</Text>
+          <TouchableOpacity onPress={onBack} className="flex-row items-center">
+            <Ionicons name="arrow-back" size={24} color="white" />
+            <Text className="text-white text-lg font-medium ml-2">Voltar</Text>
           </TouchableOpacity>
           <Image
             source={require('../assets/route_logo-w.png')}
-            className="h-8"
+            className="h-10"
             resizeMode="contain"
           />
         </View>
@@ -85,24 +87,36 @@ export const RouteDetail = ({
 
       <ScrollView className="flex-1 px-6 py-4">
         {/* Informações do Autocarro */}
-        <View className="bg-white rounded-2xl p-6 mb-6 shadow-lg border border-slate-100">
-          <Text className="text-slate-800 text-xl font-bold mb-4">Informações do Autocarro</Text>
+        <View className="bg-slate-800 rounded-2xl p-6 mb-6 shadow-lg border border-slate-700">
+          <Text className="text-white text-xl font-bold mb-4">Informações do Autocarro</Text>
           <View className="space-y-3">
-            <View className="flex-row justify-between items-center p-3 bg-slate-50 rounded-xl">
-              <Text className="text-slate-600 font-medium">Matrícula:</Text>
-              <Text className="text-slate-800 font-bold">{busNumber}</Text>
+            <View className="flex-row justify-between items-center p-3 bg-slate-700 rounded-xl">
+              <View className="flex-row items-center">
+                <FontAwesome5 name="id-card" size={16} color="#94a3b8" />
+                <Text className="text-slate-300 font-medium ml-3">Matrícula:</Text>
+              </View>
+              <Text className="text-white font-bold">{busNumber}</Text>
             </View>
-            <View className="flex-row justify-between items-center p-3 bg-slate-50 rounded-xl">
-              <Text className="text-slate-600 font-medium">Motorista:</Text>
-              <Text className="text-slate-800 font-bold">{driverName}</Text>
+            <View className="flex-row justify-between items-center p-3 bg-slate-700 rounded-xl">
+              <View className="flex-row items-center">
+                <Ionicons name="person" size={16} color="#94a3b8" />
+                <Text className="text-slate-300 font-medium ml-3">Motorista:</Text>
+              </View>
+              <Text className="text-white font-bold">{driverName}</Text>
             </View>
-            <View className="flex-row justify-between items-center p-3 bg-slate-50 rounded-xl">
-              <Text className="text-slate-600 font-medium">Hora Atual:</Text>
-              <Text className="text-purple-600 font-bold text-lg">{currentTime}</Text>
+            <View className="flex-row justify-between items-center p-3 bg-slate-700 rounded-xl">
+              <View className="flex-row items-center">
+                <MaterialIcons name="access-time" size={16} color="#94a3b8" />
+                <Text className="text-slate-300 font-medium ml-3">Hora Atual:</Text>
+              </View>
+              <Text className="text-purple-400 font-bold text-lg">{currentTime}</Text>
             </View>
-            <View className="flex-row justify-between items-center p-3 bg-slate-50 rounded-xl">
-              <Text className="text-slate-600 font-medium">Estado:</Text>
-              <View className="bg-indigo-500 px-4 py-2 rounded-full">
+            <View className="flex-row justify-between items-center p-3 bg-slate-700 rounded-xl">
+              <View className="flex-row items-center">
+                <MaterialIcons name="directions-bus" size={16} color="#94a3b8" />
+                <Text className="text-slate-300 font-medium ml-3">Estado:</Text>
+              </View>
+              <View className="bg-indigo-600 px-4 py-2 rounded-full">
                 <Text className="text-white text-sm font-bold">Em Rota</Text>
               </View>
             </View>
@@ -110,60 +124,67 @@ export const RouteDetail = ({
         </View>
 
         {/* Progresso da Rota */}
-        <View className="bg-white rounded-2xl p-6 mb-6 shadow-lg border border-slate-100">
-          <Text className="text-slate-800 text-xl font-bold mb-4">Progresso da Rota</Text>
+        <View className="bg-slate-800 rounded-2xl p-6 mb-6 shadow-lg border border-slate-700">
+          <Text className="text-white text-xl font-bold mb-4">Progresso da Rota</Text>
           <View className="relative">
             {stops.map((stop, index) => (
               <View key={stop.id} className="flex-row items-start mb-6 last:mb-0">
                 {/* Timeline */}
                 <View className="items-center mr-4">
                   <View 
-                    className={`w-5 h-5 rounded-full border-2 ${
+                    className={`w-6 h-6 rounded-full border-2 items-center justify-center ${
                       stop.isCompleted 
                         ? 'bg-emerald-500 border-emerald-500' 
                         : stop.isCurrent 
                         ? 'bg-purple-500 border-purple-500' 
-                        : 'bg-white border-slate-300'
+                        : 'bg-slate-700 border-slate-600'
                     }`}
                   >
-                    {stop.isCompleted && (
-                      <Text className="text-white text-xs leading-none text-center mt-0.5">✓</Text>
+                    {stop.isCompleted ? (
+                      <Ionicons name="checkmark" size={12} color="white" />
+                    ) : stop.isCurrent ? (
+                      <FontAwesome5 name="bus" size={10} color="white" />
+                    ) : (
+                      <View className="w-2 h-2 bg-slate-400 rounded-full" />
                     )}
                   </View>
                   {index < stops.length - 1 && (
                     <View 
                       className={`w-0.5 h-16 ${
-                        stop.isCompleted ? 'bg-emerald-500' : 'bg-slate-300'
+                        stop.isCompleted ? 'bg-emerald-500' : 'bg-slate-600'
                       }`} 
                     />
                   )}
                 </View>
 
                 {/* Stop Info */}
-                <View className="flex-1 bg-slate-50 rounded-xl p-4">
+                <View className="flex-1 bg-slate-700 rounded-xl p-4">
                   <View className="flex-row justify-between items-start mb-2">
                     <Text className={`font-bold text-base ${
-                      stop.isCurrent ? 'text-purple-600' : 'text-slate-800'
+                      stop.isCurrent ? 'text-purple-400' : 'text-white'
                     }`}>
                       {stop.name}
                     </Text>
                     <Text className={`text-sm font-bold ${
                       stop.isCompleted 
-                        ? 'text-emerald-600' 
+                        ? 'text-emerald-400' 
                         : stop.isCurrent 
-                        ? 'text-purple-600' 
-                        : 'text-slate-500'
+                        ? 'text-purple-400' 
+                        : 'text-slate-400'
                     }`}>
                       {stop.estimatedTime}
                     </Text>
                   </View>
-                  <Text className="text-slate-600 text-sm">{stop.address}</Text>
+                  <Text className="text-slate-300 text-sm">{stop.address}</Text>
                   
                   {stop.isCurrent && (
-                    <View className="mt-3 p-3 bg-purple-100 rounded-lg border border-purple-200">
-                      <Text className="text-purple-700 text-sm font-bold">
-                        🚌 Próxima paragem - Chegada estimada em 20 min
-                      </Text>
+                    <View className="mt-3 p-3 bg-purple-900/50 rounded-lg border border-purple-600">
+                      <View className="flex-row items-center">
+                        <FontAwesome5 name="bus" size={14} color="#a855f7" />
+                        <Text className="text-purple-300 text-sm font-bold ml-2">
+                          Próxima paragem - Chegada estimada em 20 min
+                        </Text>
+                      </View>
                     </View>
                   )}
                 </View>
@@ -173,26 +194,26 @@ export const RouteDetail = ({
         </View>
 
         {/* Notificações */}
-        <View className="bg-white rounded-2xl p-6 mb-6 shadow-lg border border-slate-100">
-          <Text className="text-slate-800 text-xl font-bold mb-4">Notificações</Text>
-          <View className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-3">
+        <View className="bg-slate-800 rounded-2xl p-6 mb-6 shadow-lg border border-slate-700">
+          <Text className="text-white text-xl font-bold mb-4">Notificações</Text>
+          <View className="bg-amber-900/30 border border-amber-600 rounded-xl p-4 mb-3">
             <View className="flex-row items-start">
-              <Text className="text-amber-600 mr-3 text-lg">⚠️</Text>
-              <View className="flex-1">
-                <Text className="text-amber-800 font-bold text-sm">Ligeiro atraso</Text>
-                <Text className="text-amber-700 text-xs mt-1">
+              <Ionicons name="warning" size={20} color="#f59e0b" />
+              <View className="flex-1 ml-3">
+                <Text className="text-amber-300 font-bold text-sm">Ligeiro atraso</Text>
+                <Text className="text-amber-200 text-xs mt-1">
                   Autocarro com 5 minutos de atraso devido ao trânsito na Marginal
                 </Text>
               </View>
             </View>
           </View>
           
-          <View className="bg-indigo-50 border border-indigo-200 rounded-xl p-4">
+          <View className="bg-indigo-900/30 border border-indigo-600 rounded-xl p-4">
             <View className="flex-row items-start">
-              <Text className="text-indigo-600 mr-3 text-lg">ℹ️</Text>
-              <View className="flex-1">
-                <Text className="text-indigo-800 font-bold text-sm">Próxima paragem</Text>
-                <Text className="text-indigo-700 text-xs mt-1">
+              <MaterialIcons name="info" size={20} color="#6366f1" />
+              <View className="flex-1 ml-3">
+                <Text className="text-indigo-300 font-bold text-sm">Próxima paragem</Text>
+                <Text className="text-indigo-200 text-xs mt-1">
                   O autocarro está a aproximar-se do Centro Comercial Belas
                 </Text>
               </View>
@@ -203,10 +224,16 @@ export const RouteDetail = ({
         {/* Ações */}
         <View className="flex-row justify-between mb-6">
           <TouchableOpacity className="bg-gradient-to-br from-purple-600 to-indigo-600 rounded-xl p-4 flex-1 mr-3 items-center shadow-lg">
-            <Text className="text-white font-bold text-sm">📱 Notificar Chegada</Text>
+            <View className="flex-row items-center">
+              <MaterialIcons name="notifications" size={20} color="white" />
+              <Text className="text-white font-bold text-sm ml-2">Notificar Chegada</Text>
+            </View>
           </TouchableOpacity>
           <TouchableOpacity className="bg-gradient-to-br from-emerald-600 to-teal-600 rounded-xl p-4 flex-1 ml-3 items-center shadow-lg">
-            <Text className="text-white font-bold text-sm">📞 Contactar Motorista</Text>
+            <View className="flex-row items-center">
+              <MaterialIcons name="phone" size={20} color="white" />
+              <Text className="text-white font-bold text-sm ml-2">Contactar Motorista</Text>
+            </View>
           </TouchableOpacity>
         </View>
       </ScrollView>

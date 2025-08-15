@@ -1,6 +1,7 @@
+import React, { useState } from 'react';
 import { Image, Text, View, ScrollView, TouchableOpacity, Switch } from 'react-native';
-import { useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
+import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 
 interface StudentProfileProps {
   onBack?: () => void;
@@ -22,18 +23,19 @@ export const StudentProfile = ({ onBack }: StudentProfileProps) => {
   };
 
   return (
-    <View className="flex-1 bg-slate-50">
-      <StatusBar style="light" backgroundColor="#7c3aed" />
+    <View className="flex-1 bg-slate-900">
+      <StatusBar style="light" backgroundColor="#0f172a" />
       
       {/* Header */}
       <View className="bg-gradient-to-br from-purple-600 to-indigo-700 pt-12 pb-6 px-6">
         <View className="flex-row items-center justify-between mb-4">
-          <TouchableOpacity onPress={onBack}>
-            <Text className="text-white text-lg">← Voltar</Text>
+          <TouchableOpacity onPress={onBack} className="flex-row items-center">
+            <Ionicons name="arrow-back" size={24} color="white" />
+            <Text className="text-white text-lg font-medium ml-2">Voltar</Text>
           </TouchableOpacity>
           <Image
             source={require('../assets/route_logo-w.png')}
-            className="h-8"
+            className="h-10"
             resizeMode="contain"
           />
         </View>
@@ -51,160 +53,169 @@ export const StudentProfile = ({ onBack }: StudentProfileProps) => {
 
       <ScrollView className="flex-1 px-6 py-4">
         {/* Informações Pessoais */}
-        <View className="bg-white rounded-2xl p-6 mb-6 shadow-lg border border-slate-100">
-          <Text className="text-slate-800 text-xl font-bold mb-4">Informações Pessoais</Text>
+        <View className="bg-slate-800 rounded-2xl p-6 mb-6 shadow-lg border border-slate-700">
+          <Text className="text-white text-xl font-bold mb-4">Informações Pessoais</Text>
           
           <View className="space-y-4">
-            <View className="p-3 bg-slate-50 rounded-xl">
-              <Text className="text-slate-500 text-sm font-medium">Email</Text>
-              <Text className="text-slate-800 font-bold">{studentInfo.email}</Text>
+            <View className="p-3 bg-slate-700 rounded-xl">
+              <Text className="text-slate-400 text-sm font-medium">Email</Text>
+              <Text className="text-white font-bold">{studentInfo.email}</Text>
             </View>
             
-            <View className="p-3 bg-slate-50 rounded-xl">
-              <Text className="text-slate-500 text-sm font-medium">Curso</Text>
-              <Text className="text-slate-800 font-bold">{studentInfo.course}</Text>
+            <View className="p-3 bg-slate-700 rounded-xl">
+              <Text className="text-slate-400 text-sm font-medium">Curso</Text>
+              <Text className="text-white font-bold">{studentInfo.course}</Text>
             </View>
             
-            <View className="p-3 bg-slate-50 rounded-xl">
-              <Text className="text-slate-500 text-sm font-medium">Nível</Text>
-              <Text className="text-slate-800 font-bold">{studentInfo.level}</Text>
+            <View className="p-3 bg-slate-700 rounded-xl">
+              <Text className="text-slate-400 text-sm font-medium">Nível</Text>
+              <Text className="text-white font-bold">{studentInfo.level}</Text>
             </View>
             
-            <View className="p-3 bg-purple-50 rounded-xl border border-purple-200">
-              <Text className="text-slate-500 text-sm font-medium">Rota Preferida</Text>
-              <Text className="text-purple-600 font-bold">{studentInfo.preferredRoute}</Text>
+            <View className="p-3 bg-purple-900/30 rounded-xl border border-purple-600">
+              <Text className="text-slate-400 text-sm font-medium">Rota Preferida</Text>
+              <Text className="text-purple-400 font-bold">{studentInfo.preferredRoute}</Text>
             </View>
             
-            <View className="p-3 bg-slate-50 rounded-xl">
-              <Text className="text-slate-500 text-sm font-medium">Contacto de Emergência</Text>
-              <Text className="text-slate-800 font-bold">{studentInfo.emergencyContact}</Text>
+            <View className="p-3 bg-slate-700 rounded-xl">
+              <Text className="text-slate-400 text-sm font-medium">Contacto de Emergência</Text>
+              <Text className="text-white font-bold">{studentInfo.emergencyContact}</Text>
             </View>
           </View>
         </View>
 
         {/* Configurações de Notificação */}
-        <View className="bg-white rounded-xl p-4 mb-4 shadow-sm">
-          <Text className="text-gray-800 text-lg font-semibold mb-3">Notificações</Text>
+        <View className="bg-slate-800 rounded-2xl p-6 mb-6 shadow-lg border border-slate-700">
+          <Text className="text-white text-xl font-bold mb-4">Notificações</Text>
           
-          <View className="flex-row justify-between items-center mb-3">
+          <View className="flex-row justify-between items-center mb-4 p-3 bg-slate-700 rounded-xl">
             <View className="flex-1">
-              <Text className="text-gray-800 font-medium">Notificações Push</Text>
-              <Text className="text-gray-600 text-sm">Receber alertas sobre os autocarros</Text>
+              <View className="flex-row items-center mb-1">
+                <Ionicons name="notifications" size={16} color="#a855f7" />
+                <Text className="text-white font-medium ml-2">Notificações Push</Text>
+              </View>
+              <Text className="text-slate-400 text-sm">Receber alertas sobre os autocarros</Text>
             </View>
             <Switch
               value={notificationsEnabled}
               onValueChange={setNotificationsEnabled}
-              trackColor={{ false: '#cbd5e1', true: '#a855f7' }}
-              thumbColor={notificationsEnabled ? '#ffffff' : '#f4f3f4'}
+              trackColor={{ false: '#374151', true: '#a855f7' }}
+              thumbColor={notificationsEnabled ? '#ffffff' : '#64748b'}
             />
           </View>
           
-          <View className="flex-row justify-between items-center mb-3">
+          <View className="flex-row justify-between items-center mb-4 p-3 bg-slate-700 rounded-xl">
             <View className="flex-1">
-              <Text className="text-gray-800 font-medium">Localização</Text>
-              <Text className="text-gray-600 text-sm">Permitir acesso à localização</Text>
+              <View className="flex-row items-center mb-1">
+                <Ionicons name="location" size={16} color="#6366f1" />
+                <Text className="text-white font-medium ml-2">Localização</Text>
+              </View>
+              <Text className="text-slate-400 text-sm">Permitir acesso à localização</Text>
             </View>
             <Switch
               value={locationEnabled}
               onValueChange={setLocationEnabled}
-              trackColor={{ false: '#cbd5e1', true: '#a855f7' }}
-              thumbColor={locationEnabled ? '#ffffff' : '#f4f3f4'}
+              trackColor={{ false: '#374151', true: '#6366f1' }}
+              thumbColor={locationEnabled ? '#ffffff' : '#64748b'}
             />
           </View>
           
-          <View className="flex-row justify-between items-center">
+          <View className="flex-row justify-between items-center p-3 bg-slate-700 rounded-xl">
             <View className="flex-1">
-              <Text className="text-gray-800 font-medium">Alertas Automáticos</Text>
-              <Text className="text-gray-600 text-sm">Notificação 10 min antes da chegada</Text>
+              <View className="flex-row items-center mb-1">
+                <MaterialIcons name="alarm" size={16} color="#8b5cf6" />
+                <Text className="text-white font-medium ml-2">Alertas Automáticos</Text>
+              </View>
+              <Text className="text-slate-400 text-sm">Notificação 10 min antes da chegada</Text>
             </View>
             <Switch
               value={autoAlerts}
               onValueChange={setAutoAlerts}
-              trackColor={{ false: '#cbd5e1', true: '#a855f7' }}
-              thumbColor={autoAlerts ? '#ffffff' : '#f4f3f4'}
+              trackColor={{ false: '#374151', true: '#8b5cf6' }}
+              thumbColor={autoAlerts ? '#ffffff' : '#64748b'}
             />
           </View>
         </View>
 
         {/* Estatísticas de Uso */}
-        <View className="bg-white rounded-2xl p-6 mb-6 shadow-lg border border-slate-100">
-          <Text className="text-slate-800 text-xl font-bold mb-4">Estatísticas</Text>
+        <View className="bg-slate-800 rounded-2xl p-6 mb-6 shadow-lg border border-slate-700">
+          <Text className="text-white text-xl font-bold mb-4">Estatísticas</Text>
           
           <View className="flex-row justify-between mb-4">
             <View className="items-center flex-1">
-              <View className="w-16 h-16 bg-purple-100 rounded-2xl items-center justify-center mb-2">
-                <Text className="text-2xl font-bold text-purple-600">42</Text>
+              <View className="w-16 h-16 bg-purple-900/50 rounded-2xl items-center justify-center mb-2 border border-purple-700">
+                <Text className="text-2xl font-bold text-purple-400">42</Text>
               </View>
-              <Text className="text-slate-600 text-sm text-center font-medium">Viagens este mês</Text>
+              <Text className="text-slate-400 text-sm text-center font-medium">Viagens este mês</Text>
             </View>
             <View className="items-center flex-1">
-              <View className="w-16 h-16 bg-emerald-100 rounded-2xl items-center justify-center mb-2">
-                <Text className="text-2xl font-bold text-emerald-600">98%</Text>
+              <View className="w-16 h-16 bg-emerald-900/50 rounded-2xl items-center justify-center mb-2 border border-emerald-700">
+                <Text className="text-2xl font-bold text-emerald-400">98%</Text>
               </View>
-              <Text className="text-slate-600 text-sm text-center font-medium">Pontualidade</Text>
+              <Text className="text-slate-400 text-sm text-center font-medium">Pontualidade</Text>
             </View>
             <View className="items-center flex-1">
-              <View className="w-16 h-16 bg-blue-100 rounded-2xl items-center justify-center mb-2">
-                <Text className="text-2xl font-bold text-blue-600">15.2</Text>
+              <View className="w-16 h-16 bg-blue-900/50 rounded-2xl items-center justify-center mb-2 border border-blue-700">
+                <Text className="text-2xl font-bold text-blue-400">15.2</Text>
               </View>
-              <Text className="text-slate-600 text-sm text-center font-medium">Tempo médio (min)</Text>
+              <Text className="text-slate-400 text-sm text-center font-medium">Tempo médio (min)</Text>
             </View>
           </View>
           
-          <View className="border-t border-slate-100 pt-4">
-            <Text className="text-slate-600 text-sm text-center">
-              Você usa o transporte 42Routes há <Text className="font-bold text-slate-800">6 meses</Text>
+          <View className="border-t border-slate-700 pt-4">
+            <Text className="text-slate-400 text-sm text-center">
+              Você usa o transporte 42Routes há <Text className="font-bold text-white">6 meses</Text>
             </Text>
           </View>
         </View>
 
         {/* Ações */}
         <View className="space-y-3 mb-6">
-          <TouchableOpacity className="bg-white rounded-xl p-4 flex-row items-center justify-between shadow-sm">
+          <TouchableOpacity className="bg-slate-800 rounded-xl p-4 flex-row items-center justify-between shadow-lg border border-slate-700">
             <View className="flex-row items-center">
-              <Text className="mr-3">🎯</Text>
-              <Text className="text-gray-800 font-medium">Alterar Rota Preferida</Text>
+              <MaterialIcons name="route" size={20} color="#a855f7" />
+              <Text className="text-white font-medium ml-3">Alterar Rota Preferida</Text>
             </View>
-            <Text className="text-gray-400">›</Text>
+            <Ionicons name="chevron-forward" size={16} color="#64748b" />
           </TouchableOpacity>
           
-          <TouchableOpacity className="bg-white rounded-xl p-4 flex-row items-center justify-between shadow-sm">
+          <TouchableOpacity className="bg-slate-800 rounded-xl p-4 flex-row items-center justify-between shadow-lg border border-slate-700">
             <View className="flex-row items-center">
-              <Text className="mr-3">📅</Text>
-              <Text className="text-gray-800 font-medium">Horários Personalizados</Text>
+              <MaterialIcons name="schedule" size={20} color="#6366f1" />
+              <Text className="text-white font-medium ml-3">Horários Personalizados</Text>
             </View>
-            <Text className="text-gray-400">›</Text>
+            <Ionicons name="chevron-forward" size={16} color="#64748b" />
           </TouchableOpacity>
           
-          <TouchableOpacity className="bg-white rounded-xl p-4 flex-row items-center justify-between shadow-sm">
+          <TouchableOpacity className="bg-slate-800 rounded-xl p-4 flex-row items-center justify-between shadow-lg border border-slate-700">
             <View className="flex-row items-center">
-              <Text className="mr-3">🏆</Text>
-              <Text className="text-gray-800 font-medium">Conquistas e Badges</Text>
+              <MaterialIcons name="emoji-events" size={20} color="#f59e0b" />
+              <Text className="text-white font-medium ml-3">Conquistas e Badges</Text>
             </View>
-            <Text className="text-gray-400">›</Text>
+            <Ionicons name="chevron-forward" size={16} color="#64748b" />
           </TouchableOpacity>
           
-          <TouchableOpacity className="bg-white rounded-xl p-4 flex-row items-center justify-between shadow-sm">
+          <TouchableOpacity className="bg-slate-800 rounded-xl p-4 flex-row items-center justify-between shadow-lg border border-slate-700">
             <View className="flex-row items-center">
-              <Text className="mr-3">❓</Text>
-              <Text className="text-gray-800 font-medium">Ajuda e Suporte</Text>
+              <MaterialIcons name="help-outline" size={20} color="#10b981" />
+              <Text className="text-white font-medium ml-3">Ajuda e Suporte</Text>
             </View>
-            <Text className="text-gray-400">›</Text>
+            <Ionicons name="chevron-forward" size={16} color="#64748b" />
           </TouchableOpacity>
           
-          <TouchableOpacity className="bg-red-50 rounded-xl p-4 flex-row items-center justify-between border border-red-200">
+          <TouchableOpacity className="bg-red-900/30 rounded-xl p-4 flex-row items-center justify-between border border-red-700">
             <View className="flex-row items-center">
-              <Text className="mr-3">🚪</Text>
-              <Text className="text-red-600 font-medium">Terminar Sessão</Text>
+              <MaterialIcons name="logout" size={20} color="#ef4444" />
+              <Text className="text-red-400 font-medium ml-3">Terminar Sessão</Text>
             </View>
-            <Text className="text-red-400">›</Text>
+            <Ionicons name="chevron-forward" size={16} color="#ef4444" />
           </TouchableOpacity>
         </View>
 
         {/* Versão da App */}
         <View className="items-center py-4">
-          <Text className="text-gray-500 text-sm">42Routes v1.0.0</Text>
-          <Text className="text-gray-400 text-xs">© 2024 42 Luanda</Text>
+          <Text className="text-slate-500 text-sm">42Routes v1.0.0</Text>
+          <Text className="text-slate-600 text-xs">© 2024 42 Luanda</Text>
         </View>
       </ScrollView>
     </View>
