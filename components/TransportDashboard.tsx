@@ -150,22 +150,23 @@ export const TransportDashboard = ({ studentName = "Estudante", onRouteSelect, o
                   </View>
                   <View className="items-end">
                     <Text className="text-slate-400 text-sm font-medium">Chegada em:</Text>
-                    <Text className="text-purple-400 font-bold text-xl">{route.estimatedTime}</Text>
+                    <Text className="text-cyan-400 font-bold text-xl" style={{ color: '#00babc' }}>{route.estimatedTime}</Text>
                   </View>
                 </View>
 
                 <View className="mt-4 flex-row justify-between items-center">
                   <View className="flex-row items-center">
-                    <View className="w-3 h-3 bg-indigo-400 rounded-full mr-3"></View>
+                    <View className="w-3 h-3 rounded-full mr-3" style={{ backgroundColor: '#00babc' }}></View>
                     <Text className="text-slate-300 text-sm font-medium">
                       Passageiros: {route.passengers}/{route.capacity}
                     </Text>
                   </View>
                   <View className="bg-slate-700 rounded-full h-2 flex-1 mx-4">
                     <View
-                      className="bg-gradient-to-r from-purple-500 to-indigo-500 h-2 rounded-full"
+                      className="bg-gradient-to-r from-cyan-500 to-teal-500 h-2 rounded-full"
                       style={{
-                        width: `${(route.passengers / route.capacity) * 100}%`
+                        width: `${(route.passengers / route.capacity) * 100}%`,
+                        backgroundColor: '#00babc'
                       }}
                     />
                   </View>
@@ -179,12 +180,12 @@ export const TransportDashboard = ({ studentName = "Estudante", onRouteSelect, o
         <View className="bg-slate-800 rounded-2xl p-6 mb-6 shadow-lg border border-slate-700">
           <Text className="text-white text-xl font-bold mb-4">Ações Rápidas</Text>
           <View className="flex-row justify-between">
-            <TouchableOpacity className="bg-purple-900/30 rounded-xl p-4 flex-1 mr-2 items-center border border-purple-700">
-              <View className="w-12 h-12 bg-purple-600 rounded-full items-center justify-center mb-2">
+            <TouchableOpacity className="bg-cyan-900/30 rounded-xl p-4 flex-1 mr-2 items-center border border-cyan-700" style={{ borderColor: '#00babc', backgroundColor: 'rgba(0, 186, 188, 0.1)' }}>
+              <View className="w-12 h-12 rounded-full items-center justify-center mb-2" style={{ backgroundColor: '#00babc' }}>
                 <Ionicons name="location" size={20} color="white" />
               </View>
-              <Text className="text-purple-300 font-bold text-sm">Localizar</Text>
-              <Text className="text-purple-400 text-xs mt-1">Meu Autocarro</Text>
+              <Text className="text-cyan-300 font-bold text-sm" style={{ color: '#00babc' }}>Localizar</Text>
+              <Text className="text-cyan-400 text-xs mt-1" style={{ color: '#00babc' }}>Meu Autocarro</Text>
             </TouchableOpacity>
             <TouchableOpacity 
               className="bg-emerald-900/30 rounded-xl p-4 flex-1 mx-1 items-center border border-emerald-700"

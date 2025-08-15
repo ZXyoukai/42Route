@@ -149,14 +149,14 @@ export const StudentProfile = ({ onBack }: StudentProfileProps) => {
               <Text className="text-slate-400 text-sm text-center font-medium">Viagens este mês</Text>
             </View>
             <View className="items-center flex-1">
-              <View className="w-16 h-16 bg-emerald-900/50 rounded-2xl items-center justify-center mb-2 border border-emerald-700">
-                <Text className="text-2xl font-bold text-emerald-400">98%</Text>
+              <View className="w-16 h-16 bg-cyan-900/50 rounded-2xl items-center justify-center mb-2 border border-cyan-700" style={{ backgroundColor: 'rgba(0, 186, 188, 0.1)', borderColor: '#00babc' }}>
+                <Text className="text-2xl font-bold text-cyan-400" style={{ color: '#00babc' }}>98%</Text>
               </View>
               <Text className="text-slate-400 text-sm text-center font-medium">Pontualidade</Text>
             </View>
             <View className="items-center flex-1">
-              <View className="w-16 h-16 bg-blue-900/50 rounded-2xl items-center justify-center mb-2 border border-blue-700">
-                <Text className="text-2xl font-bold text-blue-400">15.2</Text>
+              <View className="w-16 h-16 bg-cyan-900/50 rounded-2xl items-center justify-center mb-2 border border-cyan-700" style={{ backgroundColor: 'rgba(0, 186, 188, 0.1)', borderColor: '#00babc' }}>
+                <Text className="text-2xl font-bold text-cyan-400" style={{ color: '#00babc' }}>15.2</Text>
               </View>
               <Text className="text-slate-400 text-sm text-center font-medium">Tempo médio (min)</Text>
             </View>
@@ -189,7 +189,7 @@ export const StudentProfile = ({ onBack }: StudentProfileProps) => {
           
           <TouchableOpacity className="bg-slate-800 rounded-xl p-4 flex-row items-center justify-between shadow-lg border border-slate-700">
             <View className="flex-row items-center">
-              <MaterialIcons name="emoji-events" size={20} color="#f59e0b" />
+              <MaterialIcons name="emoji-events" size={20} color="#00babc" />
               <Text className="text-white font-medium ml-3">Conquistas e Badges</Text>
             </View>
             <Ionicons name="chevron-forward" size={16} color="#64748b" />
@@ -197,7 +197,7 @@ export const StudentProfile = ({ onBack }: StudentProfileProps) => {
           
           <TouchableOpacity className="bg-slate-800 rounded-xl p-4 flex-row items-center justify-between shadow-lg border border-slate-700">
             <View className="flex-row items-center">
-              <MaterialIcons name="help-outline" size={20} color="#10b981" />
+              <MaterialIcons name="help-outline" size={20} color="#00babc" />
               <Text className="text-white font-medium ml-3">Ajuda e Suporte</Text>
             </View>
             <Ionicons name="chevron-forward" size={16} color="#64748b" />

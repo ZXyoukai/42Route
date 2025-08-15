@@ -38,7 +38,7 @@ export const BottomTabBar = ({ activeTab, onTabPress }: BottomTabBarProps) => {
   ];
 
   const renderIcon = (iconType: 'Ionicons' | 'MaterialIcons' | 'FontAwesome5', iconName: string, isActive: boolean) => {
-    const color = isActive ? '#a855f7' : '#64748b';
+    const color = isActive ? '#00babc' : '#64748b';
     const size = 22;
 
     switch (iconType) {
