@@ -19,7 +19,7 @@
       [
         "expo-maps",
         {
-          "googleMapsApiKey": "AIzaSyAJ1Kb0w8NKwvkXk3qLssG-1gZSd8xwWfo"
+          "googleMapsApiKey": "AIzaSyAlm3Es35ecfHTp4-gb7MjAfoqEcWuKXX0"
         }
       ]
     ],
@@ -38,7 +38,7 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.domingos-franco.x42Routes",
       "config": {
-        "googleMapsApiKey": "AIzaSyAJ1Kb0w8NKwvkXk3qLssG-1gZSd8xwWfo"
+        "googleMapsApiKey": "AIzaSyAlm3Es35ecfHTp4-gb7MjAfoqEcWuKXX0"
       }
     },
     "android": {
@@ -46,12 +46,16 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "permissions": ["ACCESS_FINE_LOCATION", "ACCESS_COARSE_LOCATION"]
-      ,
+      "permissions": [
+        "android.permission.ACCESS_FINE_LOCATION",
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.INTERNET",
+        "android.permission.ACCESS_NETWORK_STATE"
+      ],
       "package": "com.domingos_franco.x42Routes",
       "config": {
         "googleMaps": {
-          "apiKey": "AIzaSyAJ1Kb0w8NKwvkXk3qLssG-1gZSd8xwWfo"
+          "apiKey": "AIzaSyAlm3Es35ecfHTp4-gb7MjAfoqEcWuKXX0"
         }
       }
     },
