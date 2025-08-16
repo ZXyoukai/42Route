@@ -1,0 +1,64 @@
+{
+  "expo": {
+    "name": "42Routes",
+    "slug": "42Routes",
+    "version": "1.0.0",
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "experiments": {
+      "tsconfigPaths": true
+    },
+    "plugins": [
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Allow $(PRODUCT_NAME) to use your location."
+        }
+      ],
+      [
+        "expo-maps",
+        {
+          "googleMapsApiKey": "AIzaSyAJ1Kb0w8NKwvkXk3qLssG-1gZSd8xwWfo"
+        }
+      ]
+    ],
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.domingos-franco.x42Routes",
+      "config": {
+        "googleMapsApiKey": "AIzaSyAJ1Kb0w8NKwvkXk3qLssG-1gZSd8xwWfo"
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      },
+      "permissions": ["ACCESS_FINE_LOCATION", "ACCESS_COARSE_LOCATION"]
+      ,
+      "package": "com.domingos_franco.x42Routes",
+      "config": {
+        "googleMaps": {
+          "apiKey": "AIzaSyAJ1Kb0w8NKwvkXk3qLssG-1gZSd8xwWfo"
+        }
+      }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "b38f6974-5f2c-46ec-894c-1973e241ee00"
+      }
+    }
+  }
+}

@@ -21,5 +21,28 @@ android
 
 # Temporary files created by Metro to check the health of the file watcher
 .metro-health-check*
-components/.nfs000000000a49338b000001d4
-components/.nfs000000000a379dd1000001db
+
+# NFS temporary files (common in network file systems)
+.nfs*
+*.nfs*
+
+# APK files and build artifacts
+apk*
+.apk*
+
+# Large files that shouldn't be in git
+*.log
+*.tmp
+*.temp
+*.cache
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Build artifacts from prebuild
+ios/
+
+android/
