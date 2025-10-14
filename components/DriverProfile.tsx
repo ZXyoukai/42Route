@@ -34,8 +34,8 @@ export const DriverProfile = ({ onBack }: DriverProfileProps) => {
       <StatusBar style="light" backgroundColor="#0f172a" />
       
       {/* Header */}
-      <View className="bg-gradient-to-br from-cyan-500 to-teal-600 pt-12 pb-6 px-6" style={{ backgroundColor: '#00babc' }}>
-        <View className="flex-row items-center justify-between mb-6">
+      <View className=" border-b-2 border-[#00babc] pt-12 pb-6 px-6">
+        <View className="flex justify-between mb-6">
           <TouchableOpacity onPress={onBack} className="flex-row items-center">
             <Ionicons name="arrow-back" size={24} color="white" />
             <Text className="text-white text-lg font-medium ml-2">Voltar</Text>
@@ -74,7 +74,7 @@ export const DriverProfile = ({ onBack }: DriverProfileProps) => {
             </View>
           </View>
           
-          <View className="space-y-3">
+          <View className="gap-y-2">
             <View className="flex-row justify-between items-center p-3 bg-cyan-900/30 rounded-xl border border-cyan-600" style={{ backgroundColor: 'rgba(0, 186, 188, 0.1)', borderColor: '#00babc' }}>
               <View className="flex-row items-center">
                 <FontAwesome5 name="route" size={16} color="#00babc" />
@@ -136,7 +136,7 @@ export const DriverProfile = ({ onBack }: DriverProfileProps) => {
         <View className="bg-slate-800 rounded-2xl p-6 mb-6 shadow-lg border border-slate-700">
           <Text className="text-white text-xl font-bold mb-4">Informações Profissionais</Text>
           
-          <View className="space-y-4">
+          <View className="gap-y-2">
             <View className="p-3 bg-slate-700 rounded-xl">
               <Text className="text-slate-400 text-sm font-medium">Licença de Condução</Text>
               <Text className="text-white font-bold">{driverInfo.license}</Text>
@@ -155,7 +155,7 @@ export const DriverProfile = ({ onBack }: DriverProfileProps) => {
         </View>
 
         {/* Ações Rápidas */}
-        <View className="space-y-3 mb-6">
+        <View className="gap-y-2 mb-6">
           <TouchableOpacity className="bg-slate-800 rounded-xl p-4 flex-row items-center justify-between shadow-lg border border-slate-700">
             <View className="flex-row items-center">
               <MaterialIcons name="schedule" size={20} color="#00babc" />

@@ -65,7 +65,8 @@ export default function App() {
       case 'profile':
         return (
           <StudentProfile 
-            onBack={() => setCurrentScreen('dashboard')}
+          onBack={() => setCurrentScreen('driverProfile')}
+          onLogout={() => {setCurrentScreen('login')}}
           />
         );
       case 'schedule':

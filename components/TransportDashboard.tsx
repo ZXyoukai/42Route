@@ -119,7 +119,7 @@ export const TransportDashboard = ({ studentName = "Estudante", onRouteSelect, o
       <StatusBar style="light" backgroundColor="#0f172a" />
       
       {/* Header */}
-      <View className="bg-gradient-to-br from-purple-600 to-indigo-700 mt-6 pt-12 pb-6 px-6">
+      <View className="border-b-2 border-[#00babc] mt-6 pt-12 pb-6 px-6">
         <View className="flex-row items-center justify-between w-full">
           <View>
             <Text className="text-white text-lg font-medium">Bem-vindo, {studentName}!</Text>

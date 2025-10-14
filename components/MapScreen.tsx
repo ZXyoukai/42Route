@@ -33,17 +33,12 @@ export const MapScreen = ({ studentName = "Estudante", onOpenInteractiveMap }: M
       <StatusBar style="light" backgroundColor="#0f172a" />
       
       {/* Header */}
-      <View className="bg-gradient-to-br from-cyan-500 to-teal-600 mt-14 pt-3 pb-3 px-6" style={{ backgroundColor: '#00babc' }}>
-        <View className="flex-row items-center justify-between">
+      <View className="border-b-2 border-[#00babc] mt-14 pt-3 pb-3 px-6">
+        <View className="flex-row justify-between"> 
           <View>
             <Text className="text-white text-xl font-bold">Mapa em Tempo Real</Text>
             <Text className="text-cyan-100 text-sm">Acompanhe os autocarros ao vivo</Text>
           </View>
-          <Image
-            source={require('../assets/route_logo-w.png')}
-            className="h-12 top-0 right-52"
-            resizeMode="contain"
-          />
         </View>
       </View>
 

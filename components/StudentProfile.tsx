@@ -6,9 +6,10 @@ import { useCustomAlert } from './CustomAlert';
 
 interface StudentProfileProps {
   onBack?: () => void;
+  onLogout?: () => void;
 }
 
-export const StudentProfile = ({ onBack }: StudentProfileProps) => {
+export const StudentProfile = ({ onBack, onLogout }: StudentProfileProps) => {
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [locationEnabled, setLocationEnabled] = useState(true);
   const [autoAlerts, setAutoAlerts] = useState(false);
@@ -98,7 +99,7 @@ export const StudentProfile = ({ onBack }: StudentProfileProps) => {
       'Tem certeza que deseja sair da aplicação?',
       () => {
         showSuccess('Sessão Terminada', 'Até breve!', () => {
-          onBack?.();
+          onLogout?.();
         });
       }
     );
@@ -109,15 +110,15 @@ export const StudentProfile = ({ onBack }: StudentProfileProps) => {
       <StatusBar style="light" backgroundColor="#0f172a" />
       
       {/* Header */}
-      <View className="bg-gradient-to-br  from-cyan-500 to-teal-600 mt-14 pb-2 px-6" style={{ backgroundColor: '#00babc' }}>
-        <View className="flex-row items-center justify-between mb-4">
+      <View className="border-b-2 border-[#00babc] mt-14 pb-2 px-6">
+        <View className="flex justify-between">
           <TouchableOpacity onPress={onBack} className="flex-row items-center">
             <Ionicons name="arrow-back" size={24} color="white" />
             <Text className="text-white text-lg font-medium ml-2">Voltar</Text>
           </TouchableOpacity>
           <Image
             source={require('../assets/route_logo-w.png')}
-            className="h-14 top-5 right-24"
+            className="h-10"
             resizeMode="contain"
           />
         </View>

@@ -219,21 +219,22 @@ export const TransportSchedule = ({ onBack }: TransportScheduleProps) => {
       <StatusBar style="light" backgroundColor="#0f172a" />
       
       {/* Header */}
-      <View className="bg-gradient-to-br from-cyan-500 to-teal-600 pt-12 pb-6 px-6" style={{ backgroundColor: '#00babc' }}>
-        <View className="flex-row items-center justify-between mb-4">
+      <View className="bg-gradient-to-br pt-12 pb-6 px-6 border-b-2 border-[#00babc]">
+        <View className="flex justify-between">
           <TouchableOpacity onPress={onBack} className="flex-row items-center">
             <Ionicons name="arrow-back" size={24} color="white" />
             <Text className="text-white text-lg font-medium ml-2">Voltar</Text>
           </TouchableOpacity>
           <Image
             source={require('../assets/route_logo-w.png')}
-            className="h-8"
+            className="h-10"
             resizeMode="contain"
           />
         </View>
-        
-        <Text className="text-white text-3xl font-bold mb-2">Horários</Text>
-        <Text className="text-cyan-100 text-base">Consulte os horários de todos os autocarros</Text>
+        <View>
+          <Text className="text-white text-3xl font-bold mb-2">Horários</Text>
+          <Text className="text-cyan-100 text-base">Consulte os horários de todos os autocarros</Text>
+        </View>
       </View>
 
       <ScrollView className="flex-1 px-6 py-6">

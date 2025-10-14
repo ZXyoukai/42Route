@@ -35,7 +35,7 @@ export const DriverProfile = ({ onBack }: DriverProfileProps) => {
       
       {/* Header */}
       <View className="bg-gradient-to-br from-cyan-500 to-teal-600 pt-12 pb-6 px-6" style={{ backgroundColor: '#00babc' }}>
-        <View className="flex-row items-center justify-between mb-6">
+        <View className="flex flex-row items-center justify-between mb-6">
           <TouchableOpacity onPress={onBack} className="flex-row items-center">
             <Ionicons name="arrow-back" size={24} color="white" />
             <Text className="text-white text-lg font-medium ml-2">Voltar</Text>
