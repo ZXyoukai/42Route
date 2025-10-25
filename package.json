@@ -20,6 +20,7 @@
     "nativewind": "latest",
     "react": "19.0.0",
     "react-native": "0.79.5",
+    "react-native-config": "^1.5.9",
     "react-native-maps": "^1.18.0",
     "react-native-maps-directions": "^1.9.0",
     "react-native-reanimated": "~3.17.4",
@@ -34,6 +35,7 @@
     "eslint-config-prettier": "^10.1.2",
     "prettier": "^3.2.5",
     "prettier-plugin-tailwindcss": "^0.5.11",
+    "react-native-dotenv": "^3.4.11",
     "tailwindcss": "^3.4.0",
     "typescript": "~5.8.3"
   },

@@ -1,7 +1,12 @@
+import {
+  useState,
+  useEffect
+} from 'react';
 import { Image, Text, View, ScrollView, TouchableOpacity } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { useCustomAlert } from './CustomAlert';
+import { API_BASE_URL } from '@env';
 
 interface ScheduleInfo {
   routeName: string;
@@ -14,13 +19,23 @@ interface ScheduleInfo {
   isActive: boolean;
 }
 
+// {"district": null, "id": 1, "latitude": null, "longitude": null, "stop_name": null}
+
+interface routeInfo {
+  distrit: string;
+  id: number;
+  latitude: string;
+  longitude: string;
+  stop_name: string;
+}
+
 interface TransportScheduleProps {
   onBack?: () => void;
 }
 
 export const TransportSchedule = ({ onBack }: TransportScheduleProps) => {
   const { AlertComponent, showSuccess, showError, showWarning, showInfo } = useCustomAlert();
-
+  const [routes, setRoutes] = useState<routeInfo[]>([]);
   const weekdays: ScheduleInfo[] = [
     {
       routeName: 'Rota Central',
@@ -213,7 +228,19 @@ export const TransportSchedule = ({ onBack }: TransportScheduleProps) => {
       </View>
     </TouchableOpacity>
   );
+  
+  
+  useEffect(() => {
+    const fetchRoutes = async () => {
+      const routes = await fetch(`${API_BASE_URL}/minibusstops`)
+        .then(response => response.json())
+        .then(data => console.log(data))
+        .catch(error => console.error('Error fetching routes:', error));
+      console.log('response:', routes, 'API_BASE_URL:', API_BASE_URL);
+    };
 
+    fetchRoutes();
+  }, []);
   return (
     <View className="flex-1 bg-slate-900">
       <StatusBar style="light" backgroundColor="#0f172a" />
