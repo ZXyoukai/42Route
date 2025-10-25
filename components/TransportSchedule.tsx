@@ -2,32 +2,16 @@ import {
   useState,
   useEffect
 } from 'react';
-import { Image, Text, View, ScrollView, TouchableOpacity } from 'react-native';
+import { Image, Text, View, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { useCustomAlert } from './CustomAlert';
 import { API_BASE_URL } from '@env';
+import {
+  routeInfo,
+  ScheduleInfo
+} from './interfaces';
 
-interface ScheduleInfo {
-  routeName: string;
-  routeId: string;
-  departureTime: string;
-  arrivalTime: string;
-  duration: string;
-  stops: number;
-  frequency: string;
-  isActive: boolean;
-}
-
-// {"district": null, "id": 1, "latitude": null, "longitude": null, "stop_name": null}
-
-interface routeInfo {
-  distrit: string;
-  id: number;
-  latitude: string;
-  longitude: string;
-  stop_name: string;
-}
 
 interface TransportScheduleProps {
   onBack?: () => void;
@@ -36,38 +20,40 @@ interface TransportScheduleProps {
 export const TransportSchedule = ({ onBack }: TransportScheduleProps) => {
   const { AlertComponent, showSuccess, showError, showWarning, showInfo } = useCustomAlert();
   const [routes, setRoutes] = useState<routeInfo[]>([]);
-  const weekdays: ScheduleInfo[] = [
-    {
-      routeName: 'Rota Central',
-      routeId: 'RT001',
-      departureTime: '07:30',
-      arrivalTime: '08:25',
-      duration: '55 min',
-      stops: 4,
-      frequency: 'A cada 30 min',
-      isActive: true
-    },
-    {
-      routeName: 'Rota Maianga',
-      routeId: 'RT002',
-      departureTime: '07:45',
-      arrivalTime: '08:30',
-      duration: '45 min',
-      stops: 3,
-      frequency: 'A cada 45 min',
-      isActive: true
-    },
-    {
-      routeName: 'Rota Ingombota',
-      routeId: 'RT003',
-      departureTime: '08:00',
-      arrivalTime: '08:50',
-      duration: '50 min',
-      stops: 5,
-      frequency: 'A cada hora',
-      isActive: false
-    }
-  ];
+  const [weekdays, setWeekdays] = useState<ScheduleInfo[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  // const weekdays: ScheduleInfo[] = [
+  //   {
+  //     routeName: 'Rota Central',
+  //     routeId: 'RT001',
+  //     departureTime: '07:30',
+  //     arrivalTime: '08:25',
+  //     duration: '55 min',
+  //     stops: 4,
+  //     frequency: 'A cada 30 min',
+  //     isActive: true
+  //   },
+  //   {
+  //     routeName: 'Rota Maianga',
+  //     routeId: 'RT002',
+  //     departureTime: '07:45',
+  //     arrivalTime: '08:30',
+  //     duration: '45 min',
+  //     stops: 3,
+  //     frequency: 'A cada 45 min',
+  //     isActive: true
+  //   },
+  //   {
+  //     routeName: 'Rota Ingombota',
+  //     routeId: 'RT003',
+  //     departureTime: '08:00',
+  //     arrivalTime: '08:50',
+  //     duration: '50 min',
+  //     stops: 5,
+  //     frequency: 'A cada hora',
+  //     isActive: false
+  //   }
+  // ];
 
   const weekends: ScheduleInfo[] = [
     {
@@ -231,19 +217,51 @@ export const TransportSchedule = ({ onBack }: TransportScheduleProps) => {
   
   
   useEffect(() => {
-    const fetchRoutes = async () => {
-      const routes = await fetch(`${API_BASE_URL}/minibusstops`)
-        .then(response => response.json())
-        .then(data => console.log(data))
-        .catch(error => console.error('Error fetching routes:', error));
-      console.log('response:', routes, 'API_BASE_URL:', API_BASE_URL);
-    };
+  const fetchRoutes = async () => {
+    try {
+      setLoading(true);
 
-    fetchRoutes();
-  }, []);
+      const response = await fetch(`${API_BASE_URL}/minibusstops`);
+      const data = await response.json();
+
+      console.log('Dados recebidos:', data);
+
+      // Atualiza as rotas
+      setRoutes(data as routeInfo[]);
+
+      // Gera horários a partir das rotas recebidas
+      const generatedSchedules: ScheduleInfo[] = data.map((route: routeInfo) => ({
+        routeName: route.stop_name || 'Rota Desconhecida',
+        routeId: `RT${route.id.toString().padStart(3, '0')}`,
+        departureTime: '07:30',
+        arrivalTime: '08:25',
+        duration: '55 min',
+        stops: 4,
+        frequency: 'A cada 30 min',
+        isActive: route.stop_name !== 'Camama' && route.stop_name !== 'Benfica', // Exemplo de lógica para inatividade
+      }));
+
+      // Atualiza os horários
+      setWeekdays(generatedSchedules);
+    } catch (error) {
+      console.error('Erro ao buscar rotas:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchRoutes();
+}, [API_BASE_URL]);
+
   return (
     <View className="flex-1 bg-slate-900">
-      <StatusBar style="light" backgroundColor="#0f172a" />
+      <StatusBar style="light" />
+      {loading && (
+        <View className="flex flex-col absolute inset-0 gap-y-3 bg-slate-900/70 flex-row justify-center items-center z-50">
+          <ActivityIndicator size="large" color="#00babc" />
+          <Text className="text-white ml-4 text-base">A carregar horários...</Text>
+        </View>
+      )}
       
       {/* Header */}
       <View className="bg-gradient-to-br pt-12 pb-6 px-6 border-b-2 border-[#00babc]">
@@ -271,20 +289,6 @@ export const TransportSchedule = ({ onBack }: TransportScheduleProps) => {
           {weekdays.map(renderScheduleCard)}
         </View>
 
-        {/* Horários de Fim de Semana */}
-        <View className="mb-8">
-          <Text className="text-white text-2xl font-bold mb-4">Fins de Semana</Text>
-          <View className="bg-amber-900/30 rounded-2xl p-4 mb-4 border border-amber-700">
-            <View className="flex-row items-center">
-              <MaterialIcons name="warning" size={20} color="#f59e0b" />
-              <Text className="text-amber-400 font-bold ml-2">Serviço Limitado</Text>
-            </View>
-            <Text className="text-amber-200 text-sm mt-1">
-              Aos fins de semana o serviço opera com horários reduzidos
-            </Text>
-          </View>
-          {weekends.map(renderScheduleCard)}
-        </View>
 
         {/* Contactos de Emergência */}
         <View className="mb-8">
