@@ -21,7 +21,8 @@
         {
           "googleMapsApiKey": "AIzaSyAlm3Es35ecfHTp4-gb7MjAfoqEcWuKXX0"
         }
-      ]
+      ],
+      "expo-font"
     ],
     "orientation": "portrait",
     "icon": "./assets/icon.png",
