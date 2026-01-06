@@ -17,7 +17,6 @@ export default function LoginIntra({ onback }: LoginIntraProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   
-  // Gera a URI de redirecionamento
   const redirectUri = makeRedirectUri({
     scheme: '42routes',
     path: '/auth/42/callback'
@@ -28,74 +27,71 @@ export default function LoginIntra({ onback }: LoginIntraProps) {
       setIsLoading(true);
       setError(null);
 
-      console.log('🔐 Iniciando autenticação...');
-      console.log('📍 Redirect URI:', redirectUri);
-      console.log('🌐 URL de login:', `${API_BASE_URL}/api/auth/42/login`);
+      console.log('Iniciando autenticação...');
+      console.log('Redirect URI:', redirectUri);
+      console.log('URL de login:', `${API_BASE_URL}/api/auth/42/login`);
 
-      // Abre o navegador para autenticação com a 42 API
       const result = await WebBrowser.openAuthSessionAsync(
         `${API_BASE_URL}/api/auth/42/login?redirect_uri=${encodeURIComponent(redirectUri)}`,
         redirectUri
       );
 
-      console.log('📦 Resultado completo da autenticação:', JSON.stringify(result, null, 2));
-      console.log('🔍 Tipo do resultado:', result.type);
+      console.log('Resultado completo da autenticação:', JSON.stringify(result, null, 2));
+      console.log('Tipo do resultado:', result.type);
 
-      // Trata tanto 'success' quanto 'dismiss' pois alguns navegadores fecham automaticamente
       if (result.type === 'success' || result.type === 'dismiss') {
         const { url } = result;
-        console.log('✅ URL de callback recebida:', url);
+        console.log('URL de callback recebida:', url);
         
         if (url) {
           try {
-            // Parse da URL de retorno para extrair tokens ou código
             const parsedUrl = new URL(url);
-            console.log('🔗 URL parseada:', parsedUrl.href);
-            console.log('📋 Parâmetros:', Object.fromEntries(parsedUrl.searchParams));
+            console.log('URL parseada:', parsedUrl.href);
+            console.log('Parâmetros:', Object.fromEntries(parsedUrl.searchParams));
             
             const code = parsedUrl.searchParams.get('code');
             const token = parsedUrl.searchParams.get('token');
             const authError = parsedUrl.searchParams.get('error');
             
-            console.log('🎫 Code:', code);
-            console.log('🔑 Token:', token);
-            console.log('❌ Error:', authError);
+            console.log('Code:', code);
+            console.log('Token:', token);
+            console.log('Error:', authError);
 
             if (authError) {
-              console.error('❌ Erro na autenticação:', authError);
+              console.error('Erro na autenticação:', authError);
               setError(`Erro na autenticação: ${authError}`);
             } else if (token || code) {
-              console.log('✨ Autenticação bem-sucedida!', { code, token });
-              console.log('🎉 Login completado com sucesso!');
+              console.log('Autenticação bem-sucedida!', { code, token });
+              console.log('Login completado com sucesso!');
               // Sucesso! Token ou código recebido
               // Aqui você pode salvar o token e redirecionar o usuário
               // Por exemplo: await AsyncStorage.setItem('authToken', token);
               // onLogin({ token });
             } else {
-              console.warn('⚠️ Nenhum token ou código foi retornado');
+              console.warn('Nenhum token ou código foi retornado');
               setError('Nenhum token ou código foi retornado');
             }
           } catch (parseError) {
-            console.error('❌ Erro ao fazer parse da URL:', parseError);
+            console.error('Erro ao fazer parse da URL:', parseError);
             setError('Erro ao processar resposta da autenticação');
           }
         } else {
-          console.log('ℹ️ Navegador fechado sem URL de retorno (tipo: ' + result.type + ')');
+          console.log('Navegador fechado sem URL de retorno (tipo: ' + result.type + ')');
           if (result.type === 'dismiss') {
-            console.log('👤 Usuário fechou o navegador');
+            console.log('Usuário fechou o navegador');
           }
         }
       } else if (result.type === 'cancel') {
-        console.log('🚫 Login cancelado pelo usuário');
+        console.log('Login cancelado pelo usuário');
       } else {
-        console.log('❓ Tipo de resultado desconhecido:', result.type);
+        console.log('Tipo de resultado desconhecido:', result.type);
       }
     } catch (err) {
-      console.error('💥 Erro ao abrir navegador:', err);
+      console.error('Erro ao abrir navegador:', err);
       setError('Erro ao tentar fazer login. Tente novamente.');
     } finally {
       setIsLoading(false);
-      console.log('🏁 Processo de autenticação finalizado');
+      console.log('Processo de autenticação finalizado');
     }
   };
 

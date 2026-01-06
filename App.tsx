@@ -5,7 +5,6 @@ import { View } from 'react-native';
 import { LoginScreen } from 'components/LoginScreen';
 import { TransportDashboard } from 'components/TransportDashboard';
 import { RouteDetail } from 'components/RouteDetail';
-import { StudentProfile } from 'components/StudentProfile';
 import { DriverProfile } from 'components/DriverProfile';
 import { BottomTabBar } from 'components/BottomTabBar';
 
@@ -40,7 +39,6 @@ export default function App() {
   const [userData, setUserData] = useState<UserData | null>(null);
   const [selectedRouteId, setSelectedRouteId] = useState<number | null>(null);
 
-  // IMPORTANTE: Substituir por autenticação real
   const handleLogin = (data: { name: string; email: string }) => {
     // Simulação: em produção, obter do backend
     const userData: UserData = {
