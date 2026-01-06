@@ -3,6 +3,7 @@
     "name": "42Routes",
     "slug": "42Routes",
     "version": "1.0.0",
+    "scheme": "42routes",
     "web": {
       "favicon": "./assets/favicon.png"
     },
@@ -22,7 +23,8 @@
           "googleMapsApiKey": "AIzaSyAlm3Es35ecfHTp4-gb7MjAfoqEcWuKXX0"
         }
       ],
-      "expo-font"
+      "expo-font",
+      "expo-web-browser"
     ],
     "orientation": "portrait",
     "icon": "./assets/icon.png",

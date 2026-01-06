@@ -1,115 +1,163 @@
 import React, { useState } from 'react';
 import { View } from 'react-native';
+
+// Componentes originais (para referência)
 import { LoginScreen } from 'components/LoginScreen';
 import { TransportDashboard } from 'components/TransportDashboard';
 import { RouteDetail } from 'components/RouteDetail';
 import { StudentProfile } from 'components/StudentProfile';
-import { TransportSchedule } from 'components/TransportSchedule';
-import { MapScreen } from 'components/MapScreen';
 import { DriverProfile } from 'components/DriverProfile';
 import { BottomTabBar } from 'components/BottomTabBar';
 
-import './global.css';
-import { InteractiveMap } from 'components/InteractiveMap';
+// Componentes integrados com API
+import { TransportDashboardAPI } from 'components/TransportDashboardAPI';
+import { RouteDetailAPI } from 'components/RouteDetailAPI';
+import { StudentProfileAPI } from 'components/StudentProfileAPI';
+import { DriverProfileAPI } from 'components/DriverProfileAPI';
 
-type Screen = 'login' | 'dashboard' | 'routeDetail' | 'profile' | 'schedule' | 'map' | 'driverProfile' | 'interactiveMap';
+import './global.css';
+
+type Screen = 
+  | 'login' 
+  | 'dashboard' 
+  | 'routeDetail' 
+  | 'profile' 
+  | 'driverProfile'
+  | 'map'
+  | 'schedule';
 
 interface UserData {
+  id: number;
   name: string;
   email: string;
+  role: 'cadete' | 'driver' | 'admin';
 }
+
+type TabName = 'dashboard' | 'map' | 'schedule' | 'profile';
 
 export default function App() {
   const [currentScreen, setCurrentScreen] = useState<Screen>('login');
   const [userData, setUserData] = useState<UserData | null>(null);
-  const [selectedRoute, setSelectedRoute] = useState<any>(null);
-  const [mapType, setMapType] = useState<'location' | 'routes' | 'nearest'>('location');
+  const [selectedRouteId, setSelectedRouteId] = useState<number | null>(null);
 
-  const handleLogin = (data: UserData) => {
-    setUserData(data);
+  // IMPORTANTE: Substituir por autenticação real
+  const handleLogin = (data: { name: string; email: string }) => {
+    // Simulação: em produção, obter do backend
+    const userData: UserData = {
+      id: 1,
+      name: data.name,
+      email: data.email,
+      role: 'cadete', // Definir baseado na resposta da API
+    };
+    setUserData(userData);
     setCurrentScreen('dashboard');
   };
 
-  const handleTabPress = (tab: 'dashboard' | 'map' | 'schedule' | 'profile') => {
-    setCurrentScreen(tab);
+  const handleLogout = () => {
+    setUserData(null);
+    setSelectedRouteId(null);
+    setCurrentScreen('login');
   };
 
-  const handleOpenInteractiveMap = (type: 'location' | 'routes' | 'nearest') => {
-    setMapType(type);
-    setCurrentScreen('interactiveMap');
+  const handleTabPress = (tab: TabName) => {
+    if (tab === 'dashboard' || tab === 'profile' || tab === 'map' || tab === 'schedule') {
+      setCurrentScreen(tab);
+    }
   };
 
   const renderScreen = () => {
+    // Tela de Login
     if (currentScreen === 'login') {
       return <LoginScreen onLogin={handleLogin} />;
     }
 
+    // Telas autenticadas
     switch (currentScreen) {
       case 'dashboard':
         return (
-          <TransportDashboard 
-            studentName={userData?.name || 'Estudante'}
-            onRouteSelect={() => setCurrentScreen('routeDetail')}
-            onProfileSelect={() => setCurrentScreen('profile')}
-            onScheduleSelect={() => setCurrentScreen('schedule')}
-          />
+          <View className="flex-1">
+            <TransportDashboardAPI 
+              studentName={userData?.name || 'Estudante'}
+              onRouteSelect={(route) => {
+                setSelectedRouteId(route.id);
+                setCurrentScreen('routeDetail');
+              }}
+            />
+            <BottomTabBar 
+              activeTab="dashboard"
+              onTabPress={handleTabPress}
+            />
+          </View>
         );
+
       case 'routeDetail':
+        if (selectedRouteId === null) {
+          setCurrentScreen('dashboard');
+          return null;
+        }
         return (
-          <RouteDetail 
-            routeId="RT001"
-            routeName="Rota Central"
+          <RouteDetailAPI 
+            routeId={selectedRouteId}
             onBack={() => setCurrentScreen('dashboard')}
           />
         );
+
       case 'profile':
-        return (
-          <StudentProfile 
-          onBack={() => setCurrentScreen('driverProfile')}
-          onLogout={() => {setCurrentScreen('login')}}
-          />
-        );
-      case 'schedule':
-        return (
-          <TransportSchedule 
-            onBack={() => setCurrentScreen('dashboard')}
-          />
-        );
-      case 'map':
-        return (
-          <MapScreen 
-            studentName={userData?.name || 'Estudante'}
-            onOpenInteractiveMap={handleOpenInteractiveMap}
-          />
-        );
-      case 'driverProfile':
-        return (
-          <DriverProfile 
-            onBack={() => setCurrentScreen('routeDetail')}
-          />
-        );
-      case 'interactiveMap':
-        return (
-          <InteractiveMap onBack={() => setCurrentScreen('map')} />
-        );
+        if (!userData) return null;
+        
+        // Renderiza perfil baseado no tipo de usuário
+        if (userData.role === 'driver') {
+          return (
+            <View className="flex-1">
+              <DriverProfileAPI 
+                driverId={userData.id}
+                onBack={() => setCurrentScreen('dashboard')}
+              />
+              <BottomTabBar 
+                activeTab="profile"
+                onTabPress={handleTabPress}
+              />
+            </View>
+          );
+        } else if (userData.role === 'cadete') {
+          return (
+            <View className="flex-1">
+              <StudentProfileAPI 
+                cadeteId={userData.id}
+                onBack={() => setCurrentScreen('dashboard')}
+                onLogout={handleLogout}
+              />
+              <BottomTabBar 
+                activeTab="profile"
+                onTabPress={handleTabPress}
+              />
+            </View>
+          );
+        }
+        return null;
+
       default:
-        return <TransportDashboard studentName={userData?.name || 'Estudante'} />;
+        return (
+          <View className="flex-1">
+            <TransportDashboardAPI 
+              studentName={userData?.name || 'Estudante'}
+              onRouteSelect={(route) => {
+                setSelectedRouteId(route.id);
+                setCurrentScreen('routeDetail');
+              }}
+            />
+            <BottomTabBar 
+              activeTab="dashboard"
+              onTabPress={handleTabPress}
+            />
+          </View>
+        );
     }
   };
 
-  const showBottomTab = userData && !['routeDetail', 'driverProfile'].includes(currentScreen);
-
   return (
     <View className="flex-1">
-      <View className="flex-1">
-        {renderScreen()}
-      </View>
-      {showBottomTab && (
-        <BottomTabBar
-          activeTab={(['dashboard', 'map', 'schedule', 'profile'].includes(currentScreen) ? currentScreen : 'dashboard') as 'dashboard' | 'map' | 'schedule' | 'profile'}
-          onTabPress={handleTabPress}
-        />
-      )}
+      {renderScreen()}
     </View>
   );
 }
