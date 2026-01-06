@@ -32,10 +32,10 @@ export default function LoginIntra({ onback }: LoginIntraProps) {
       console.log('URL de login:', `${API_BASE_URL}/api/auth/42/login`);
 
       const result = await WebBrowser.openAuthSessionAsync(
-        `${API_BASE_URL}/api/auth/42/login?redirect_uri=${encodeURIComponent(redirectUri)}`,
+        `${API_BASE_URL}/api/auth/42/login?redirect_uri=${redirectUri}`,
         redirectUri
       );
-
+      //10.18.15.133
       console.log('Resultado completo da autenticação:', JSON.stringify(result, null, 2));
       console.log('Tipo do resultado:', result.type);
 
