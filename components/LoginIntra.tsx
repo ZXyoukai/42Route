@@ -3,11 +3,10 @@ import { View, Text, TouchableOpacity, ActivityIndicator, StyleSheet } from 'rea
 import * as WebBrowser from 'expo-web-browser';
 import { makeRedirectUri } from 'expo-auth-session';
 import { Ionicons } from '@expo/vector-icons';
+import { authService } from 'services';
+
 
 WebBrowser.maybeCompleteAuthSession();
-
-// URL base da sua API
-const API_BASE_URL = 'https://four2routeapi.onrender.com';
 
 interface LoginIntraProps {
   onback: () => void;
@@ -24,68 +23,7 @@ export default function LoginIntra({ onback }: LoginIntraProps) {
 
   const handleLogin = async () => {
     try {
-      setIsLoading(true);
-      setError(null);
-
-      console.log('Iniciando autenticação...');
-      console.log('Redirect URI:', redirectUri);
-      console.log('URL de login:', `${API_BASE_URL}/api/auth/42/login`);
-
-      const result = await WebBrowser.openAuthSessionAsync(
-        `${API_BASE_URL}/api/auth/42/login?redirect_uri=${redirectUri}`,
-        redirectUri
-      );
-      //10.18.15.133
-      console.log('Resultado completo da autenticação:', JSON.stringify(result, null, 2));
-      console.log('Tipo do resultado:', result.type);
-
-      if (result.type === 'success' || result.type === 'dismiss') {
-        const { url } = result;
-        console.log('URL de callback recebida:', url);
-        
-        if (url) {
-          try {
-            const parsedUrl = new URL(url);
-            console.log('URL parseada:', parsedUrl.href);
-            console.log('Parâmetros:', Object.fromEntries(parsedUrl.searchParams));
-            
-            const code = parsedUrl.searchParams.get('code');
-            const token = parsedUrl.searchParams.get('token');
-            const authError = parsedUrl.searchParams.get('error');
-            
-            console.log('Code:', code);
-            console.log('Token:', token);
-            console.log('Error:', authError);
-
-            if (authError) {
-              console.error('Erro na autenticação:', authError);
-              setError(`Erro na autenticação: ${authError}`);
-            } else if (token || code) {
-              console.log('Autenticação bem-sucedida!', { code, token });
-              console.log('Login completado com sucesso!');
-              // Sucesso! Token ou código recebido
-              // Aqui você pode salvar o token e redirecionar o usuário
-              // Por exemplo: await AsyncStorage.setItem('authToken', token);
-              // onLogin({ token });
-            } else {
-              console.warn('Nenhum token ou código foi retornado');
-              setError('Nenhum token ou código foi retornado');
-            }
-          } catch (parseError) {
-            console.error('Erro ao fazer parse da URL:', parseError);
-            setError('Erro ao processar resposta da autenticação');
-          }
-        } else {
-          console.log('Navegador fechado sem URL de retorno (tipo: ' + result.type + ')');
-          if (result.type === 'dismiss') {
-            console.log('Usuário fechou o navegador');
-          }
-        }
-      } else if (result.type === 'cancel') {
-        console.log('Login cancelado pelo usuário');
-      } else {
-        console.log('Tipo de resultado desconhecido:', result.type);
-      }
+      await authService.login42();
     } catch (err) {
       console.error('Erro ao abrir navegador:', err);
       setError('Erro ao tentar fazer login. Tente novamente.');

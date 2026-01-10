@@ -2,7 +2,18 @@ import { useState, useEffect } from 'react';
 import { routeService } from '../services/routeService';
 import { Route } from '../types/api';
 
-export const useRoutes = () => {
+export interface IUseRoutes
+{
+  routes : Route[],
+  loading: boolean,
+  error : string | null,
+  fetchRoutes : () => Promise<void>,
+  getRouteById: (id: number) => Promise<{}>,
+  createRoute: (data: any) => Promise<{}>,
+  addStopToRoute: (routeId: number, stopData: any) => Promise<void>,
+}
+
+export const useRoutes = () : IUseRoutes => {
   const [routes, setRoutes] = useState<Route[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);

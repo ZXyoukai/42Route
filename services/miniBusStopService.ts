@@ -5,6 +5,7 @@ export const miniBusStopService = {
   // GET /api/minibusstops - Listar todas as paragens
   getAll: async (): Promise<MiniBusStop[]> => {
     const response = await api.get('/minibusstops');
+    console.log('Resposta da API de paragens:', response.data);
     return response.data;
   },
 
