@@ -1,31 +1,99 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, ActivityIndicator, ScrollView, TouchableOpacity } from 'react-native';
 import { Ionicons, FontAwesome5 } from '@expo/vector-icons';
 import { StatusBar } from 'expo-status-bar';
 import MapView, { Marker, Polyline, PROVIDER_GOOGLE } from 'react-native-maps';
 import { Route, MiniBusStop, Driver } from '../types/api';
 import { routeService } from '../services/routeService';
+import polyline from '@mapbox/polyline';
+import { getCurrentPositionAsync } from 'expo-location';
 
 interface RouteDetailAPIProps {
   routeId: number;
   onBack?: () => void;
 }
 
+
+
 export const RouteDetailAPI = ({ routeId, onBack }: RouteDetailAPIProps) => {
+
   const [route, setRoute] = useState<Route | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [ msg, setMsg] = useState<string>('Carregando dados da rota...');
   const [selectedStop, setSelectedStop] = useState<MiniBusStop | null>(null);
+  const [routeCoords, setRouteCoords] = useState<{ latitude: number; longitude: number }[]>([]);
+  const [estimatedDistance, setEstimatedDistance] = useState<number | null>(null);
+  const [estimatedDuration, setEstimatedDuration] = useState<number | null>(null);
 
-  useEffect(() => {
-    loadRouteData();
-  }, [routeId]);
+useEffect(() => {
+  const fetchData = async () => {
+    await loadRouteData();
+  };
+  fetchData();
+}, [routeId]);
+
+useEffect(() => {
+  if (route?.stops && route.stops.length >= 2) {
+    const calculateRoute = async () => {
+      setLoading(true);
+      setMsg('Calculando rota e estimativas...');
+
+      try {
+        let allCoords: { latitude: number; longitude: number }[] = [];
+        let totalDistance = 0;
+        let totalDuration = 0;
+
+        for (let i = 0; i < route.stops.length - 1; i++) {
+          setMsg(`Calculando rota... (${i + 1}/${route.stops.length - 1})`);
+
+          const origin = {
+            latitude: route.stops[i].latitude!,
+            longitude: route.stops[i].longitude!,
+          };
+          const destination = {
+            latitude: route.stops[i + 1].latitude!,
+            longitude: route.stops[i + 1].longitude!,
+          };
+          const url = `https://router.project-osrm.org/route/v1/driving/${origin.longitude},${origin.latitude};${destination.longitude},${destination.latitude}?overview=full`;
+
+          const response = await fetch(url);
+          const data = await response.json();
+
+          if (data.routes?.[0]) {
+            const points = polyline.decode(data.routes[0].geometry);
+            const coords = points.map((point: any) => ({
+              latitude: point[0],
+              longitude: point[1],
+            }));
+
+            allCoords = [...allCoords, ...coords];
+            totalDistance += data.routes[0].distance / 1000;
+            totalDuration += data.routes[0].duration / 60;
+          }
+        }
+
+        setRouteCoords(allCoords);
+        setEstimatedDistance(totalDistance);
+        setEstimatedDuration(totalDuration);
+      } catch (error) {
+        console.log('Erro ao calcular rota:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    calculateRoute();
+  }
+}, [route]);
 
   const loadRouteData = async () => {
     try {
       setLoading(true);
       const data = await routeService.getById(routeId);
+      console.log('Dados da rota carregados:', JSON.stringify(data, null, 2));
       setRoute(data);
+      // setRoute(data);
       setError(null);
     } catch (err: any) {
       setError(err.message || 'Erro ao carregar dados da rota');
@@ -36,9 +104,9 @@ export const RouteDetailAPI = ({ routeId, onBack }: RouteDetailAPIProps) => {
 
   if (loading) {
     return (
-      <View className="flex-1 bg-slate-900 justify-center items-center">
+      <View className="flex-1  bg-slate-900 justify-center items-center">
         <ActivityIndicator size="large" color="#00babc" />
-        <Text className="text-white mt-4">Carregando rota...</Text>
+        <Text className="text-white mt-4">{msg}</Text>
       </View>
     );
   }
@@ -60,18 +128,13 @@ export const RouteDetailAPI = ({ routeId, onBack }: RouteDetailAPIProps) => {
     );
   }
 
-  const validStops = route.stops?.filter(
+  const validStops = route?.stops?.filter(
     stop => stop.latitude !== null && stop.longitude !== null
   ) || [];
 
-  const coordinates = validStops.map(stop => ({
-    latitude: stop.latitude!,
-    longitude: stop.longitude!,
-  }));
-
-  const initialRegion = coordinates.length > 0 ? {
-    latitude: coordinates[0].latitude,
-    longitude: coordinates[0].longitude,
+  const initialRegion = routeCoords.length > 0 ? {
+    latitude: routeCoords[0].latitude,
+    longitude: routeCoords[0].longitude,
     latitudeDelta: 0.05,
     longitudeDelta: 0.05,
   } : {
@@ -81,7 +144,7 @@ export const RouteDetailAPI = ({ routeId, onBack }: RouteDetailAPIProps) => {
     longitudeDelta: 0.1,
   };
 
-  const activeDrivers = route.drivers?.filter(d => d.current_route?.id === route.id) || [];
+  const activeDrivers = route?.drivers?.filter(d => d.current_route?.id === route.id) || [];
 
   return (
     <View className="flex-1 bg-slate-900">
@@ -125,16 +188,16 @@ export const RouteDetailAPI = ({ routeId, onBack }: RouteDetailAPIProps) => {
 
       {/* Map */}
       {validStops.length > 0 && (
-        <View className="h-64 border-b border-slate-700">
+        <View className="h-96 border-b border-slate-700">
           <MapView
             provider={PROVIDER_GOOGLE}
             style={{ flex: 1 }}
             initialRegion={initialRegion}
           >
             {/* Route line */}
-            {coordinates.length > 1 && (
+            {routeCoords.length > 1 && (
               <Polyline
-                coordinates={coordinates}
+                coordinates={routeCoords}
                 strokeColor="#00babc"
                 strokeWidth={3}
               />
