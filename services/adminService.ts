@@ -1,9 +1,11 @@
 import api from './api';
 import { Admin, CreateAdminRequest, UpdateAdminRequest } from '../types/api';
+import { API_BASE_URL } from '@env';
 
 export const adminService = {
   // GET /api/admins - Listar todos os administradores
   getAll: async (): Promise<Admin[]> => {
+    console.log("Fetching all admins and ", API_BASE_URL);
     const response = await api.get('/admins');
     return response.data;
   },

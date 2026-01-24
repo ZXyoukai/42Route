@@ -1,9 +1,9 @@
 {
   "expo": {
-    "name": "42Routes",
-    "slug": "42Routes",
+    "name": "routes42",
+    "slug": "routes42",
     "version": "1.0.0",
-    "scheme": "42routes",
+    "scheme": "routes42",
     "web": {
       "favicon": "./assets/favicon.png"
     },
