@@ -17,7 +17,7 @@ export default function LoginIntra({ onback }: LoginIntraProps) {
   const [error, setError] = useState<string | null>(null);
   
   const redirectUri = makeRedirectUri({
-    scheme: '42routes',
+    //scheme: 'routes42',
     path: '/auth/42/callback'
   });
 
@@ -56,13 +56,13 @@ export default function LoginIntra({ onback }: LoginIntraProps) {
         )}
 
         {/* Redirect URI info */}
-        <View style={styles.infoContainer}>
+        {/* <View style={styles.infoContainer}>
           <Text style={styles.infoTitle}>URL de Redirecionamento:</Text>
           <Text style={styles.infoText}>{redirectUri}</Text>
           <Text style={styles.infoSubtext}>
             Certifique-se de que esta URL está registrada no seu servidor
           </Text>
-        </View>
+        </View> */}
 
         {/* Botões */}
         <View style={styles.buttonContainer}>
