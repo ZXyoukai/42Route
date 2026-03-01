@@ -57,7 +57,7 @@ export const LoginScreen = ({ onLogin }: LoginScreenProps) => {
 
   // Se o usuário escolheu login via Intra, mostra o componente LoginIntra
   if (showIntraLogin) {
-    return <LoginIntra onback={() => setShowIntraLogin(false)} />;
+    return <LoginIntra onback={() => setShowIntraLogin(false)} onLogin={onLogin} />;
   }
 
   return (

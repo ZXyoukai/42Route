@@ -3,25 +3,26 @@ import { Image, Text, View, ScrollView, TouchableOpacity, Switch } from 'react-n
 import { StatusBar } from 'expo-status-bar';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { useCustomAlert } from './CustomAlert';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Cadete } from 'types/api';
 
 interface StudentProfileProps {
   onBack?: () => void;
   onLogout?: () => void;
 }
 
-export const StudentProfileAPI = ({ onBack, onLogout }: StudentProfileProps) => {
+export const StudentProfileAPI = async ({ onBack, onLogout }: StudentProfileProps) => {
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [locationEnabled, setLocationEnabled] = useState(true);
   const [autoAlerts, setAutoAlerts] = useState(false);
-  
   const { AlertComponent, showSuccess, showError, showWarning, showInfo } = useCustomAlert();
-
+  const userData : Cadete =  await AsyncStorage.getItem('user').then(data => data ? JSON.parse(data) : null);
   const studentInfo = {
-    name: 'João Silva',
-    studentId: '42LU001',
-    email: 'joao.silva@student.42luanda.ao',
+    name: userData ? userData.username : '42routeStudentMock',
+    studentId: userData ? userData.id : '42LUANDA1234',
+    email:  userData ? userData.email : 'joao.silva@student.42luanda.ao',
     course: 'Common Core - Web Development',
-    level: 'Level 3',
+    level: 'Level 9',
     preferredRoute: 'Rota Central',
     emergencyContact: '+244 923 456 789'
   };
@@ -126,7 +127,7 @@ export const StudentProfileAPI = ({ onBack, onLogout }: StudentProfileProps) => 
         <View className="items-center">
           <View className="w-24 h-24 bg-white rounded-full items-center justify-center mb-4 shadow-lg">
             <Text className="text-cyan-600 text-3xl font-bold" style={{ color: '#00babc' }}>
-              {studentInfo.name.split(' ').map(n => n[0]).join('')}
+              {studentInfo.name}
             </Text>
           </View>
           <Text className="text-white text-2xl font-bold">{studentInfo.name}</Text>

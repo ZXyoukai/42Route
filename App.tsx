@@ -1,11 +1,8 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View } from 'react-native';
 
 // Componentes originais (para referência)
 import { LoginScreen } from 'components/LoginScreen';
-import { TransportDashboard } from 'components/TransportDashboard';
-import { RouteDetail } from 'components/RouteDetail';
-import { DriverProfile } from 'components/DriverProfile';
 import { BottomTabBar } from 'components/BottomTabBar';
 
 // Componentes integrados com API
@@ -15,6 +12,7 @@ import { StudentProfileAPI } from 'components/StudentProfileAPI';
 import { DriverProfileAPI } from 'components/DriverProfileAPI';
 
 import './global.css';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 type Screen = 
   | 'login' 
@@ -34,24 +32,63 @@ interface UserData {
 
 type TabName = 'dashboard' | 'map' | 'schedule' | 'profile';
 
+export const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const checkAuth = async () => {
+      const authValue = await AsyncStorage.getItem('authenticated');
+      if (isMounted) {
+        setIsAuthenticated(authValue === 'true');
+      }
+    };
+
+    checkAuth();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  if (isAuthenticated === null) {
+    return null;
+  }
+
+  if (!isAuthenticated) {
+    return <LoginScreen onLogin={() => {}} />;
+  }
+
+  return <>{children}</>;
+}
+
 export default function App() {
   const [currentScreen, setCurrentScreen] = useState<Screen>('login');
   const [userData, setUserData] = useState<UserData | null>(null);
   const [selectedRouteId, setSelectedRouteId] = useState<number | null>(null);
 
-  const handleLogin = (data: { name: string; email: string }) => {
-    // Simulação: em produção, obter do backend
-    const userData: UserData = {
-      id: 1,
-      name: data.name,
-      email: data.email,
-      role: 'cadete', // Definir baseado na resposta da API
+  const handleLogin = async (data: { name: string; email: string }) => {
+    const userDataString = await AsyncStorage.getItem('user');
+    const parsedUser = userDataString ? JSON.parse(userDataString) : null;
+
+    const nextUser: UserData = {
+      id: parsedUser?.id ?? 0,
+      name: parsedUser?.username ?? parsedUser?.name ?? data.name,
+      email: parsedUser?.email ?? data.email,
+      role: parsedUser?.role ?? 'cadete',
     };
-    setUserData(userData);
+
+    await AsyncStorage.setItem('authenticated', 'true');
+    await AsyncStorage.setItem('user', JSON.stringify(nextUser));
+
+    setUserData(nextUser);
     setCurrentScreen('dashboard');
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    await AsyncStorage.removeItem('authenticated');
+    await AsyncStorage.removeItem('user');
     setUserData(null);
     setSelectedRouteId(null);
     setCurrentScreen('login');
@@ -71,8 +108,9 @@ export default function App() {
 
     // Telas autenticadas
     switch (currentScreen) {
-      case 'dashboard':
+      case 'dashboard' :
         return (
+          <ProtectedRoute>
           <View className="flex-1">
             <TransportDashboardAPI 
               studentName={userData?.name || 'Estudante'}
@@ -86,6 +124,7 @@ export default function App() {
               onTabPress={handleTabPress}
             />
           </View>
+          </ProtectedRoute>
         );
 
       case 'routeDetail':
@@ -94,10 +133,13 @@ export default function App() {
           return null;
         }
         return (
+          
+          <ProtectedRoute>
           <RouteDetailAPI 
             routeId={selectedRouteId}
             onBack={() => setCurrentScreen('dashboard')}
           />
+          </ProtectedRoute>
         );
 
       case 'profile':
@@ -106,6 +148,7 @@ export default function App() {
         // Renderiza perfil baseado no tipo de usuário
         if (userData.role === 'driver') {
           return (
+            <ProtectedRoute>
             <View className="flex-1">
               <DriverProfileAPI 
                 driverId={userData.id}
@@ -116,12 +159,13 @@ export default function App() {
                 onTabPress={handleTabPress}
               />
             </View>
+            </ProtectedRoute>
           );
         } else if (userData.role === 'cadete') {
           return (
+              <ProtectedRoute>
             <View className="flex-1">
               <StudentProfileAPI 
-                cadeteId={userData.id}
                 onBack={() => setCurrentScreen('dashboard')}
                 onLogout={handleLogout}
               />
@@ -130,6 +174,7 @@ export default function App() {
                 onTabPress={handleTabPress}
               />
             </View>
+            </ProtectedRoute>
           );
         }
         return null;

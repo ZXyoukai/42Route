@@ -1,29 +1,88 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, TouchableOpacity, ActivityIndicator, StyleSheet } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import { View, Text, TouchableOpacity, ActivityIndicator, StyleSheet, Modal, Animated, Easing } from 'react-native';
 import * as WebBrowser from 'expo-web-browser';
-import { makeRedirectUri } from 'expo-auth-session';
 import { Ionicons } from '@expo/vector-icons';
 import { authService } from 'services';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
 WebBrowser.maybeCompleteAuthSession();
 
 interface LoginIntraProps {
   onback: () => void;
+  onLogin: (userData: { name: string; email: string }) => void;
 }
 
-export default function LoginIntra({ onback }: LoginIntraProps) {
+export default function LoginIntra({ onback, onLogin }: LoginIntraProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  
-  const redirectUri = makeRedirectUri({
-    //scheme: 'routes42',
-    path: '/auth/42/callback'
-  });
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const successTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const iconScale = useRef(new Animated.Value(1)).current;
+
+  useEffect(() => {
+    return () => {
+      if (successTimeoutRef.current) {
+        clearTimeout(successTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    if (showSuccessModal) {
+      const pulseAnimation = Animated.loop(
+        Animated.sequence([
+          Animated.timing(iconScale, {
+            toValue: 1.12,
+            duration: 420,
+            easing: Easing.inOut(Easing.ease),
+            useNativeDriver: true,
+          }),
+          Animated.timing(iconScale, {
+            toValue: 1,
+            duration: 420,
+            easing: Easing.inOut(Easing.ease),
+            useNativeDriver: true,
+          }),
+        ])
+      );
+
+      pulseAnimation.start();
+
+      return () => {
+        pulseAnimation.stop();
+        iconScale.setValue(1);
+      };
+    }
+
+    iconScale.setValue(1);
+  }, [showSuccessModal, iconScale]);
 
   const handleLogin = async () => {
     try {
-      await authService.login42();
+      setIsLoading(true);
+      setError(null);
+      const result = await authService.login42();
+
+      if (result.type === 'success') {
+        setShowSuccessModal(true);
+
+        successTimeoutRef.current = setTimeout(() => {
+          setShowSuccessModal(false);
+          const handleIntraLoginSuccess = async () => {
+            const userRaw = await AsyncStorage.getItem('user');
+            const user = userRaw ? JSON.parse(userRaw) : null;
+
+            onLogin({
+              name: user?.username ?? 'Cadete',
+              email: user?.email ?? '',
+            });
+          };
+
+          handleIntraLoginSuccess();
+        }, 2400);
+      }
+      
     } catch (err) {
       console.error('Erro ao abrir navegador:', err);
       setError('Erro ao tentar fazer login. Tente novamente.');
@@ -96,6 +155,18 @@ export default function LoginIntra({ onback }: LoginIntraProps) {
           </TouchableOpacity>
         </View>
       </View>
+
+      <Modal visible={showSuccessModal} transparent animationType="fade">
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalCard}>
+            <Animated.View style={[styles.modalIconContainer, { transform: [{ scale: iconScale }] }]}>
+              <Ionicons name="checkmark-circle" size={48} color="#00babc" />
+            </Animated.View>
+            <Text style={styles.modalTitle}>Login realizado com sucesso!</Text>
+            <Text style={styles.modalSubtitle}>Voltando para a tela anterior...</Text>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -211,5 +282,38 @@ const styles = StyleSheet.create({
   },
   secondaryButtonText: {
     color: '#00babc',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 24,
+  },
+  modalCard: {
+    width: '100%',
+    maxWidth: 360,
+    borderRadius: 20,
+    paddingVertical: 24,
+    paddingHorizontal: 20,
+    alignItems: 'center',
+    backgroundColor: '#1e293b',
+    borderWidth: 1,
+    borderColor: '#00babc',
+  },
+  modalIconContainer: {
+    marginBottom: 12,
+  },
+  modalTitle: {
+    color: '#e2e8f0',
+    fontSize: 20,
+    fontWeight: '700',
+    textAlign: 'center',
+  },
+  modalSubtitle: {
+    color: '#94a3b8',
+    fontSize: 14,
+    marginTop: 8,
+    textAlign: 'center',
   },
 });
