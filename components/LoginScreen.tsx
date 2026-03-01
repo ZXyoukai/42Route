@@ -12,6 +12,8 @@ import {
 import { StatusBar } from 'expo-status-bar';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { useCustomAlert } from './CustomAlert';
+import logoBlack from '../assets/route_logo-d.png';
+import LoginIntra from './LoginIntra';
 
 interface LoginScreenProps {
   onLogin: (userData: { name: string; email: string }) => void;
@@ -22,6 +24,7 @@ export const LoginScreen = ({ onLogin }: LoginScreenProps) => {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [showIntraLogin, setShowIntraLogin] = useState(false);
   
   const { AlertComponent, showError, showSuccess } = useCustomAlert();
 
@@ -51,6 +54,11 @@ export const LoginScreen = ({ onLogin }: LoginScreenProps) => {
       );
     }, 2000);
   };
+
+  // Se o usuário escolheu login via Intra, mostra o componente LoginIntra
+  if (showIntraLogin) {
+    return <LoginIntra onback={() => setShowIntraLogin(false)} />;
+  }
 
   return (
     <View className="flex-1 bg-slate-900">
@@ -170,6 +178,27 @@ export const LoginScreen = ({ onLogin }: LoginScreenProps) => {
                     <Text className="text-white font-bold text-xl ml-2">Entrar</Text>
                   </View>
                 )}
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                className={`rounded-2xl py-5 px-6 items-center mb-4 shadow-2xl bg-gradient-to-r from-cyan-500 via-cyan-600 to-teal-600
+                `}
+                onPress={() => setShowIntraLogin(true)}
+                disabled={isLoading}
+                activeOpacity={0.8}
+                style={{
+                  backgroundColor: isLoading ? '#475569' : '#00babc',
+                  shadowColor: '#00babc',
+                  shadowOffset: { width: 0, height: 4 },
+                  shadowOpacity: 0.3,
+                  shadowRadius: 8,
+                  elevation: 8,
+                }}
+              >
+                  <View className="flex-row items-center">
+                    <Image source={logoBlack} resizeMode='contain' className='w-14 h-14' />
+                    <Text className="text-black font-bold text-xl ml-2">Entrar com o Intra</Text>
+                  </View>
               </TouchableOpacity>
 
               {/* Links auxiliares */}

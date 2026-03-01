@@ -1,8 +1,9 @@
 {
   "expo": {
-    "name": "42Routes",
-    "slug": "42Routes",
+    "name": "routes42",
+    "slug": "routes42",
     "version": "1.0.0",
+    "scheme": "routes42",
     "web": {
       "favicon": "./assets/favicon.png"
     },
@@ -22,7 +23,8 @@
           "googleMapsApiKey": "AIzaSyA_eu9qzXQVqqSGaT3e2uj63uwb0XIlrEI"
         }
       ],
-      "expo-font"
+      "expo-font",
+      "expo-web-browser"
     ],
     "orientation": "portrait",
     "icon": "./assets/icon.png",

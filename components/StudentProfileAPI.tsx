@@ -1,236 +1,324 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, ActivityIndicator, ScrollView, TouchableOpacity, Switch } from 'react-native';
-import { Ionicons, MaterialIcons } from '@expo/vector-icons';
+import React, { useState } from 'react';
+import { Image, Text, View, ScrollView, TouchableOpacity, Switch } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
-import { Cadete } from '../types/api';
-import { cadeteService } from '../services/cadeteService';
+import { Ionicons, MaterialIcons } from '@expo/vector-icons';
+import { useCustomAlert } from './CustomAlert';
 
-interface StudentProfileAPIProps {
-  cadeteId: number;
+interface StudentProfileProps {
   onBack?: () => void;
   onLogout?: () => void;
 }
 
-export const StudentProfileAPI = ({ cadeteId, onBack, onLogout }: StudentProfileAPIProps) => {
-  const [cadete, setCadete] = useState<Cadete | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+export const StudentProfileAPI = ({ onBack, onLogout }: StudentProfileProps) => {
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [locationEnabled, setLocationEnabled] = useState(true);
+  const [autoAlerts, setAutoAlerts] = useState(false);
+  
+  const { AlertComponent, showSuccess, showError, showWarning, showInfo } = useCustomAlert();
 
-  useEffect(() => {
-    loadCadeteData();
-  }, [cadeteId]);
+  const studentInfo = {
+    name: 'João Silva',
+    studentId: '42LU001',
+    email: 'joao.silva@student.42luanda.ao',
+    course: 'Common Core - Web Development',
+    level: 'Level 3',
+    preferredRoute: 'Rota Central',
+    emergencyContact: '+244 923 456 789'
+  };
 
-  const loadCadeteData = async () => {
-    try {
-      setLoading(true);
-      const data = await cadeteService.getById(cadeteId);
-      setCadete(data);
-      setError(null);
-    } catch (err: any) {
-      setError(err.message || 'Erro ao carregar dados do estudante');
-    } finally {
-      setLoading(false);
+  const handleNotificationChange = (value: boolean) => {
+    setNotificationsEnabled(value);
+    if (value) {
+      showSuccess(
+        'Notificações Ativadas',
+        'Agora receberá alertas sobre os seus autocarros e horários.'
+      );
+    } else {
+      showWarning(
+        'Desativar Notificações',
+        'Não receberá mais alertas sobre os autocarros. Pode perder informações importantes.',
+        () => {
+          showInfo('Notificações Desativadas', 'Pode reativar nas configurações a qualquer momento.');
+        },
+        () => {
+          setNotificationsEnabled(true);
+        }
+      );
     }
   };
 
-  const loadRouteInfo = async () => {
-    if (!cadete) return;
-    try {
-      const routeInfo = await cadeteService.getRouteInformations(cadete.id);
-      console.log('Route info:', routeInfo);
-      // Handle route information
-    } catch (err) {
-      console.error('Error loading route info:', err);
+  const handleLocationChange = (value: boolean) => {
+    setLocationEnabled(value);
+    if (value) {
+      showSuccess(
+        'Localização Ativada',
+        'Agora pode usar funcionalidades baseadas em localização.'
+      );
+    } else {
+      showError(
+        'Localização Desativada',
+        'Algumas funcionalidades podem não funcionar corretamente sem acesso à localização.'
+      );
     }
   };
 
-  if (loading) {
-    return (
-      <View className="flex-1 bg-slate-900 justify-center items-center">
-        <ActivityIndicator size="large" color="#00babc" />
-        <Text className="text-white mt-4">Carregando perfil...</Text>
-      </View>
+  const handleRouteChange = () => {
+    showInfo(
+      'Alterar Rota Preferida',
+      'Esta funcionalidade estará disponível em breve. Poderá escolher a sua rota preferida.'
     );
-  }
+  };
 
-  if (error || !cadete) {
-    return (
-      <View className="flex-1 bg-slate-900 justify-center items-center px-6">
-        <Ionicons name="alert-circle" size={64} color="#ef4444" />
-        <Text className="text-white text-xl font-bold mt-4 text-center">Erro ao carregar perfil</Text>
-        <Text className="text-slate-400 mt-2 text-center">{error}</Text>
-        <TouchableOpacity 
-          onPress={loadCadeteData}
-          className="bg-cyan-600 px-6 py-3 rounded-xl mt-6"
-          style={{ backgroundColor: '#00babc' }}
-        >
-          <Text className="text-white font-bold">Tentar Novamente</Text>
-        </TouchableOpacity>
-      </View>
+  const handleScheduleCustom = () => {
+    showInfo(
+      'Horários Personalizados',
+      'Em breve poderá criar horários personalizados com alertas específicos.'
     );
-  }
+  };
+
+  const handleAchievements = () => {
+    showSuccess(
+      'Conquistas Desbloqueadas!',
+      'Você tem 3 badges: Utilizador Frequente, Pontual e Eco-Friendly!'
+    );
+  };
+
+  const handleSupport = () => {
+    showWarning(
+      'Contactar Suporte',
+      'Será redirecionado para o canal de suporte. Pretende continuar?',
+      () => {
+        showSuccess('Suporte Contactado', 'Em breve receberá ajuda da nossa equipa.');
+      }
+    );
+  };
+
+  const handleLogout = () => {
+    showWarning(
+      'Terminar Sessão',
+      'Tem certeza que deseja sair da aplicação?',
+      () => {
+        showSuccess('Sessão Terminada', 'Até breve!', () => {
+          onLogout?.();
+        });
+      }
+    );
+  };
 
   return (
     <View className="flex-1 bg-slate-900">
       <StatusBar style="light" backgroundColor="#0f172a" />
       
       {/* Header */}
-      <View className="border-b-2 border-[#00babc] pt-12 pb-6 px-6">
-        <View className="flex-row justify-between items-center mb-6">
+      <View className="border-b-2 border-[#00babc] mt-14 pb-2 px-6">
+        <View className="flex justify-between">
           <TouchableOpacity onPress={onBack} className="flex-row items-center">
             <Ionicons name="arrow-back" size={24} color="white" />
             <Text className="text-white text-lg font-medium ml-2">Voltar</Text>
           </TouchableOpacity>
-          <TouchableOpacity onPress={onLogout}>
-            <Ionicons name="log-out-outline" size={24} color="#ef4444" />
-          </TouchableOpacity>
+          <Image
+            source={require('../assets/route_logo-w.png')}
+            className="h-10"
+            resizeMode="contain"
+          />
         </View>
         
         <View className="items-center">
-          <View className="w-24 h-24 bg-slate-800 rounded-full items-center justify-center mb-4 shadow-lg border-2 border-cyan-600">
+          <View className="w-24 h-24 bg-white rounded-full items-center justify-center mb-4 shadow-lg">
             <Text className="text-cyan-600 text-3xl font-bold" style={{ color: '#00babc' }}>
-              {cadete.full_name?.split(' ').map(n => n[0]).join('') || 'CD'}
+              {studentInfo.name.split(' ').map(n => n[0]).join('')}
             </Text>
           </View>
-          <Text className="text-white text-2xl font-bold">{cadete.full_name || 'Cadete'}</Text>
-          <Text className="text-cyan-100 text-sm">ID: {cadete.id}</Text>
-          {cadete.email && (
-            <Text className="text-slate-400 text-sm mt-1">{cadete.email}</Text>
-          )}
+          <Text className="text-white text-2xl font-bold">{studentInfo.name}</Text>
+          <Text className="text-cyan-100 text-sm">{studentInfo.studentId}</Text>
         </View>
       </View>
 
-      <ScrollView className="flex-1 px-6 py-4">
-        {/* Personal Information */}
-        <View className="bg-slate-800 rounded-2xl p-6 mb-6 shadow-lg border border-slate-700">
+      <ScrollView className="flex-1 px-6 py-8">
+        {/* Informações Pessoais */}
+        <View className="bg-slate-800 rounded-2xl p-6 mb-6 shadow-lg space-y-4  border border-slate-700">
           <Text className="text-white text-xl font-bold mb-4">Informações Pessoais</Text>
           
           <View className="gap-y-2">
-            {cadete.username && (
-              <View className="p-3 bg-slate-700 rounded-xl">
-                <Text className="text-slate-400 text-sm font-medium">Username</Text>
-                <Text className="text-white font-bold">{cadete.username}</Text>
-              </View>
-            )}
+            <View className="p-3 bg-slate-700 rounded-xl">
+              <Text className="text-slate-400 text-sm font-medium">Email</Text>
+              <Text className="text-white font-bold">{studentInfo.email}</Text>
+            </View>
             
-            {cadete.phone && (
-              <View className="p-3 bg-slate-700 rounded-xl">
-                <Text className="text-slate-400 text-sm font-medium">Telefone</Text>
-                <Text className="text-white font-bold">{cadete.phone}</Text>
-              </View>
-            )}
+            <View className="p-3 bg-slate-700 rounded-xl">
+              <Text className="text-slate-400 text-sm font-medium">Curso</Text>
+              <Text className="text-white font-bold">{studentInfo.course}</Text>
+            </View>
             
-            {cadete.city && (
-              <View className="p-3 bg-slate-700 rounded-xl">
-                <Text className="text-slate-400 text-sm font-medium">Cidade</Text>
-                <Text className="text-white font-bold">{cadete.city}</Text>
-              </View>
-            )}
+            <View className="p-3 bg-slate-700 rounded-xl">
+              <Text className="text-slate-400 text-sm font-medium">Nível</Text>
+              <Text className="text-white font-bold">{studentInfo.level}</Text>
+            </View>
             
-            {cadete.distrit && (
-              <View className="p-3 bg-slate-700 rounded-xl">
-                <Text className="text-slate-400 text-sm font-medium">Distrito</Text>
-                <Text className="text-white font-bold">{cadete.distrit}</Text>
-              </View>
-            )}
+            <View className="p-3 bg-cyan-900/30 rounded-xl border border-cyan-600">
+              <Text className="text-slate-400 text-sm font-medium">Rota Preferida</Text>
+              <Text className="text-cyan-400 font-bold" style={{ color: '#00babc' }}>{studentInfo.preferredRoute}</Text>
+            </View>
+            
+            <View className="p-3 bg-slate-700 rounded-xl">
+              <Text className="text-slate-400 text-sm font-medium">Contacto de Emergência</Text>
+              <Text className="text-white font-bold">{studentInfo.emergencyContact}</Text>
+            </View>
           </View>
         </View>
 
-        {/* Stop Information */}
-        {cadete.stop && (
-          <View className="bg-slate-800 rounded-2xl p-6 mb-6 shadow-lg border border-slate-700">
-            <Text className="text-white text-xl font-bold mb-4">Paragem Atribuída</Text>
-            <View className="bg-cyan-900/30 rounded-xl p-4 border border-cyan-600" style={{ backgroundColor: 'rgba(0, 186, 188, 0.1)', borderColor: '#00babc' }}>
-              <Text className="text-cyan-400 text-lg font-bold" style={{ color: '#00babc' }}>
-                {cadete.stop.stop_name}
-              </Text>
-              {cadete.stop.distrit && (
-                <Text className="text-slate-300 text-sm mt-2">{cadete.stop.distrit}</Text>
-              )}
-              {cadete.stop.latitude && cadete.stop.longitude && (
-                <Text className="text-slate-400 text-xs mt-2 font-mono">
-                  {cadete.stop.latitude.toFixed(6)}, {cadete.stop.longitude.toFixed(6)}
-                </Text>
-              )}
-              <TouchableOpacity 
-                onPress={loadRouteInfo}
-                className="bg-cyan-600 px-4 py-2 rounded-lg mt-3"
-                style={{ backgroundColor: '#00babc' }}
-              >
-                <Text className="text-white text-center font-bold">Ver Informações da Rota</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        )}
-
-        {/* Settings */}
+        {/* Configurações de Notificação */}
         <View className="bg-slate-800 rounded-2xl p-6 mb-6 shadow-lg border border-slate-700">
-          <Text className="text-white text-xl font-bold mb-4">Configurações</Text>
+          <Text className="text-white text-xl font-bold mb-4">Notificações</Text>
           
-          <View className="gap-y-3">
-            <View className="flex-row justify-between items-center p-3 bg-slate-700 rounded-xl">
-              <View className="flex-row items-center">
-                <Ionicons name="notifications" size={20} color="#00babc" />
-                <Text className="text-white ml-3">Notificações</Text>
+          <View className="flex-row justify-between items-center mb-4 p-3 bg-slate-700 rounded-xl">
+            <View className="flex-1">
+              <View className="flex-row items-center mb-1">
+                <Ionicons name="notifications" size={16} color="#00babc" />
+                <Text className="text-white font-medium ml-2">Notificações Push</Text>
               </View>
-              <Switch 
-                value={notificationsEnabled}
-                onValueChange={setNotificationsEnabled}
-                trackColor={{ false: '#475569', true: '#00babc' }}
-                thumbColor={notificationsEnabled ? '#ffffff' : '#94a3b8'}
-              />
+              <Text className="text-slate-400 text-sm">Receber alertas sobre os autocarros</Text>
             </View>
-
-            <View className="flex-row justify-between items-center p-3 bg-slate-700 rounded-xl">
-              <View className="flex-row items-center">
-                <Ionicons name="location" size={20} color="#00babc" />
-                <Text className="text-white ml-3">Localização</Text>
+            <Switch
+              value={notificationsEnabled}
+              onValueChange={handleNotificationChange}
+              trackColor={{ false: '#374151', true: '#00babc' }}
+              thumbColor={notificationsEnabled ? '#ffffff' : '#64748b'}
+            />
+          </View>
+          
+          <View className="flex-row justify-between items-center mb-4 p-3 bg-slate-700 rounded-xl">
+            <View className="flex-1">
+              <View className="flex-row items-center mb-1">
+                <Ionicons name="location" size={16} color="#00babc" />
+                <Text className="text-white font-medium ml-2">Localização</Text>
               </View>
-              <Switch 
-                value={locationEnabled}
-                onValueChange={setLocationEnabled}
-                trackColor={{ false: '#475569', true: '#00babc' }}
-                thumbColor={locationEnabled ? '#ffffff' : '#94a3b8'}
-              />
+              <Text className="text-slate-400 text-sm">Permitir acesso à localização</Text>
             </View>
+            <Switch
+              value={locationEnabled}
+              onValueChange={handleLocationChange}
+              trackColor={{ false: '#374151', true: '#00babc' }}
+              thumbColor={locationEnabled ? '#ffffff' : '#64748b'}
+            />
+          </View>
+          
+          <View className="flex-row justify-between items-center p-3 bg-slate-700 rounded-xl">
+            <View className="flex-1">
+              <View className="flex-row items-center mb-1">
+                <MaterialIcons name="alarm" size={16} color="#00babc" />
+                <Text className="text-white font-medium ml-2">Alertas Automáticos</Text>
+              </View>
+              <Text className="text-slate-400 text-sm">Notificação 10 min antes da chegada</Text>
+            </View>
+            <Switch
+              value={autoAlerts}
+              onValueChange={setAutoAlerts}
+              trackColor={{ false: '#374151', true: '#00babc' }}
+              thumbColor={autoAlerts ? '#ffffff' : '#64748b'}
+            />
           </View>
         </View>
 
-        {/* Messages */}
-        {cadete.messages && cadete.messages.length > 0 && (
-          <View className="bg-slate-800 rounded-2xl p-6 mb-6 shadow-lg border border-slate-700">
-            <Text className="text-white text-xl font-bold mb-4">Mensagens Recentes</Text>
-            {cadete.messages.slice(0, 5).map((msg, idx) => (
-              <View key={idx} className="bg-slate-700 rounded-xl p-3 mb-2">
-                <View className="flex-row justify-between items-start mb-2">
-                  <Text className="text-cyan-400 text-sm font-bold" style={{ color: '#00babc' }}>
-                    {msg.driver?.full_name || 'Motorista'}
-                  </Text>
-                </View>
-                <Text className="text-white">{msg.message}</Text>
+        {/* Estatísticas de Uso */}
+        <View className="bg-slate-800 rounded-2xl p-6 mb-6 shadow-lg border border-slate-700">
+          <Text className="text-white text-xl font-bold mb-4">Estatísticas</Text>
+          
+          <View className="flex-row justify-between mb-4">
+            <View className="items-center flex-1">
+              <View className="w-16 h-16 bg-cyan-900/50 rounded-2xl items-center justify-center mb-2 border border-cyan-700" style={{ backgroundColor: 'rgba(0, 186, 188, 0.1)', borderColor: '#00babc' }}>
+                <Text className="text-2xl font-bold text-cyan-400" style={{ color: '#00babc' }}>42</Text>
               </View>
-            ))}
+              <Text className="text-slate-400 text-sm text-center font-medium">Viagens este mês</Text>
+            </View>
+            <View className="items-center flex-1">
+              <View className="w-16 h-16 bg-cyan-900/50 rounded-2xl items-center justify-center mb-2 border border-cyan-700" style={{ backgroundColor: 'rgba(0, 186, 188, 0.1)', borderColor: '#00babc' }}>
+                <Text className="text-2xl font-bold text-cyan-400" style={{ color: '#00babc' }}>98%</Text>
+              </View>
+              <Text className="text-slate-400 text-sm text-center font-medium">Pontualidade</Text>
+            </View>
+            <View className="items-center flex-1">
+              <View className="w-16 h-16 bg-cyan-900/50 rounded-2xl items-center justify-center mb-2 border border-cyan-700" style={{ backgroundColor: 'rgba(0, 186, 188, 0.1)', borderColor: '#00babc' }}>
+                <Text className="text-2xl font-bold text-cyan-400" style={{ color: '#00babc' }}>15.2</Text>
+              </View>
+              <Text className="text-slate-400 text-sm text-center font-medium">Tempo médio (min)</Text>
+            </View>
           </View>
-        )}
+          
+          <View className="border-t border-slate-700 pt-4">
+            <Text className="text-slate-400 text-sm text-center">
+              Você usa o transporte 42Routes há <Text className="font-bold text-white">6 meses</Text>
+            </Text>
+          </View>
+        </View>
 
-        {/* Action Buttons */}
-        <TouchableOpacity 
-          onPress={loadCadeteData}
-          className="bg-cyan-600 rounded-xl py-4 mb-4"
-          style={{ backgroundColor: '#00babc' }}
-        >
-          <Text className="text-white text-center font-bold text-lg">Atualizar Dados</Text>
-        </TouchableOpacity>
+        {/* Ações */}
+        <View className="gap-y-2 mb-6">
+          <TouchableOpacity 
+            className="bg-slate-800 rounded-xl p-4 flex-row items-center justify-between shadow-lg border border-slate-700"
+            onPress={handleRouteChange}
+          >
+            <View className="flex-row items-center">
+              <MaterialIcons name="route" size={20} color="#00babc" />
+              <Text className="text-white font-medium ml-3">Alterar Rota Preferida</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={16} color="#64748b" />
+          </TouchableOpacity>
+          
+          <TouchableOpacity 
+            className="bg-slate-800 rounded-xl p-4 flex-row items-center justify-between shadow-lg border border-slate-700"
+            onPress={handleScheduleCustom}
+          >
+            <View className="flex-row items-center">
+              <MaterialIcons name="schedule" size={20} color="#00babc" />
+              <Text className="text-white font-medium ml-3">Horários Personalizados</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={16} color="#64748b" />
+          </TouchableOpacity>
+          
+          <TouchableOpacity 
+            className="bg-slate-800 rounded-xl p-4 flex-row items-center justify-between shadow-lg border border-slate-700"
+            onPress={handleAchievements}
+          >
+            <View className="flex-row items-center">
+              <MaterialIcons name="emoji-events" size={20} color="#00babc" />
+              <Text className="text-white font-medium ml-3">Conquistas e Badges</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={16} color="#64748b" />
+          </TouchableOpacity>
+          
+          <TouchableOpacity 
+            className="bg-slate-800 rounded-xl p-4 flex-row items-center justify-between shadow-lg border border-slate-700"
+            onPress={handleSupport}
+          >
+            <View className="flex-row items-center">
+              <MaterialIcons name="help-outline" size={20} color="#00babc" />
+              <Text className="text-white font-medium ml-3">Ajuda e Suporte</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={16} color="#64748b" />
+          </TouchableOpacity>
+          
+          <TouchableOpacity 
+            className="bg-red-900/30 rounded-xl p-4 flex-row items-center justify-between border border-red-700"
+            onPress={handleLogout}
+          >
+            <View className="flex-row items-center">
+              <MaterialIcons name="logout" size={20} color="#ef4444" />
+              <Text className="text-red-400 font-medium ml-3">Terminar Sessão</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={16} color="#ef4444" />
+          </TouchableOpacity>
+        </View>
 
-        <TouchableOpacity 
-          onPress={onLogout}
-          className="bg-red-600 rounded-xl py-4 mb-6"
-        >
-          <Text className="text-white text-center font-bold text-lg">Terminar Sessão</Text>
-        </TouchableOpacity>
+        {/* Versão da App */}
+        <View className="items-center py-4">
+          <Text className="text-slate-500 text-sm">42Routes v1.0.0</Text>
+          <Text className="text-slate-600 text-xs">© 2024 42 Luanda</Text>
+        </View>
       </ScrollView>
+      
+      {/* Custom Alert Component */}
+      {AlertComponent}
     </View>
   );
 };

@@ -7,6 +7,24 @@ export interface Admin {
   email: string | null;
 }
 
+export interface DriverCoordinates {
+  id: number;
+  lat: number;
+  long: number;
+  driver: Driver;
+}
+
+export interface Driver {
+  id: number;
+  full_name: string | null;
+  username: string | null;
+  email: string | null;
+  photo: string | null;
+  phone: number | null;
+  coordinates: DriverCoordinates[];
+  current_route: Route | null;
+}
+
 export interface MiniBusStop {
   id: number;
   stop_name: string | null;
@@ -25,20 +43,6 @@ export interface Route {
   drivers: Driver[];
 }
 
-export interface Message {
-  id: number;
-  message: string;
-  cadete: Cadete;
-  driver: Driver;
-}
-
-export interface DriverCoordinates {
-  id: number;
-  lat: number;
-  long: number;
-  driver: Driver;
-}
-
 export interface Cadete {
   id: number;
   full_name: string | null;
@@ -48,19 +52,24 @@ export interface Cadete {
   distrit: string | null;
   phone: number | null;
   stop: MiniBusStop | null;
-  messages: Message[];
 }
 
-export interface Driver {
+export interface Message {
+  id: number;
+  sender_id: number;
+  senderType: number;
+  content: string;
+  createdAt: string;
+  chat: Chat;
+}
+
+export interface Chat {
   id: number;
   full_name: string | null;
-  username: string | null;
-  email: string | null;
-  photo: string | null;
-  phone: number | null;
-  coordinates: DriverCoordinates[];
+  type: 'GENERAL' | 'ROUTE';
+  route_id: number | null;
+  createdAt: string;
   messages: Message[];
-  current_route: Route | null;
 }
 
 // Request/Response types
