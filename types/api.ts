@@ -52,6 +52,13 @@ export interface Cadete {
   distrit: string | null;
   phone: number | null;
   stop: MiniBusStop | null;
+  avatar: {
+    link: string;
+  };
+  course: string;
+  level: number;
+  grade: string;
+  isDBUser: boolean;
 }
 
 export interface Message {
@@ -85,14 +92,37 @@ export interface UpdateAdminRequest {
 }
 
 export interface CreateCadeteRequest {
-  name: string;
+  full_name: string;
+  username?: string;
   email: string;
-  phone: string;
+  city?: string;
+  distrit?: string;
+  phone?: number;
+  stop_id?: number;
+  avatar?: {
+    link: string;
+  };
+  course?: string;
+  level?: number;
+  grade?: string;
+  isDBUser?: boolean;
 }
 
 export interface UpdateCadeteRequest {
-  name?: string;
-  phone?: string;
+  full_name?: string;
+  username?: string;
+  email?: string;
+  city?: string;
+  distrit?: string;
+  phone?: number;
+  stop_id?: number;
+  avatar?: {
+    link: string;
+  };
+  course?: string;
+  level?: number;
+  grade?: string;
+  isDBUser?: boolean;
 }
 
 export interface CreateDriverRequest {

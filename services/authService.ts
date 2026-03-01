@@ -11,13 +11,24 @@ interface loginIntraResponse {
   token?: string;
 }
 
-interface payload {
+interface CadeteTokenPayload {
   id: number;
-  email: string;
-  username: string;
-  iat: number;
-  exp: number;
+  email?: string | null;
+  username?: string | null;
+  full_name?: string | null;
+  city?: string | null;
+  distrit?: string | null;
+  phone?: number | string | null;
+  stop?: Cadete['stop'] | null;
+  avatar?: {
+    link?: string | null;
+  } | null;
+  course?: string | null;
+  level?: number | null;
+  grade?: string | null;
+  isDBUser?: boolean | null;
 }
+
 export const authService = {
   // GET /api/auth/42/login - Iniciar login OAuth 42
   login42: async (): Promise<loginIntraResponse> => {
@@ -37,9 +48,33 @@ export const authService = {
       const token = data.searchParams.get('token');
 
       if (token) {
-        const tokenDecoded = jwtDecode<payload>(token);
-        await AsyncStorage.setItem('user', JSON.stringify({ id: tokenDecoded.id, email: tokenDecoded.email, username: tokenDecoded.username } as Cadete));
-        await AsyncStorage.setItem('authenticated', 'true');
+        const tokenDecoded = jwtDecode<CadeteTokenPayload>(token);
+        const normalizedPhone =
+          typeof tokenDecoded.phone === 'string'
+            ? Number(tokenDecoded.phone)
+            : tokenDecoded.phone;
+
+        const cadeteUser: Cadete = {
+          id: tokenDecoded.id,
+          full_name: tokenDecoded.full_name ?? tokenDecoded.username ?? null,
+          username: tokenDecoded.username ?? tokenDecoded.full_name ?? null,
+          email: tokenDecoded.email ?? null,
+          city: tokenDecoded.city ?? null,
+          distrit: tokenDecoded.distrit ?? null,
+          phone: Number.isFinite(normalizedPhone) ? normalizedPhone! : null,
+          stop: tokenDecoded.stop ?? null,
+          avatar: { link: tokenDecoded.avatar?.link ?? '' },
+          course: tokenDecoded.course ?? '',
+          level: tokenDecoded.level ?? 0,
+          grade: tokenDecoded.grade ?? '',
+          isDBUser: tokenDecoded.isDBUser ?? false,
+        };
+
+        await AsyncStorage.multiSet([
+          ['user', JSON.stringify(cadeteUser)],
+          ['authenticated', 'true'],
+          ['token', token],
+        ]);
       }
     } else if (response.type === 'cancel') {
       console.log('Login cancelado pelo usuário');

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, ActivityIndicator, ScrollView, TouchableOpacity } from 'react-native';
+import { BusLoadingScreen } from './BusLoadingScreen';
 import { Ionicons, MaterialIcons, FontAwesome5 } from '@expo/vector-icons';
 import { StatusBar } from 'expo-status-bar';
 import * as Location from 'expo-location';
@@ -82,12 +83,7 @@ export const DriverProfileAPI = ({ driverId, onBack }: DriverProfileAPIProps) =>
   };
 
   if (loading) {
-    return (
-      <View className="flex-1 bg-slate-900 justify-center items-center">
-        <ActivityIndicator size="large" color="#00babc" />
-        <Text className="text-white mt-4">Carregando perfil...</Text>
-      </View>
-    );
+    return <BusLoadingScreen msg="Carregando perfil do motorista..." />;
   }
 
   if (error || !driver) {

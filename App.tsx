@@ -10,6 +10,10 @@ import { TransportDashboardAPI } from 'components/TransportDashboardAPI';
 import { RouteDetailAPI } from 'components/RouteDetailAPI';
 import { StudentProfileAPI } from 'components/StudentProfileAPI';
 import { DriverProfileAPI } from 'components/DriverProfileAPI';
+import { MapScreen } from 'components/MapScreen';
+import { TransportSchedule } from 'components/TransportSchedule';
+import { CadeteOnboarding } from 'components/CadeteOnboarding';
+import { Cadete, MiniBusStop } from 'types/api';
 
 import './global.css';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -21,13 +25,27 @@ type Screen =
   | 'profile' 
   | 'driverProfile'
   | 'map'
-  | 'schedule';
+  | 'schedule'
+  | 'cadeteOnboarding';
 
 interface UserData {
   id: number;
   name: string;
   email: string;
   role: 'cadete' | 'driver' | 'admin';
+  full_name?: string | null;
+  username?: string | null;
+  city?: string | null;
+  distrit?: string | null;
+  phone?: number | null;
+  stop?: MiniBusStop | null;
+  avatar?: {
+    link: string;
+  };
+  course?: string;
+  level?: number;
+  grade?: string;
+  isDBUser?: boolean;
 }
 
 type TabName = 'dashboard' | 'map' | 'schedule' | 'profile';
@@ -77,13 +95,28 @@ export default function App() {
       name: parsedUser?.username ?? parsedUser?.name ?? data.name,
       email: parsedUser?.email ?? data.email,
       role: parsedUser?.role ?? 'cadete',
+      full_name: parsedUser?.full_name ?? null,
+      username: parsedUser?.username ?? parsedUser?.name ?? data.name,
+      city: parsedUser?.city ?? null,
+      distrit: parsedUser?.distrit ?? null,
+      phone: parsedUser?.phone ?? null,
+      stop: parsedUser?.stop ?? null,
+      avatar: parsedUser?.avatar ?? { link: '' },
+      course: parsedUser?.course ?? '',
+      level: parsedUser?.level ?? 0,
+      grade: parsedUser?.grade ?? '',
+      isDBUser: parsedUser?.isDBUser ?? false,
     };
 
     await AsyncStorage.setItem('authenticated', 'true');
     await AsyncStorage.setItem('user', JSON.stringify(nextUser));
 
     setUserData(nextUser);
-    setCurrentScreen('dashboard');
+    const shouldGoToOnboarding =
+      nextUser.role === 'cadete' &&
+      (!nextUser.isDBUser || !nextUser.stop || !nextUser.course || !nextUser.grade || !nextUser.level);
+
+    setCurrentScreen(shouldGoToOnboarding ? 'cadeteOnboarding' : 'dashboard');
   };
 
   const handleLogout = async () => {
@@ -178,6 +211,79 @@ export default function App() {
           );
         }
         return null;
+
+      case 'map':
+        return (
+          <ProtectedRoute>
+            <View className="flex-1">
+              <MapScreen studentName={userData?.name || 'Estudante'} />
+              <BottomTabBar
+                activeTab="map"
+                onTabPress={handleTabPress}
+              />
+            </View>
+          </ProtectedRoute>
+        );
+
+      case 'schedule':
+        return (
+          <ProtectedRoute>
+            <View className="flex-1">
+              <TransportSchedule />
+              <BottomTabBar
+                activeTab="schedule"
+                onTabPress={handleTabPress}
+              />
+            </View>
+          </ProtectedRoute>
+        );
+
+      case 'cadeteOnboarding': {
+        if (!userData) return null;
+        const onboardingCadete: Cadete = {
+          id: userData.id,
+          full_name: userData.full_name ?? userData.name ?? null,
+          username: userData.username ?? userData.name ?? null,
+          email: userData.email ?? null,
+          city: userData.city ?? null,
+          distrit: userData.distrit ?? null,
+          phone: userData.phone ?? null,
+          stop: userData.stop ?? null,
+          avatar: userData.avatar ?? { link: '' },
+          course: userData.course ?? '',
+          level: userData.level ?? 0,
+          grade: userData.grade ?? '',
+          isDBUser: userData.isDBUser ?? false,
+        };
+        return (
+          <ProtectedRoute>
+            <CadeteOnboarding
+              initialUser={onboardingCadete}
+              onComplete={(updatedUser) => {
+                const normalizedUser: UserData = {
+                  id: updatedUser.id,
+                  name: updatedUser.full_name ?? updatedUser.username ?? 'Cadete',
+                  email: updatedUser.email ?? '',
+                  role: 'cadete',
+                  full_name: updatedUser.full_name,
+                  username: updatedUser.username,
+                  city: updatedUser.city,
+                  distrit: updatedUser.distrit,
+                  phone: updatedUser.phone,
+                  stop: updatedUser.stop,
+                  avatar: updatedUser.avatar,
+                  course: updatedUser.course,
+                  level: updatedUser.level,
+                  grade: updatedUser.grade,
+                  isDBUser: updatedUser.isDBUser,
+                };
+                setUserData(normalizedUser);
+                setCurrentScreen('dashboard');
+              }}
+            />
+          </ProtectedRoute>
+        );
+      }
 
       default:
         return (

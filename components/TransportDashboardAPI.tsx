@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, ActivityIndicator, ScrollView, TouchableOpacity, RefreshControl } from 'react-native';
+import { BusLoadingScreen } from './BusLoadingScreen';
 import { Ionicons, MaterialIcons, FontAwesome5 } from '@expo/vector-icons';
 import { useRoutes } from '../hooks/useRoutes';
 import { useDrivers } from '../hooks/useDrivers';
@@ -69,12 +70,7 @@ export const TransportDashboardAPI = ({ studentName = "Estudante", onRouteSelect
   );
 
   if (loading && !refreshing) {
-    return (
-      <View className="flex-1 bg-slate-900 justify-center items-center">
-        <ActivityIndicator size="large" color="#00babc" />
-        <Text className="text-white mt-4">Carregando rotas...</Text>
-      </View>
-    );
+    return <BusLoadingScreen msg="Carregando rotas..." />;
   }
 
   if (error) {
@@ -98,14 +94,9 @@ export const TransportDashboardAPI = ({ studentName = "Estudante", onRouteSelect
     <View className="flex-1 bg-slate-900">
       {/* Header */}
       <View className="border-b-2 border-[#00babc] pt-12 pb-6 px-6">
-        <View className="flex-row justify-between items-center mb-4">
-          <View>
-            <Text className="text-slate-400 text-sm">Bem-vindo(a),</Text>
-            <Text className="text-white text-2xl font-bold">{studentName}</Text>
-          </View>
-          <TouchableOpacity className="w-12 h-12 bg-slate-800 rounded-full items-center justify-center border border-cyan-600">
-            <Ionicons name="person" size={24} color="#00babc" />
-          </TouchableOpacity>
+        <View className="mb-2">
+          <Text className="text-slate-400 text-sm">Bem-vindo(a),</Text>
+          <Text className="text-white text-2xl font-bold">{studentName}</Text>
         </View>
 
         {/* Quick Stats */}

@@ -1,14 +1,12 @@
 import {
-  useState,
-  useEffect
+  useState
 } from 'react';
+import { BusLoadingScreen } from './BusLoadingScreen';
 import { Image, Text, View, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { useCustomAlert } from './CustomAlert';
-import { API_BASE_URL } from '@env';
 import {
-  routeInfo,
   ScheduleInfo
 } from './interfaces';
 
@@ -19,63 +17,28 @@ interface TransportScheduleProps {
 
 export const TransportSchedule = ({ onBack }: TransportScheduleProps) => {
   const { AlertComponent, showSuccess, showError, showWarning, showInfo } = useCustomAlert();
-  const [routes, setRoutes] = useState<routeInfo[]>([]);
-  const [weekdays, setWeekdays] = useState<ScheduleInfo[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  // const weekdays: ScheduleInfo[] = [
-  //   {
-  //     routeName: 'Rota Central',
-  //     routeId: 'RT001',
-  //     departureTime: '07:30',
-  //     arrivalTime: '08:25',
-  //     duration: '55 min',
-  //     stops: 4,
-  //     frequency: 'A cada 30 min',
-  //     isActive: true
-  //   },
-  //   {
-  //     routeName: 'Rota Maianga',
-  //     routeId: 'RT002',
-  //     departureTime: '07:45',
-  //     arrivalTime: '08:30',
-  //     duration: '45 min',
-  //     stops: 3,
-  //     frequency: 'A cada 45 min',
-  //     isActive: true
-  //   },
-  //   {
-  //     routeName: 'Rota Ingombota',
-  //     routeId: 'RT003',
-  //     departureTime: '08:00',
-  //     arrivalTime: '08:50',
-  //     duration: '50 min',
-  //     stops: 5,
-  //     frequency: 'A cada hora',
-  //     isActive: false
-  //   }
-  // ];
-
-  const weekends: ScheduleInfo[] = [
+  const [loading] = useState<boolean>(false);
+  const weekdays: ScheduleInfo[] = [
     {
-      routeName: 'Rota Central',
+      routeName: 'Rota Manhã',
       routeId: 'RT001',
-      departureTime: '09:00',
-      arrivalTime: '09:55',
-      duration: '55 min',
+      departureTime: '06:30',
+      arrivalTime: '07:15',
+      duration: '45 min',
       stops: 4,
-      frequency: 'A cada hora',
-      isActive: true
+      frequency: 'Partida única',
+      isActive: true,
     },
     {
-      routeName: 'Rota Maianga',
+      routeName: 'Rota Tarde',
       routeId: 'RT002',
-      departureTime: '09:30',
-      arrivalTime: '10:15',
+      departureTime: '10:00',
+      arrivalTime: '10:45',
       duration: '45 min',
-      stops: 3,
-      frequency: 'A cada 2 horas',
-      isActive: true
-    }
+      stops: 4,
+      frequency: 'Partida única',
+      isActive: true,
+    },
   ];
 
   const handleRoutePress = (route: ScheduleInfo) => {
@@ -214,61 +177,20 @@ export const TransportSchedule = ({ onBack }: TransportScheduleProps) => {
       </View>
     </TouchableOpacity>
   );
-  
-  
-  useEffect(() => {
-  const fetchRoutes = async () => {
-    try {
-      setLoading(true);
-
-      const response = await fetch(`${API_BASE_URL}/minibusstops`);
-      const data = await response.json();
-
-      console.log('Dados recebidos:', data);
-
-      // Atualiza as rotas
-      setRoutes(data as routeInfo[]);
-
-      // Gera horários a partir das rotas recebidas
-      const generatedSchedules: ScheduleInfo[] = data.map((route: routeInfo) => ({
-        routeName: route.stop_name || 'Rota Desconhecida',
-        routeId: `RT${route.id.toString().padStart(3, '0')}`,
-        departureTime: '07:30',
-        arrivalTime: '08:25',
-        duration: '55 min',
-        stops: 4,
-        frequency: 'A cada 30 min',
-        isActive: route.stop_name !== 'Camama' && route.stop_name !== 'Benfica', // Exemplo de lógica para inatividade
-      }));
-
-      // Atualiza os horários
-      setWeekdays(generatedSchedules);
-    } catch (error) {
-      console.error('Erro ao buscar rotas:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  fetchRoutes();
-}, [API_BASE_URL]);
-
   return (
     <View className="flex-1 bg-slate-900">
       <StatusBar style="light" />
-      {loading && (
-        <View className="flex flex-col absolute inset-0 gap-y-3 bg-slate-900/70 flex-row justify-center items-center z-50">
-          <ActivityIndicator size="large" color="#00babc" />
-          <Text className="text-white ml-4 text-base">A carregar horários...</Text>
-        </View>
-      )}
+      {loading && <BusLoadingScreen msg="A carregar horários..." />}
       
       {/* Header */}
       <View className="bg-gradient-to-br pt-12 pb-6 px-6 border-b-2 border-[#00babc]">
         <View className="flex justify-between">
-          <TouchableOpacity onPress={onBack} className="flex-row items-center">
-            <Ionicons name="arrow-back" size={24} color="white" />
-            <Text className="text-white text-lg font-medium ml-2">Voltar</Text>
+          <TouchableOpacity
+            onPress={onBack}
+            style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: 'rgba(15,23,42,0.9)', borderWidth: 1, borderColor: '#334155', alignItems: 'center', justifyContent: 'center' }}
+            activeOpacity={0.8}
+          >
+            <Ionicons name="arrow-back" size={20} color="#fff" />
           </TouchableOpacity>
           <Image
             source={require('../assets/route_logo-w.png')}

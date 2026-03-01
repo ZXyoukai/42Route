@@ -1,17 +1,19 @@
 import React, { useState } from 'react';
-import { 
-  View, 
-  Text, 
-  TextInput, 
-  TouchableOpacity, 
-  Image, 
-  KeyboardAvoidingView, 
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  Image,
+  KeyboardAvoidingView,
   Platform,
-  ScrollView
+  ScrollView,
+  StyleSheet,
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
-import { Ionicons, MaterialIcons } from '@expo/vector-icons';
+import { Ionicons, MaterialIcons, FontAwesome5 } from '@expo/vector-icons';
 import { useCustomAlert } from './CustomAlert';
+import logoWhite from '../assets/route_logo-w.png';
 import logoBlack from '../assets/route_logo-d.png';
 import LoginIntra from './LoginIntra';
 
@@ -19,97 +21,89 @@ interface LoginScreenProps {
   onLogin: (userData: { name: string; email: string }) => void;
 }
 
+const ACCENT = '#00babc';
+const BG = '#0f172a';
+const CARD = '#1e293b';
+const BORDER = '#334155';
+const MUTED = '#64748b';
+
 export const LoginScreen = ({ onLogin }: LoginScreenProps) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [showIntraLogin, setShowIntraLogin] = useState(false);
-  
+
   const { AlertComponent, showError, showSuccess } = useCustomAlert();
 
   const handleLogin = async () => {
     if (!email || !password) {
-      showError(
-        'Erro de Autenticação', 
-        'Por favor preencha todos os campos para continuar'
-      );
+      showError('Campos obrigatórios', 'Por favor preencha o email e a palavra-passe.');
       return;
     }
-
     setIsLoading(true);
-    
-    // Simular autenticação
     setTimeout(() => {
       setIsLoading(false);
-      showSuccess(
-        'Login Realizado!', 
-        'Bem-vindo ao sistema 42Routes',
-        () => {
-          onLogin({
-            name: 'João Silva',
-            email: email
-          });
-        }
-      );
-    }, 2000);
+      showSuccess('Login Realizado!', 'Bem-vindo ao sistema 42Routes', () => {
+        onLogin({ name: 'Motorista', email });
+      });
+    }, 1800);
   };
 
-  // Se o usuário escolheu login via Intra, mostra o componente LoginIntra
   if (showIntraLogin) {
     return <LoginIntra onback={() => setShowIntraLogin(false)} onLogin={onLogin} />;
   }
 
   return (
-    <View className="flex-1 bg-slate-900">
-      <StatusBar style="light" backgroundColor="#0f172a" />
-      
-      <KeyboardAvoidingView 
-        className="flex-1" 
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      >
-        <ScrollView 
-          className="flex-1" 
+    <View style={styles.root}>
+      <StatusBar style="light" backgroundColor={BG} />
+
+      <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+        <ScrollView
+          style={{ flex: 1 }}
           contentContainerStyle={{ flexGrow: 1 }}
           showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
         >
-          {/* Header com Logo */}
-          <View className="pt-20 pb-12 px-6 items-center">
-            <View className="bg-gradient-to-br from-cyan-500 to-teal-600 rounded-3xl p-4 mb-6 shadow-2xl" style={{ backgroundColor: '#00babc' }}>
-              <Image
-                source={require('../assets/route_logo-w.png')}
-                className="h-24"
-                resizeMode="contain"
-              />
+          {/* ── Logo / Brand ─────────────────────────────────── */}
+          <View style={styles.brand}>
+            <View style={styles.logoBox}>
+              <Image source={logoWhite} style={{ width: 120, height: 56 }} resizeMode="contain" />
             </View>
-            
-            {/* <Text className="text-white text-3xl font-bold mb-2">42Routes</Text> */}
-            <Text className="text-slate-300 text-lg text-center">
-              Sistema de Transporte
-            </Text>
-            <Text className="text-slate-400 text-sm text-center mt-1">
-              42 Escola de Programação - Luanda
-            </Text>
+            <Text style={styles.brandSub}>Sistema de Transporte · 42 Luanda</Text>
           </View>
 
-          {/* Form de Login */}
-          <View className="flex-1 px-6">
-            <View className="bg-slate-800 rounded-3xl p-6 shadow-2xl border border-slate-700">
-              <Text className="text-white text-2xl font-bold mb-6 text-center">
-                Iniciar Sessão
-              </Text>
+          <View style={styles.body}>
+            {/* ── Separador ─────────────────────────────────── */}
+            <View style={styles.dividerRow}>
+              <View style={styles.dividerLine} />
+              <Text style={styles.dividerLabel}>Escolha como entrar</Text>
+              <View style={styles.dividerLine} />
+            </View>
 
-              {/* Campo Email */}
-              <View className="mb-4">
-                <Text className="text-slate-300 text-sm font-medium mb-2">
-                  Email Institucional
-                </Text>
-                <View className="bg-slate-700 rounded-xl flex-row items-center px-4 py-3 border border-slate-600">
-                  <MaterialIcons name="email" size={20} color="#94a3b8" />
+            {/* ══════════════════════════════════════════════════
+                CARD 1 — Motorista (email + password)
+            ══════════════════════════════════════════════════ */}
+            <View style={styles.card}>
+              {/* Role chip */}
+              <View style={styles.roleRow}>
+                <View style={styles.roleIconWrap}>
+                  <FontAwesome5 name="id-card" size={16} color={ACCENT} />
+                </View>
+                <View>
+                  <Text style={styles.roleTitle}>Motorista</Text>
+                  <Text style={styles.roleSub}>Acesso com credenciais institucionais</Text>
+                </View>
+              </View>
+
+              {/* Email */}
+              <View style={styles.fieldWrap}>
+                <View style={styles.fieldRow}>
+                  <MaterialIcons name="email" size={18} color={MUTED} style={{ marginRight: 10 }} />
                   <TextInput
-                    className="flex-1 text-white ml-3 text-base"
-                    placeholder="seu.email@student.42luanda.ao"
-                    placeholderTextColor="#64748b"
+                    style={styles.input}
+                    placeholder="Email institucional"
+                    placeholderTextColor={MUTED}
                     value={email}
                     onChangeText={setEmail}
                     keyboardType="email-address"
@@ -119,145 +113,247 @@ export const LoginScreen = ({ onLogin }: LoginScreenProps) => {
                 </View>
               </View>
 
-              {/* Campo Senha */}
-              <View className="mb-6">
-                <Text className="text-slate-300 text-sm font-medium mb-2">
-                  Palavra-passe
-                </Text>
-                <View className="bg-slate-700 rounded-xl flex-row items-center px-4 py-3 border border-slate-600">
-                  <Ionicons name="lock-closed" size={20} color="#94a3b8" />
+              {/* Password */}
+              <View style={[styles.fieldWrap, { marginBottom: 18 }]}>
+                <View style={styles.fieldRow}>
+                  <Ionicons name="lock-closed" size={18} color={MUTED} style={{ marginRight: 10 }} />
                   <TextInput
-                    className="flex-1 text-white ml-3 text-base"
-                    placeholder="Digite a sua palavra-passe"
-                    placeholderTextColor="#64748b"
+                    style={styles.input}
+                    placeholder="Palavra-passe"
+                    placeholderTextColor={MUTED}
                     value={password}
                     onChangeText={setPassword}
                     secureTextEntry={!showPassword}
                     autoComplete="password"
                   />
-                  <TouchableOpacity
-                    onPress={() => setShowPassword(!showPassword)}
-                    className="ml-2"
-                  >
-                    <Ionicons 
-                      name={showPassword ? "eye-off" : "eye"} 
-                      size={20} 
-                      color="#94a3b8" 
-                    />
+                  <TouchableOpacity onPress={() => setShowPassword(!showPassword)} style={{ padding: 4 }}>
+                    <Ionicons name={showPassword ? 'eye-off' : 'eye'} size={18} color={MUTED} />
                   </TouchableOpacity>
                 </View>
               </View>
 
-              {/* Botão Login */}
               <TouchableOpacity
-                className={`rounded-2xl py-5 px-6 items-center mb-4 shadow-2xl ${
-                  isLoading 
-                    ? 'bg-slate-600' 
-                    : 'bg-gradient-to-r from-cyan-500 via-cyan-600 to-teal-600'
-                }`}
+                style={[styles.btn, isLoading && styles.btnDisabled]}
                 onPress={handleLogin}
                 disabled={isLoading}
-                activeOpacity={0.8}
-                style={{
-                  backgroundColor: isLoading ? '#475569' : '#00babc',
-                  shadowColor: '#00babc',
-                  shadowOffset: { width: 0, height: 4 },
-                  shadowOpacity: 0.3,
-                  shadowRadius: 8,
-                  elevation: 8,
-                }}
+                activeOpacity={0.85}
               >
                 {isLoading ? (
-                  <View className="flex-row items-center">
-                    <View className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-3" />
-                    <Text className="text-white font-bold text-xl">A entrar...</Text>
+                  <View style={styles.btnInner}>
+                    <View style={styles.spinner} />
+                    <Text style={styles.btnText}>A entrar...</Text>
                   </View>
                 ) : (
-                  <View className="flex-row items-center">
-                    <Ionicons name="log-in" size={24} color="white" />
-                    <Text className="text-white font-bold text-xl ml-2">Entrar</Text>
+                  <View style={styles.btnInner}>
+                    <FontAwesome5 name="id-card" size={16} color="#fff" />
+                    <Text style={styles.btnText}>Entrar como Motorista</Text>
                   </View>
                 )}
               </TouchableOpacity>
 
-              <TouchableOpacity
-                className={`rounded-2xl py-5 px-6 items-center mb-4 shadow-2xl bg-gradient-to-r from-cyan-500 via-cyan-600 to-teal-600
-                `}
-                onPress={() => setShowIntraLogin(true)}
-                disabled={isLoading}
-                activeOpacity={0.8}
-                style={{
-                  backgroundColor: isLoading ? '#475569' : '#00babc',
-                  shadowColor: '#00babc',
-                  shadowOffset: { width: 0, height: 4 },
-                  shadowOpacity: 0.3,
-                  shadowRadius: 8,
-                  elevation: 8,
-                }}
-              >
-                  <View className="flex-row items-center">
-                    <Image source={logoBlack} resizeMode='contain' className='w-14 h-14' />
-                    <Text className="text-black font-bold text-xl ml-2">Entrar com o Intra</Text>
-                  </View>
+              <TouchableOpacity style={{ alignSelf: 'center', marginTop: 10 }}>
+                <Text style={styles.forgotText}>Esqueceu a palavra-passe?</Text>
               </TouchableOpacity>
-
-              {/* Links auxiliares */}
-              <View className="items-center">
-                <TouchableOpacity className="mb-2">
-                  <Text className="text-slate-400 text-sm font-medium" style={{ color: '#00babc' }}>
-                    Esqueceu a palavra-passe?
-                  </Text>
-                </TouchableOpacity>
-                
-                <View className="flex-row items-center">
-                  <View className="flex-1 h-px bg-slate-600" />
-                  <Text className="text-slate-400 text-xs mx-4">OU</Text>
-                  <View className="flex-1 h-px bg-slate-600" />
-                </View>
-
-                <TouchableOpacity className="mt-3 flex-row items-center">
-                  <MaterialIcons name="help-outline" size={16} color="#00babc" />
-                  <Text className="text-slate-400 text-sm font-medium ml-2" style={{ color: '#00babc' }}>
-                    Precisa de ajuda? Contacte o suporte
-                  </Text>
-                </TouchableOpacity>
-              </View>
             </View>
 
-            {/* Informações adicionais */}
-            <View className="mt-8 px-4 pb-6">
-              <View className="bg-slate-800/50 rounded-2xl p-4 border border-slate-700/50">
-                <View className="flex-row items-start mb-3">
-                  <Ionicons name="information-circle" size={20} color="#00babc" />
-                  <View className="flex-1 ml-3">
-                    <Text className="font-bold text-sm mb-1" style={{ color: '#00babc' }}>
-                      Primeira vez na aplicação?
-                    </Text>
-                    <Text className="text-slate-300 text-xs leading-relaxed">
-                      Use as suas credenciais da intranet da 42 Luanda para aceder ao sistema de transporte.
-                    </Text>
-                  </View>
+            {/* ── OR divider ────────────────────────────────── */}
+            <View style={styles.orRow}>
+              <View style={styles.orLine} />
+              <Text style={styles.orText}>OU</Text>
+              <View style={styles.orLine} />
+            </View>
+
+            {/* ══════════════════════════════════════════════════
+                CARD 2 — Cadete / Intra 42
+            ══════════════════════════════════════════════════ */}
+            <View style={[styles.card, styles.cardAccent]}>
+              <View style={styles.roleRow}>
+                <View style={[styles.roleIconWrap, { backgroundColor: 'rgba(0,186,188,0.18)' }]}>
+                  <FontAwesome5 name="user-graduate" size={16} color={ACCENT} />
                 </View>
-                
-                <View className="flex-row items-start">
-                  <MaterialIcons name="security" size={20} color="#10b981" />
-                  <View className="flex-1 ml-3">
-                    <Text className="text-emerald-400 font-bold text-sm mb-1">
-                      Segurança Garantida
-                    </Text>
-                    <Text className="text-slate-300 text-xs leading-relaxed">
-                      Os seus dados estão protegidos com criptografia de ponta a ponta.
-                    </Text>
-                  </View>
+                <View>
+                  <Text style={styles.roleTitle}>Cadete 42</Text>
+                  <Text style={styles.roleSub}>Autenticação via Intra da 42</Text>
                 </View>
               </View>
+
+              <View style={styles.intraLogoRow}>
+                <Image source={logoBlack} style={{ width: 48, height: 48 }} resizeMode="contain" />
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.intraTitle}>Login com Intra 42</Text>
+                  <Text style={styles.intraSub}>
+                    Usa as tuas credenciais da plataforma 42 para entrar de forma segura.
+                  </Text>
+                </View>
+              </View>
+
+              <TouchableOpacity
+                style={styles.btnOutline}
+                onPress={() => setShowIntraLogin(true)}
+                activeOpacity={0.85}
+              >
+                <View style={styles.btnInner}>
+                  <Ionicons name="shield-checkmark" size={18} color={ACCENT} />
+                  <Text style={styles.btnOutlineText}>Entrar com Intra 42</Text>
+                </View>
+              </TouchableOpacity>
+            </View>
+
+            {/* ── Footer info ───────────────────────────────── */}
+            <View style={styles.footer}>
+              <MaterialIcons name="security" size={14} color="#10b981" />
+              <Text style={styles.footerText}>
+                Ligação segura · dados protegidos na 42 Luanda
+              </Text>
             </View>
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
-      
-      {/* Custom Alert Component */}
+
       {AlertComponent}
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  root: { flex: 1, backgroundColor: BG },
+
+  brand: {
+    alignItems: 'center',
+    paddingTop: 72,
+    paddingBottom: 28,
+    paddingHorizontal: 24,
+  },
+  logoBox: {
+    backgroundColor: ACCENT,
+    borderRadius: 24,
+    paddingHorizontal: 20,
+    paddingVertical: 14,
+    marginBottom: 16,
+    shadowColor: ACCENT,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.35,
+    shadowRadius: 16,
+    elevation: 12,
+  },
+  brandSub: { color: MUTED, fontSize: 14, textAlign: 'center' },
+
+  body: { paddingHorizontal: 20, paddingBottom: 32 },
+
+  dividerRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 16 },
+  dividerLine: { flex: 1, height: 1, backgroundColor: BORDER },
+  dividerLabel: { color: MUTED, fontSize: 12, marginHorizontal: 12 },
+
+  card: {
+    backgroundColor: CARD,
+    borderRadius: 20,
+    padding: 20,
+    borderWidth: 1,
+    borderColor: BORDER,
+    marginBottom: 4,
+  },
+  cardAccent: {
+    borderColor: 'rgba(0,186,188,0.35)',
+    backgroundColor: 'rgba(0,186,188,0.04)',
+  },
+
+  roleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    marginBottom: 18,
+    paddingBottom: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: BORDER,
+  },
+  roleIconWrap: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    backgroundColor: 'rgba(0,186,188,0.1)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(0,186,188,0.25)',
+  },
+  roleTitle: { color: '#fff', fontSize: 15, fontWeight: '700' },
+  roleSub: { color: MUTED, fontSize: 12, marginTop: 1 },
+
+  fieldWrap: {
+    backgroundColor: BG,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: BORDER,
+    marginBottom: 12,
+  },
+  fieldRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 14,
+    paddingVertical: 13,
+  },
+  input: { flex: 1, color: '#fff', fontSize: 14 },
+
+  btn: {
+    backgroundColor: ACCENT,
+    borderRadius: 14,
+    paddingVertical: 15,
+    alignItems: 'center',
+    shadowColor: ACCENT,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 6,
+  },
+  btnDisabled: { backgroundColor: '#475569', shadowOpacity: 0 },
+  btnInner: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  btnText: { color: '#fff', fontSize: 15, fontWeight: '700' },
+
+  btnOutline: {
+    borderRadius: 14,
+    paddingVertical: 15,
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: ACCENT,
+  },
+  btnOutlineText: { color: ACCENT, fontSize: 15, fontWeight: '700' },
+
+  forgotText: { color: ACCENT, fontSize: 13 },
+
+  orRow: { flexDirection: 'row', alignItems: 'center', marginVertical: 14 },
+  orLine: { flex: 1, height: 1, backgroundColor: BORDER },
+  orText: { color: MUTED, fontSize: 11, fontWeight: '600', marginHorizontal: 12 },
+
+  intraLogoRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 14,
+    backgroundColor: BG,
+    borderRadius: 14,
+    padding: 14,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: BORDER,
+  },
+  intraTitle: { color: '#fff', fontSize: 14, fontWeight: '700', marginBottom: 3 },
+  intraSub: { color: MUTED, fontSize: 12, lineHeight: 16 },
+
+  spinner: {
+    width: 18,
+    height: 18,
+    borderRadius: 9,
+    borderWidth: 2,
+    borderColor: '#fff',
+    borderTopColor: 'transparent',
+  },
+
+  footer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    marginTop: 20,
+  },
+  footerText: { color: MUTED, fontSize: 12 },
+});
+

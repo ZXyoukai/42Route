@@ -12,6 +12,7 @@ export const useMiniBusStops = () => {
       setLoading(true);
       setError(null);
       const data = await miniBusStopService.getAll();
+      console.log('Paragens carregadas:', data);
       setStops(data);
     } catch (err: any) {
       setError(err.message || 'Erro ao carregar paragens');

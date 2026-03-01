@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
-import { Image, Text, View, ScrollView, TouchableOpacity, Switch } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { Image, Text, View, ScrollView, TouchableOpacity, Switch, StyleSheet } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
-import { Ionicons, MaterialIcons } from '@expo/vector-icons';
+import { Ionicons, MaterialIcons, FontAwesome5 } from '@expo/vector-icons';
 import { useCustomAlert } from './CustomAlert';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Cadete } from 'types/api';
@@ -11,20 +11,53 @@ interface StudentProfileProps {
   onLogout?: () => void;
 }
 
-export const StudentProfileAPI = async ({ onBack, onLogout }: StudentProfileProps) => {
+export const StudentProfileAPI = ({ onBack, onLogout }: StudentProfileProps) => {
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [locationEnabled, setLocationEnabled] = useState(true);
   const [autoAlerts, setAutoAlerts] = useState(false);
+  const [userData, setUserData] = useState<Cadete | null>(null);
   const { AlertComponent, showSuccess, showError, showWarning, showInfo } = useCustomAlert();
-  const userData : Cadete =  await AsyncStorage.getItem('user').then(data => data ? JSON.parse(data) : null);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadUserData = async () => {
+      const data = await AsyncStorage.getItem('user');
+      const parsedData = data ? JSON.parse(data) as Cadete : null;
+      console.log('Loaded user data:', parsedData);
+
+      if (isMounted) {
+        setUserData(parsedData);
+      }
+    };
+
+    loadUserData();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const name = (userData ? (userData.full_name || userData.username) : null) ?? '42routeStudent';
+  const initials = name
+    .split(' ')
+    .slice(0, 2)
+    .map((w: string) => w[0]?.toUpperCase() ?? '')
+    .join('');
+
   const studentInfo = {
-    name: userData ? userData.username : '42routeStudentMock',
+    name,
+    initials,
     studentId: userData ? userData.id : '42LUANDA1234',
-    email:  userData ? userData.email : 'joao.silva@student.42luanda.ao',
-    course: 'Common Core - Web Development',
-    level: 'Level 9',
-    preferredRoute: 'Rota Central',
-    emergencyContact: '+244 923 456 789'
+    email: userData ? userData.email : 'joao.silva@student.42luanda.ao',
+    course: userData?.course || 'Common Core',
+    level: userData?.level ?? 0,
+    grade: userData?.grade || 'N/D',
+    city: userData?.city || 'N/D',
+    distrit: userData?.distrit || 'N/D',
+    selectedStop: userData?.stop?.stop_name || 'Sem paragem definida',
+    preferredRoute: userData?.stop?.route?.route_name || 'Rota Central',
+    isComplete: !!userData?.isDBUser,
   };
 
   const handleNotificationChange = (value: boolean) => {
@@ -107,219 +140,409 @@ export const StudentProfileAPI = async ({ onBack, onLogout }: StudentProfileProp
   };
 
   return (
-    <View className="flex-1 bg-slate-900">
+    <View style={s.root}>
       <StatusBar style="light" backgroundColor="#0f172a" />
-      
-      {/* Header */}
-      <View className="border-b-2 border-[#00babc] mt-14 pb-2 px-6">
-        <View className="flex justify-between">
-          <TouchableOpacity onPress={onBack} className="flex-row items-center">
-            <Ionicons name="arrow-back" size={24} color="white" />
-            <Text className="text-white text-lg font-medium ml-2">Voltar</Text>
-          </TouchableOpacity>
-          <Image
-            source={require('../assets/route_logo-w.png')}
-            className="h-10"
-            resizeMode="contain"
-          />
+
+      {/* ── Hero ─────────────────────────────────────────────── */}
+      <View style={s.hero}>
+        {/* Back */}
+        <TouchableOpacity onPress={onBack} style={s.backBtn} activeOpacity={0.7}>
+          <Ionicons name="arrow-back" size={20} color="#fff" />
+        </TouchableOpacity>
+
+        {/* Avatar */}
+        <View style={s.avatarWrap}>
+          {userData?.avatar?.link ? (
+            <Image source={{ uri: userData.avatar.link }} style={s.avatarImg} />
+          ) : (
+            <View style={s.avatarFallback}>
+              <Text style={s.avatarText}>{studentInfo.initials}</Text>
+            </View>
+          )}
+          {/* Status dot */}
+          <View style={[s.statusDot, studentInfo.isComplete ? s.dotGreen : s.dotAmber]} />
         </View>
-        
-        <View className="items-center">
-          <View className="w-24 h-24 bg-white rounded-full items-center justify-center mb-4 shadow-lg">
-            <Text className="text-cyan-600 text-3xl font-bold" style={{ color: '#00babc' }}>
-              {studentInfo.name}
+
+        <Text style={s.heroName}>{studentInfo.name}</Text>
+        <Text style={s.heroEmail}>{studentInfo.email}</Text>
+
+        {/* Badges row */}
+        <View style={s.badgesRow}>
+          <View style={s.badge}>
+            <FontAwesome5 name="graduation-cap" size={10} color="#00babc" />
+            <Text style={s.badgeText}>Cadete</Text>
+          </View>
+          <View style={s.badge}>
+            <MaterialIcons name="directions-bus" size={11} color="#00babc" />
+            <Text style={s.badgeText}>{studentInfo.preferredRoute}</Text>
+          </View>
+          <View style={[s.badge, studentInfo.isComplete ? s.badgeGreen : s.badgeAmber]}>
+            <Ionicons
+              name={studentInfo.isComplete ? 'checkmark-circle' : 'time-outline'}
+              size={11}
+              color={studentInfo.isComplete ? '#22c55e' : '#f59e0b'}
+            />
+            <Text style={[s.badgeText, studentInfo.isComplete ? { color: '#22c55e' } : { color: '#f59e0b' }]}>
+              {studentInfo.isComplete ? 'Perfil completo' : 'Cadastro pendente'}
             </Text>
           </View>
-          <Text className="text-white text-2xl font-bold">{studentInfo.name}</Text>
-          <Text className="text-cyan-100 text-sm">{studentInfo.studentId}</Text>
         </View>
       </View>
 
-      <ScrollView className="flex-1 px-6 py-8">
-        {/* Informações Pessoais */}
-        <View className="bg-slate-800 rounded-2xl p-6 mb-6 shadow-lg space-y-4  border border-slate-700">
-          <Text className="text-white text-xl font-bold mb-4">Informações Pessoais</Text>
-          
-          <View className="gap-y-2">
-            <View className="p-3 bg-slate-700 rounded-xl">
-              <Text className="text-slate-400 text-sm font-medium">Email</Text>
-              <Text className="text-white font-bold">{studentInfo.email}</Text>
-            </View>
-            
-            <View className="p-3 bg-slate-700 rounded-xl">
-              <Text className="text-slate-400 text-sm font-medium">Curso</Text>
-              <Text className="text-white font-bold">{studentInfo.course}</Text>
-            </View>
-            
-            <View className="p-3 bg-slate-700 rounded-xl">
-              <Text className="text-slate-400 text-sm font-medium">Nível</Text>
-              <Text className="text-white font-bold">{studentInfo.level}</Text>
-            </View>
-            
-            <View className="p-3 bg-cyan-900/30 rounded-xl border border-cyan-600">
-              <Text className="text-slate-400 text-sm font-medium">Rota Preferida</Text>
-              <Text className="text-cyan-400 font-bold" style={{ color: '#00babc' }}>{studentInfo.preferredRoute}</Text>
-            </View>
-            
-            <View className="p-3 bg-slate-700 rounded-xl">
-              <Text className="text-slate-400 text-sm font-medium">Contacto de Emergência</Text>
-              <Text className="text-white font-bold">{studentInfo.emergencyContact}</Text>
-            </View>
-          </View>
+      <ScrollView style={s.scroll} showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 32 }}>
+
+        {/* ── Stats grid ───────────────────────────────────────── */}
+        <View style={s.statsGrid}>
+          <StatCard value={`Lv. ${studentInfo.level}`} label="Nível" icon={<FontAwesome5 name="layer-group" size={16} color="#00babc" />} />
+          <StatCard value={studentInfo.grade} label="Nota" icon={<MaterialIcons name="grade" size={18} color="#00babc" />} />
+          <StatCard value="42" label="Viagens" icon={<MaterialIcons name="directions-bus" size={18} color="#00babc" />} />
+          <StatCard value="98%" label="Pontualidade" icon={<Ionicons name="checkmark-circle" size={17} color="#00babc" />} />
         </View>
 
-        {/* Configurações de Notificação */}
-        <View className="bg-slate-800 rounded-2xl p-6 mb-6 shadow-lg border border-slate-700">
-          <Text className="text-white text-xl font-bold mb-4">Notificações</Text>
-          
-          <View className="flex-row justify-between items-center mb-4 p-3 bg-slate-700 rounded-xl">
-            <View className="flex-1">
-              <View className="flex-row items-center mb-1">
-                <Ionicons name="notifications" size={16} color="#00babc" />
-                <Text className="text-white font-medium ml-2">Notificações Push</Text>
-              </View>
-              <Text className="text-slate-400 text-sm">Receber alertas sobre os autocarros</Text>
-            </View>
-            <Switch
-              value={notificationsEnabled}
-              onValueChange={handleNotificationChange}
-              trackColor={{ false: '#374151', true: '#00babc' }}
-              thumbColor={notificationsEnabled ? '#ffffff' : '#64748b'}
-            />
-          </View>
-          
-          <View className="flex-row justify-between items-center mb-4 p-3 bg-slate-700 rounded-xl">
-            <View className="flex-1">
-              <View className="flex-row items-center mb-1">
-                <Ionicons name="location" size={16} color="#00babc" />
-                <Text className="text-white font-medium ml-2">Localização</Text>
-              </View>
-              <Text className="text-slate-400 text-sm">Permitir acesso à localização</Text>
-            </View>
-            <Switch
-              value={locationEnabled}
-              onValueChange={handleLocationChange}
-              trackColor={{ false: '#374151', true: '#00babc' }}
-              thumbColor={locationEnabled ? '#ffffff' : '#64748b'}
-            />
-          </View>
-          
-          <View className="flex-row justify-between items-center p-3 bg-slate-700 rounded-xl">
-            <View className="flex-1">
-              <View className="flex-row items-center mb-1">
-                <MaterialIcons name="alarm" size={16} color="#00babc" />
-                <Text className="text-white font-medium ml-2">Alertas Automáticos</Text>
-              </View>
-              <Text className="text-slate-400 text-sm">Notificação 10 min antes da chegada</Text>
-            </View>
-            <Switch
-              value={autoAlerts}
-              onValueChange={setAutoAlerts}
-              trackColor={{ false: '#374151', true: '#00babc' }}
-              thumbColor={autoAlerts ? '#ffffff' : '#64748b'}
-            />
-          </View>
-        </View>
+        {/* ── Informações ─────────────────────────────────────── */}
+        <Card title="Informações" icon={<Ionicons name="person-circle-outline" size={18} color="#00babc" />}>
+          <InfoRow icon={<MaterialIcons name="school" size={16} color="#00babc" />} label="Curso" value={studentInfo.course} />
+          <InfoRow icon={<Ionicons name="location-outline" size={16} color="#00babc" />} label="Cidade / Distrito" value={`${studentInfo.city} / ${studentInfo.distrit}`} />
+          <InfoRow icon={<MaterialIcons name="place" size={16} color="#00babc" />} label="Paragem" value={studentInfo.selectedStop} accent />
+          <InfoRow icon={<MaterialIcons name="route" size={16} color="#00babc" />} label="Rota" value={studentInfo.preferredRoute} accent />
+        </Card>
 
-        {/* Estatísticas de Uso */}
-        <View className="bg-slate-800 rounded-2xl p-6 mb-6 shadow-lg border border-slate-700">
-          <Text className="text-white text-xl font-bold mb-4">Estatísticas</Text>
-          
-          <View className="flex-row justify-between mb-4">
-            <View className="items-center flex-1">
-              <View className="w-16 h-16 bg-cyan-900/50 rounded-2xl items-center justify-center mb-2 border border-cyan-700" style={{ backgroundColor: 'rgba(0, 186, 188, 0.1)', borderColor: '#00babc' }}>
-                <Text className="text-2xl font-bold text-cyan-400" style={{ color: '#00babc' }}>42</Text>
-              </View>
-              <Text className="text-slate-400 text-sm text-center font-medium">Viagens este mês</Text>
-            </View>
-            <View className="items-center flex-1">
-              <View className="w-16 h-16 bg-cyan-900/50 rounded-2xl items-center justify-center mb-2 border border-cyan-700" style={{ backgroundColor: 'rgba(0, 186, 188, 0.1)', borderColor: '#00babc' }}>
-                <Text className="text-2xl font-bold text-cyan-400" style={{ color: '#00babc' }}>98%</Text>
-              </View>
-              <Text className="text-slate-400 text-sm text-center font-medium">Pontualidade</Text>
-            </View>
-            <View className="items-center flex-1">
-              <View className="w-16 h-16 bg-cyan-900/50 rounded-2xl items-center justify-center mb-2 border border-cyan-700" style={{ backgroundColor: 'rgba(0, 186, 188, 0.1)', borderColor: '#00babc' }}>
-                <Text className="text-2xl font-bold text-cyan-400" style={{ color: '#00babc' }}>15.2</Text>
-              </View>
-              <Text className="text-slate-400 text-sm text-center font-medium">Tempo médio (min)</Text>
-            </View>
-          </View>
-          
-          <View className="border-t border-slate-700 pt-4">
-            <Text className="text-slate-400 text-sm text-center">
-              Você usa o transporte 42Routes há <Text className="font-bold text-white">6 meses</Text>
-            </Text>
-          </View>
-        </View>
+        {/* ── Notificações ─────────────────────────────────────── */}
+        <Card title="Notificações" icon={<Ionicons name="notifications-outline" size={18} color="#00babc" />}>
+          <ToggleRow
+            icon={<Ionicons name="notifications" size={15} color="#00babc" />}
+            label="Notificações Push"
+            sub="Alertas sobre os teus autocarros"
+            value={notificationsEnabled}
+            onChange={handleNotificationChange}
+          />
+          <ToggleRow
+            icon={<Ionicons name="location" size={15} color="#00babc" />}
+            label="Localização"
+            sub="Funcionalidades baseadas em GPS"
+            value={locationEnabled}
+            onChange={handleLocationChange}
+          />
+          <ToggleRow
+            icon={<MaterialIcons name="alarm" size={15} color="#00babc" />}
+            label="Alertas Automáticos"
+            sub="Notificação 10 min antes da chegada"
+            value={autoAlerts}
+            onChange={setAutoAlerts}
+          />
+        </Card>
 
-        {/* Ações */}
-        <View className="gap-y-2 mb-6">
-          <TouchableOpacity 
-            className="bg-slate-800 rounded-xl p-4 flex-row items-center justify-between shadow-lg border border-slate-700"
-            onPress={handleRouteChange}
-          >
-            <View className="flex-row items-center">
-              <MaterialIcons name="route" size={20} color="#00babc" />
-              <Text className="text-white font-medium ml-3">Alterar Rota Preferida</Text>
-            </View>
-            <Ionicons name="chevron-forward" size={16} color="#64748b" />
-          </TouchableOpacity>
-          
-          <TouchableOpacity 
-            className="bg-slate-800 rounded-xl p-4 flex-row items-center justify-between shadow-lg border border-slate-700"
-            onPress={handleScheduleCustom}
-          >
-            <View className="flex-row items-center">
-              <MaterialIcons name="schedule" size={20} color="#00babc" />
-              <Text className="text-white font-medium ml-3">Horários Personalizados</Text>
-            </View>
-            <Ionicons name="chevron-forward" size={16} color="#64748b" />
-          </TouchableOpacity>
-          
-          <TouchableOpacity 
-            className="bg-slate-800 rounded-xl p-4 flex-row items-center justify-between shadow-lg border border-slate-700"
-            onPress={handleAchievements}
-          >
-            <View className="flex-row items-center">
-              <MaterialIcons name="emoji-events" size={20} color="#00babc" />
-              <Text className="text-white font-medium ml-3">Conquistas e Badges</Text>
-            </View>
-            <Ionicons name="chevron-forward" size={16} color="#64748b" />
-          </TouchableOpacity>
-          
-          <TouchableOpacity 
-            className="bg-slate-800 rounded-xl p-4 flex-row items-center justify-between shadow-lg border border-slate-700"
-            onPress={handleSupport}
-          >
-            <View className="flex-row items-center">
-              <MaterialIcons name="help-outline" size={20} color="#00babc" />
-              <Text className="text-white font-medium ml-3">Ajuda e Suporte</Text>
-            </View>
-            <Ionicons name="chevron-forward" size={16} color="#64748b" />
-          </TouchableOpacity>
-          
-          <TouchableOpacity 
-            className="bg-red-900/30 rounded-xl p-4 flex-row items-center justify-between border border-red-700"
-            onPress={handleLogout}
-          >
-            <View className="flex-row items-center">
-              <MaterialIcons name="logout" size={20} color="#ef4444" />
-              <Text className="text-red-400 font-medium ml-3">Terminar Sessão</Text>
-            </View>
-            <Ionicons name="chevron-forward" size={16} color="#ef4444" />
-          </TouchableOpacity>
-        </View>
+        {/* ── Ações ────────────────────────────────────────────── */}
+        <Card title="Mais opções" icon={<MaterialIcons name="tune" size={18} color="#00babc" />}>
+          <ActionRow icon={<MaterialIcons name="route" size={17} color="#00babc" />} label="Alterar Rota Preferida" onPress={handleRouteChange} />
+          <ActionRow icon={<MaterialIcons name="schedule" size={17} color="#00babc" />} label="Horários Personalizados" onPress={handleScheduleCustom} />
+          <ActionRow icon={<MaterialIcons name="emoji-events" size={17} color="#00babc" />} label="Conquistas e Badges" onPress={handleAchievements} />
+          <ActionRow icon={<MaterialIcons name="help-outline" size={17} color="#00babc" />} label="Ajuda e Suporte" onPress={handleSupport} />
+        </Card>
 
-        {/* Versão da App */}
-        <View className="items-center py-4">
-          <Text className="text-slate-500 text-sm">42Routes v1.0.0</Text>
-          <Text className="text-slate-600 text-xs">© 2024 42 Luanda</Text>
-        </View>
+        {/* ── Logout ────────────────────────────────────────────── */}
+        <TouchableOpacity style={s.logoutBtn} onPress={handleLogout} activeOpacity={0.8}>
+          <MaterialIcons name="logout" size={18} color="#ef4444" />
+          <Text style={s.logoutText}>Terminar Sessão</Text>
+        </TouchableOpacity>
+
+        <Text style={s.version}>42Routes v1.0.0 · © 2024 42 Luanda</Text>
       </ScrollView>
-      
-      {/* Custom Alert Component */}
+
       {AlertComponent}
     </View>
   );
 };
+
+// ── Sub-components ──────────────────────────────────────────────────────────
+
+const StatCard = ({
+  value,
+  label,
+  icon,
+}: {
+  value: string;
+  label: string;
+  icon: React.ReactNode;
+}) => (
+  <View style={s.statCard}>
+    <View style={s.statIconWrap}>{icon}</View>
+    <Text style={s.statValue}>{value}</Text>
+    <Text style={s.statLabel}>{label}</Text>
+  </View>
+);
+
+const Card = ({
+  title,
+  icon,
+  children,
+}: {
+  title: string;
+  icon: React.ReactNode;
+  children: React.ReactNode;
+}) => (
+  <View style={s.card}>
+    <View style={s.cardHeader}>
+      <View style={s.cardIconWrap}>{icon}</View>
+      <Text style={s.cardTitle}>{title}</Text>
+    </View>
+    {children}
+  </View>
+);
+
+const InfoRow = ({
+  icon,
+  label,
+  value,
+  accent,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: string;
+  accent?: boolean;
+}) => (
+  <View style={s.infoRow}>
+    <View style={[s.infoIconWrap, accent && s.infoIconAccent]}>{icon}</View>
+    <View style={{ flex: 1 }}>
+      <Text style={s.infoLabel}>{label}</Text>
+      <Text style={[s.infoValue, accent && { color: '#00babc' }]}>{value}</Text>
+    </View>
+  </View>
+);
+
+const ToggleRow = ({
+  icon,
+  label,
+  sub,
+  value,
+  onChange,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  sub: string;
+  value: boolean;
+  onChange: (v: boolean) => void;
+}) => (
+  <View style={s.toggleRow}>
+    <View style={s.infoIconWrap}>{icon}</View>
+    <View style={{ flex: 1 }}>
+      <Text style={s.infoValue}>{label}</Text>
+      <Text style={s.infoLabel}>{sub}</Text>
+    </View>
+    <Switch
+      value={value}
+      onValueChange={onChange}
+      trackColor={{ false: '#334155', true: '#00babc' }}
+      thumbColor={value ? '#ffffff' : '#64748b'}
+    />
+  </View>
+);
+
+const ActionRow = ({
+  icon,
+  label,
+  onPress,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  onPress: () => void;
+}) => (
+  <TouchableOpacity style={s.actionRow} onPress={onPress} activeOpacity={0.7}>
+    <View style={s.infoIconWrap}>{icon}</View>
+    <Text style={[s.infoValue, { flex: 1 }]}>{label}</Text>
+    <Ionicons name="chevron-forward" size={16} color="#475569" />
+  </TouchableOpacity>
+);
+
+// ── Styles ──────────────────────────────────────────────────────────────────
+const ACCENT = '#00babc';
+const BG = '#0f172a';
+const CARD = '#1e293b';
+const BORDER = '#334155';
+const MUTED = '#64748b';
+
+const s = StyleSheet.create({
+  root: { flex: 1, backgroundColor: BG },
+
+  // Hero
+  hero: {
+    backgroundColor: CARD,
+    alignItems: 'center',
+    paddingTop: 60,
+    paddingBottom: 24,
+    paddingHorizontal: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: BORDER,
+  },
+  backBtn: {
+    position: 'absolute',
+    top: 56,
+    left: 20,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(15,23,42,0.9)',
+    borderWidth: 1,
+    borderColor: '#334155',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  avatarWrap: { position: 'relative', marginBottom: 14 },
+  avatarImg: { width: 88, height: 88, borderRadius: 44, borderWidth: 3, borderColor: ACCENT },
+  avatarFallback: {
+    width: 88,
+    height: 88,
+    borderRadius: 44,
+    backgroundColor: 'rgba(0,186,188,0.12)',
+    borderWidth: 3,
+    borderColor: ACCENT,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  avatarText: { color: ACCENT, fontSize: 30, fontWeight: '800' },
+  statusDot: {
+    position: 'absolute',
+    bottom: 4,
+    right: 4,
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    borderWidth: 2,
+    borderColor: CARD,
+  },
+  dotGreen: { backgroundColor: '#22c55e' },
+  dotAmber: { backgroundColor: '#f59e0b' },
+  heroName: { color: '#fff', fontSize: 22, fontWeight: '800', textAlign: 'center' },
+  heroEmail: { color: MUTED, fontSize: 13, marginTop: 3, marginBottom: 12 },
+  badgesRow: { flexDirection: 'row', gap: 8, flexWrap: 'wrap', justifyContent: 'center' },
+  badge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    backgroundColor: 'rgba(0,186,188,0.1)',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: 'rgba(0,186,188,0.25)',
+  },
+  badgeGreen: { backgroundColor: 'rgba(34,197,94,0.1)', borderColor: 'rgba(34,197,94,0.3)' },
+  badgeAmber: { backgroundColor: 'rgba(245,158,11,0.1)', borderColor: 'rgba(245,158,11,0.3)' },
+  badgeText: { color: ACCENT, fontSize: 11, fontWeight: '600' },
+
+  scroll: { flex: 1, paddingHorizontal: 16, paddingTop: 14 },
+
+  // Stats
+  statsGrid: {
+    flexDirection: 'row',
+    gap: 10,
+    marginBottom: 14,
+  },
+  statCard: {
+    flex: 1,
+    backgroundColor: CARD,
+    borderRadius: 16,
+    padding: 12,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: BORDER,
+    gap: 4,
+  },
+  statIconWrap: {
+    width: 34,
+    height: 34,
+    borderRadius: 10,
+    backgroundColor: 'rgba(0,186,188,0.1)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 2,
+  },
+  statValue: { color: '#fff', fontSize: 14, fontWeight: '800' },
+  statLabel: { color: MUTED, fontSize: 10, textAlign: 'center' },
+
+  // Cards
+  card: {
+    backgroundColor: CARD,
+    borderRadius: 20,
+    padding: 16,
+    marginBottom: 14,
+    borderWidth: 1,
+    borderColor: BORDER,
+  },
+  cardHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    marginBottom: 14,
+    paddingBottom: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: BORDER,
+  },
+  cardIconWrap: {
+    width: 32,
+    height: 32,
+    borderRadius: 9,
+    backgroundColor: 'rgba(0,186,188,0.1)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  cardTitle: { color: '#fff', fontSize: 15, fontWeight: '700' },
+
+  // Info rows
+  infoRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    paddingVertical: 9,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(51,65,85,0.6)',
+  },
+  infoIconWrap: {
+    width: 30,
+    height: 30,
+    borderRadius: 8,
+    backgroundColor: 'rgba(0,186,188,0.08)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  infoIconAccent: { backgroundColor: 'rgba(0,186,188,0.15)' },
+  infoLabel: { color: MUTED, fontSize: 11, marginBottom: 1 },
+  infoValue: { color: '#e2e8f0', fontSize: 14, fontWeight: '600' },
+
+  // Toggle
+  toggleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    paddingVertical: 9,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(51,65,85,0.6)',
+  },
+
+  // Action
+  actionRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(51,65,85,0.6)',
+  },
+
+  // Logout
+  logoutBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 10,
+    backgroundColor: 'rgba(239,68,68,0.1)',
+    borderRadius: 16,
+    paddingVertical: 15,
+    marginBottom: 14,
+    borderWidth: 1,
+    borderColor: 'rgba(239,68,68,0.3)',
+  },
+  logoutText: { color: '#ef4444', fontSize: 15, fontWeight: '700' },
+
+  version: { color: '#475569', fontSize: 11, textAlign: 'center', marginBottom: 8 },
+});
