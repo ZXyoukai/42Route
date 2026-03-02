@@ -16,6 +16,7 @@ import { useCustomAlert } from './CustomAlert';
 import logoWhite from '../assets/route_logo-w.png';
 import logoBlack from '../assets/route_logo-d.png';
 import LoginIntra from './LoginIntra';
+import { authService } from '../services/authService';
 
 interface LoginScreenProps {
   onLogin: (userData: { name: string; email: string }) => void;
@@ -28,7 +29,7 @@ const BORDER = '#334155';
 const MUTED = '#64748b';
 
 export const LoginScreen = ({ onLogin }: LoginScreenProps) => {
-  const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -37,17 +38,25 @@ export const LoginScreen = ({ onLogin }: LoginScreenProps) => {
   const { AlertComponent, showError, showSuccess } = useCustomAlert();
 
   const handleLogin = async () => {
-    if (!email || !password) {
-      showError('Campos obrigatórios', 'Por favor preencha o email e a palavra-passe.');
+    if (!username || !password) {
+      showError('Campos obrigatórios', 'Por favor preencha o utilizador e a palavra-passe.');
       return;
     }
     setIsLoading(true);
-    setTimeout(() => {
-      setIsLoading(false);
-      showSuccess('Login Realizado!', 'Bem-vindo ao sistema 42Routes', () => {
-        onLogin({ name: 'Motorista', email });
+    try {
+      const driver = await authService.driverLogin({ username, password });
+      showSuccess('Login Realizado!', `Bem-vindo, ${driver.full_name ?? driver.username ?? 'Motorista'}!`, () => {
+        onLogin({ name: driver.full_name ?? driver.username ?? 'Motorista', email: driver.email ?? username });
       });
-    }, 1800);
+    } catch (err: any) {
+      const msg =
+        err?.response?.data?.message ??
+        err?.response?.data?.error ??
+        'Credenciais inválidas. Tente novamente.';
+      showError('Erro ao entrar', msg);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   if (showIntraLogin) {
@@ -99,16 +108,15 @@ export const LoginScreen = ({ onLogin }: LoginScreenProps) => {
               {/* Email */}
               <View style={styles.fieldWrap}>
                 <View style={styles.fieldRow}>
-                  <MaterialIcons name="email" size={18} color={MUTED} style={{ marginRight: 10 }} />
+                  <MaterialIcons name="person" size={18} color={MUTED} style={{ marginRight: 10 }} />
                   <TextInput
                     style={styles.input}
-                    placeholder="Email institucional"
+                    placeholder="Nome de utilizador"
                     placeholderTextColor={MUTED}
-                    value={email}
-                    onChangeText={setEmail}
-                    keyboardType="email-address"
+                    value={username}
+                    onChangeText={setUsername}
                     autoCapitalize="none"
-                    autoComplete="email"
+                    autoComplete="username"
                   />
                 </View>
               </View>

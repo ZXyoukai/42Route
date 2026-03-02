@@ -1,60 +1,40 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, ActivityIndicator, ScrollView, TouchableOpacity } from 'react-native';
+import {
+  View,
+  Text,
+  ScrollView,
+  TouchableOpacity,
+  StyleSheet,
+  Alert,
+} from 'react-native';
 import { BusLoadingScreen } from './BusLoadingScreen';
 import { Ionicons, MaterialIcons, FontAwesome5 } from '@expo/vector-icons';
 import { StatusBar } from 'expo-status-bar';
-import * as Location from 'expo-location';
 import { Driver } from '../types/api';
 import { driverService } from '../services/driverService';
+
+const ACCENT = '#00babc';
+const BG = '#0f172a';
+const CARD = '#1e293b';
+const BORDER = '#334155';
+const MUTED = '#64748b';
+const DANGER = '#ef4444';
+const SUCCESS = '#10b981';
 
 interface DriverProfileAPIProps {
   driverId: number;
   onBack?: () => void;
+  onLogout?: () => void;
 }
 
-export const DriverProfileAPI = ({ driverId, onBack }: DriverProfileAPIProps) => {
+export const DriverProfileAPI = ({ driverId, onBack, onLogout }: DriverProfileAPIProps) => {
   const [driver, setDriver] = useState<Driver | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [isTracking, setIsTracking] = useState(false);
 
   useEffect(() => {
     loadDriverData();
   }, [driverId]);
-
-  useEffect(() => {
-    let locationSubscription: Location.LocationSubscription | null = null;
-
-    const startLocationTracking = async () => {
-      if (!isTracking) return;
-
-      const { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== 'granted') {
-        console.error('Permission to access location was denied');
-        setIsTracking(false);
-        return;
-      }
-
-      locationSubscription = await Location.watchPositionAsync(
-        {
-          accuracy: Location.Accuracy.High,
-          timeInterval: 10000, // Update every 10 seconds
-          distanceInterval: 50, // Update every 50 meters
-        },
-        (location) => {
-          updateDriverLocation(location.coords.latitude, location.coords.longitude);
-        }
-      );
-    };
-
-    startLocationTracking();
-
-    return () => {
-      if (locationSubscription) {
-        locationSubscription.remove();
-      }
-    };
-  }, [isTracking]);
 
   const loadDriverData = async () => {
     try {
@@ -63,153 +43,288 @@ export const DriverProfileAPI = ({ driverId, onBack }: DriverProfileAPIProps) =>
       setDriver(data);
       setError(null);
     } catch (err: any) {
-      setError(err.message || 'Erro ao carregar dados do motorista');
+      setError(err.message || 'Erro ao carregar perfil do motorista');
     } finally {
       setLoading(false);
     }
   };
 
-  const updateDriverLocation = async (lat: number, long: number) => {
-    try {
-      await driverService.updateLocation(driverId, { lat, long });
-      console.log('Location updated:', lat, long);
-    } catch (err) {
-      console.error('Error updating location:', err);
-    }
+  const confirmLogout = () => {
+    Alert.alert(
+      'Terminar Sessão',
+      'Tens a certeza que queres sair da aplicação?',
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        { text: 'Sair', style: 'destructive', onPress: onLogout },
+      ]
+    );
   };
 
-  const toggleTracking = () => {
-    setIsTracking(!isTracking);
-  };
-
-  if (loading) {
-    return <BusLoadingScreen msg="Carregando perfil do motorista..." />;
-  }
+  if (loading) return <BusLoadingScreen msg="A carregar perfil do motorista..." />;
 
   if (error || !driver) {
     return (
-      <View className="flex-1 bg-slate-900 justify-center items-center px-6">
-        <Ionicons name="alert-circle" size={64} color="#ef4444" />
-        <Text className="text-white text-xl font-bold mt-4 text-center">Erro ao carregar perfil</Text>
-        <Text className="text-slate-400 mt-2 text-center">{error}</Text>
-        <TouchableOpacity 
-          onPress={loadDriverData}
-          className="bg-cyan-600 px-6 py-3 rounded-xl mt-6"
-          style={{ backgroundColor: '#00babc' }}
-        >
-          <Text className="text-white font-bold">Tentar Novamente</Text>
+      <View style={[styles.root, { justifyContent: 'center', alignItems: 'center', padding: 24 }]}>
+        <Ionicons name="alert-circle" size={64} color={DANGER} />
+        <Text style={styles.errorTitle}>Erro ao carregar perfil</Text>
+        <Text style={styles.errorMsg}>{error}</Text>
+        <TouchableOpacity onPress={loadDriverData} style={styles.retryBtn}>
+          <Text style={styles.retryBtnText}>Tentar Novamente</Text>
         </TouchableOpacity>
       </View>
     );
   }
 
-  const lastLocation = driver.coordinates && driver.coordinates.length > 0 
-    ? driver.coordinates[driver.coordinates.length - 1] 
-    : null;
+  const initials = driver.full_name?.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() || 'DR';
+  const lastCoord = driver.coordinates?.length ? driver.coordinates[driver.coordinates.length - 1] : null;
+  const hasRoute = !!driver.current_route;
 
   return (
-    <View className="flex-1 bg-slate-900">
-      <StatusBar style="light" backgroundColor="#0f172a" />
-      
-      {/* Header */}
-      <View className="border-b-2 border-[#00babc] pt-12 pb-6 px-6">
-        <TouchableOpacity onPress={onBack} className="flex-row items-center mb-6">
-          <Ionicons name="arrow-back" size={24} color="white" />
-          <Text className="text-white text-lg font-medium ml-2">Voltar</Text>
-        </TouchableOpacity>
-        
-        <View className="items-center">
-          <View className="w-24 h-24 bg-slate-800 rounded-full items-center justify-center mb-4 shadow-lg border-2 border-cyan-600">
-            {driver.photo ? (
-              <Text className="text-cyan-600 text-3xl">📷</Text>
-            ) : (
-              <Text className="text-cyan-600 text-3xl font-bold" style={{ color: '#00babc' }}>
-                {driver.full_name?.split(' ').map(n => n[0]).join('') || 'DR'}
+    <View style={styles.root}>
+      <StatusBar style="light" backgroundColor={BG} />
+
+      <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: 32 }} showsVerticalScrollIndicator={false}>
+
+        {/* ── Header / Avatar ──────────────────────────────────── */}
+        <View style={styles.header}>
+          <View style={styles.avatarWrap}>
+            <Text style={styles.avatarText}>{initials}</Text>
+          </View>
+          <Text style={styles.fullName}>{driver.full_name || 'Motorista'}</Text>
+          <View style={styles.badgeRow}>
+            <View style={styles.badge}>
+              <FontAwesome5 name="id-card" size={11} color={ACCENT} />
+              <Text style={styles.badgeText}>Motorista</Text>
+            </View>
+            <View style={styles.badge}>
+              <Text style={styles.badgeText}>ID #{driver.id}</Text>
+            </View>
+          </View>
+          {driver.email && (
+            <Text style={styles.email}>{driver.email}</Text>
+          )}
+        </View>
+
+        {/* ── Rota Atual ──────────────────────────────────────── */}
+        <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <MaterialIcons name="route" size={18} color={ACCENT} />
+            <Text style={styles.sectionTitle}>Rota Atribuída</Text>
+          </View>
+
+          {hasRoute ? (
+            <View style={styles.routeBox}>
+              <Text style={styles.routeName}>{driver.current_route!.route_name}</Text>
+              {driver.current_route!.description && (
+                <Text style={styles.routeDesc}>{driver.current_route!.description}</Text>
+              )}
+              <View style={styles.routeMetaRow}>
+                <View style={styles.routeMetaItem}>
+                  <Ionicons name="location" size={13} color={ACCENT} />
+                  <Text style={styles.routeMetaText}>
+                    {driver.current_route!.stops?.length ?? 0} paragens
+                  </Text>
+                </View>
+              </View>
+            </View>
+          ) : (
+            <Text style={styles.mutedText}>Sem rota atribuída de momento.</Text>
+          )}
+        </View>
+
+        {/* ── Última Localização Registada ─────────────────────── */}
+        <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <Ionicons name="location" size={18} color={ACCENT} />
+            <Text style={styles.sectionTitle}>Última Posição Registada</Text>
+          </View>
+
+          {lastCoord ? (
+            <View style={styles.coordBox}>
+              <Text style={styles.coordLabel}>Coordenadas GPS</Text>
+              <Text style={styles.coordText}>
+                Lat {lastCoord.lat.toFixed(6)}  ·  Long {lastCoord.long.toFixed(6)}
               </Text>
+            </View>
+          ) : (
+            <Text style={styles.mutedText}>Nenhuma posição registada ainda.</Text>
+          )}
+        </View>
+
+        {/* ── Contacto ────────────────────────────────────────── */}
+        <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <Ionicons name="call" size={18} color={ACCENT} />
+            <Text style={styles.sectionTitle}>Contacto</Text>
+          </View>
+
+          <View style={styles.infoGrid}>
+            {driver.username && (
+              <View style={styles.infoItem}>
+                <Text style={styles.infoLabel}>Username</Text>
+                <Text style={styles.infoValue}>{driver.username}</Text>
+              </View>
+            )}
+            {driver.phone && (
+              <View style={styles.infoItem}>
+                <Text style={styles.infoLabel}>Telefone</Text>
+                <Text style={styles.infoValue}>{driver.phone}</Text>
+              </View>
+            )}
+            {driver.email && (
+              <View style={styles.infoItem}>
+                <Text style={styles.infoLabel}>Email</Text>
+                <Text style={styles.infoValue}>{driver.email}</Text>
+              </View>
             )}
           </View>
-          <Text className="text-white text-2xl font-bold">{driver.full_name || 'Motorista'}</Text>
-          <Text className="text-cyan-100 text-sm">ID: {driver.id}</Text>
-          {driver.email && (
-            <Text className="text-slate-400 text-sm mt-1">{driver.email}</Text>
-          )}
-        </View>
-      </View>
-
-      <ScrollView className="flex-1 px-6 py-4">
-        {/* Location Tracking Status */}
-        <View className="bg-slate-800 rounded-2xl p-6 mb-6 shadow-lg border border-slate-700">
-          <View className="flex-row justify-between items-center mb-4">
-            <Text className="text-white text-xl font-bold">Rastreamento GPS</Text>
-            <TouchableOpacity 
-              onPress={toggleTracking}
-              className={`px-4 py-2 rounded-full ${isTracking ? 'bg-emerald-900/30 border border-emerald-600' : 'bg-red-900/30 border border-red-600'}`}
-            >
-              <Text className={`text-xs font-bold ${isTracking ? 'text-emerald-400' : 'text-red-400'}`}>
-                {isTracking ? 'ATIVO' : 'INATIVO'}
-              </Text>
-            </TouchableOpacity>
-          </View>
-          
-          {lastLocation && (
-            <View className="bg-slate-700 rounded-xl p-3">
-              <Text className="text-slate-400 text-xs mb-1">Última Localização</Text>
-              <Text className="text-white font-mono text-sm">
-                Lat: {lastLocation.lat.toFixed(6)}, Long: {lastLocation.long.toFixed(6)}
-              </Text>
-            </View>
-          )}
         </View>
 
-        {/* Current Route */}
-        {driver.current_route && (
-          <View className="bg-slate-800 rounded-2xl p-6 mb-6 shadow-lg border border-slate-700">
-            <Text className="text-white text-xl font-bold mb-4">Rota Atual</Text>
-            <View className="bg-cyan-900/30 rounded-xl p-4 border border-cyan-600" style={{ backgroundColor: 'rgba(0, 186, 188, 0.1)', borderColor: '#00babc' }}>
-              <Text className="text-cyan-400 text-lg font-bold" style={{ color: '#00babc' }}>
-                {driver.current_route.route_name}
-              </Text>
-              {driver.current_route.description && (
-                <Text className="text-slate-300 text-sm mt-2">{driver.current_route.description}</Text>
-              )}
-              <Text className="text-slate-400 text-sm mt-2">
-                {driver.current_route.stops?.length || 0} paragens
-              </Text>
-            </View>
-          </View>
+        {/* ── Terminar Sessão ──────────────────────────────────── */}
+        {onLogout && (
+          <TouchableOpacity style={styles.logoutBtn} onPress={confirmLogout} activeOpacity={0.8}>
+            <Ionicons name="log-out" size={18} color={DANGER} />
+            <Text style={styles.logoutText}>Terminar Sessão</Text>
+          </TouchableOpacity>
         )}
 
-        {/* Contact Info */}
-        <View className="bg-slate-800 rounded-2xl p-6 mb-6 shadow-lg border border-slate-700">
-          <Text className="text-white text-xl font-bold mb-4">Informações de Contacto</Text>
-          
-          {driver.phone && (
-            <View className="p-3 bg-slate-700 rounded-xl mb-2">
-              <Text className="text-slate-400 text-sm font-medium">Telefone</Text>
-              <Text className="text-white font-bold">{driver.phone}</Text>
-            </View>
-          )}
-          
-          {driver.username && (
-            <View className="p-3 bg-slate-700 rounded-xl">
-              <Text className="text-slate-400 text-sm font-medium">Username</Text>
-              <Text className="text-white font-bold">{driver.username}</Text>
-            </View>
-          )}
-        </View>
-
-        {/* Messages */}
-        {driver.messages && driver.messages.length > 0 && (
-          <View className="bg-slate-800 rounded-2xl p-6 mb-6 shadow-lg border border-slate-700">
-            <Text className="text-white text-xl font-bold mb-4">Mensagens Recentes</Text>
-            {driver.messages.slice(0, 3).map((msg, idx) => (
-              <View key={idx} className="bg-slate-700 rounded-xl p-3 mb-2">
-                <Text className="text-white">{msg.message}</Text>
-              </View>
-            ))}
-          </View>
-        )}
       </ScrollView>
     </View>
   );
 };
+
+/* ── Styles ────────────────────────────────────────────────────── */
+const styles = StyleSheet.create({
+  root: { flex: 1, backgroundColor: BG },
+
+  /* Header */
+  header: {
+    alignItems: 'center',
+    paddingTop: 52,
+    paddingBottom: 24,
+    paddingHorizontal: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: BORDER,
+    marginBottom: 8,
+  },
+  avatarWrap: {
+    width: 88,
+    height: 88,
+    borderRadius: 44,
+    backgroundColor: 'rgba(0,186,188,0.15)',
+    borderWidth: 2,
+    borderColor: ACCENT,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 14,
+  },
+  avatarText: { color: ACCENT, fontSize: 30, fontWeight: '700' },
+  fullName: { color: '#fff', fontSize: 22, fontWeight: '700', textAlign: 'center' },
+  badgeRow: { flexDirection: 'row', gap: 8, marginTop: 8 },
+  badge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    backgroundColor: 'rgba(0,186,188,0.12)',
+    borderRadius: 20,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderWidth: 1,
+    borderColor: 'rgba(0,186,188,0.3)',
+  },
+  badgeText: { color: ACCENT, fontSize: 12, fontWeight: '600' },
+  email: { color: MUTED, fontSize: 13, marginTop: 8 },
+
+  /* Sections */
+  section: {
+    marginHorizontal: 16,
+    marginTop: 14,
+    backgroundColor: CARD,
+    borderRadius: 18,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: BORDER,
+  },
+  sectionHeader: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 12 },
+  sectionTitle: { color: '#fff', fontSize: 15, fontWeight: '700' },
+
+  /* Route */
+  routeBox: {
+    backgroundColor: 'rgba(0,186,188,0.07)',
+    borderRadius: 12,
+    padding: 14,
+    borderWidth: 1,
+    borderColor: 'rgba(0,186,188,0.22)',
+  },
+  routeName: { color: ACCENT, fontSize: 16, fontWeight: '700' },
+  routeDesc: { color: '#cbd5e1', fontSize: 13, marginTop: 4 },
+  routeMetaRow: { flexDirection: 'row', marginTop: 10 },
+  routeMetaItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    backgroundColor: 'rgba(0,186,188,0.12)',
+    borderRadius: 20,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderWidth: 1,
+    borderColor: 'rgba(0,186,188,0.3)',
+  },
+  routeMetaText: { color: ACCENT, fontSize: 12, fontWeight: '500' },
+
+  /* Coordinates */
+  coordBox: {
+    backgroundColor: 'rgba(0,186,188,0.07)',
+    borderRadius: 12,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(0,186,188,0.22)',
+  },
+  coordLabel: { color: MUTED, fontSize: 11, marginBottom: 4 },
+  coordText: { color: ACCENT, fontFamily: 'monospace', fontSize: 13 },
+
+  /* Info grid */
+  infoGrid: { gap: 8 },
+  infoItem: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    backgroundColor: 'rgba(15,23,42,0.6)',
+    borderRadius: 10,
+  },
+  infoLabel: { color: MUTED, fontSize: 13 },
+  infoValue: { color: '#fff', fontSize: 13, fontWeight: '600', flexShrink: 1, textAlign: 'right', maxWidth: '60%' },
+
+  /* Muted */
+  mutedText: { color: MUTED, fontSize: 13 },
+
+  /* Logout */
+  logoutBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 10,
+    marginHorizontal: 16,
+    marginTop: 24,
+    paddingVertical: 14,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: 'rgba(239,68,68,0.4)',
+    backgroundColor: 'rgba(239,68,68,0.08)',
+  },
+  logoutText: { color: DANGER, fontSize: 15, fontWeight: '600' },
+
+  /* Error */
+  errorTitle: { color: '#fff', fontSize: 18, fontWeight: '700', marginTop: 16, textAlign: 'center' },
+  errorMsg: { color: MUTED, marginTop: 8, textAlign: 'center', fontSize: 13 },
+  retryBtn: {
+    backgroundColor: ACCENT,
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 12,
+    marginTop: 20,
+  },
+  retryBtnText: { color: '#fff', fontWeight: '700' },
+});

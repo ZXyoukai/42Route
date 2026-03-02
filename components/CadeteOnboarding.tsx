@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   View,
   Text,
@@ -14,6 +14,7 @@ import { useMiniBusStops } from '../hooks/useMiniBusStops';
 import { Cadete } from '../types/api';
 import { useCustomAlert } from './CustomAlert';
 import { BusLoadingScreen } from './BusLoadingScreen';
+import { api } from 'services';
 
 const ACCENT = '#00babc';
 const BG = '#0f172a';
@@ -148,7 +149,6 @@ export const CadeteOnboarding = ({ initialUser, onComplete }: CadeteOnboardingPr
   };
 
   if (saving) return <BusLoadingScreen msg="A guardar o teu perfil..." />;
-
   return (
     <View style={styles.root}>
       <StatusBar style="light" backgroundColor={BG} />
@@ -272,7 +272,7 @@ export const CadeteOnboarding = ({ initialUser, onComplete }: CadeteOnboardingPr
           </View>
         </View> */}
 
-        {/* ── Paragem ─────────────────────────────────────────── */}
+        {/* ── Paragem ─────────────────────────────────────────── */};
         <View style={styles.card}>
           <Section
             icon={<MaterialIcons name="directions-bus" size={18} color={ACCENT} />}

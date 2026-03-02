@@ -10,6 +10,7 @@ import { TransportDashboardAPI } from 'components/TransportDashboardAPI';
 import { RouteDetailAPI } from 'components/RouteDetailAPI';
 import { StudentProfileAPI } from 'components/StudentProfileAPI';
 import { DriverProfileAPI } from 'components/DriverProfileAPI';
+import { DriverDashboard } from 'components/DriverDashboard';
 import { MapScreen } from 'components/MapScreen';
 import { TransportSchedule } from 'components/TransportSchedule';
 import { CadeteOnboarding } from 'components/CadeteOnboarding';
@@ -87,16 +88,27 @@ export default function App() {
   const [selectedRouteId, setSelectedRouteId] = useState<number | null>(null);
 
   const handleLogin = async (data: { name: string; email: string }) => {
-    const userDataString = await AsyncStorage.getItem('user');
-    const parsedUser = userDataString ? JSON.parse(userDataString) : null;
+    // Detecta o tipo de utilizador pelo papel guardado no login
+    const [userDataString, driverDataString, savedRole] = await Promise.all([
+      AsyncStorage.getItem('user'),
+      AsyncStorage.getItem('driver_user'),
+      AsyncStorage.getItem('user_role'),
+    ]);
+
+    const isDriver = savedRole === 'driver' || !!driverDataString;
+    const parsedUser = isDriver
+      ? (driverDataString ? JSON.parse(driverDataString) : null)
+      : (userDataString ? JSON.parse(userDataString) : null);
+
+    const role: 'driver' | 'cadete' = isDriver ? 'driver' : 'cadete';
 
     const nextUser: UserData = {
       id: parsedUser?.id ?? 0,
-      name: parsedUser?.username ?? parsedUser?.name ?? data.name,
+      name: parsedUser?.username ?? parsedUser?.full_name ?? data.name,
       email: parsedUser?.email ?? data.email,
-      role: parsedUser?.role ?? 'cadete',
+      role,
       full_name: parsedUser?.full_name ?? null,
-      username: parsedUser?.username ?? parsedUser?.name ?? data.name,
+      username: parsedUser?.username ?? parsedUser?.full_name ?? data.name,
       city: parsedUser?.city ?? null,
       distrit: parsedUser?.distrit ?? null,
       phone: parsedUser?.phone ?? null,
@@ -109,19 +121,22 @@ export default function App() {
     };
 
     await AsyncStorage.setItem('authenticated', 'true');
-    await AsyncStorage.setItem('user', JSON.stringify(nextUser));
 
     setUserData(nextUser);
-    const shouldGoToOnboarding =
-      nextUser.role === 'cadete' &&
-      (!nextUser.isDBUser || !nextUser.stop || !nextUser.course || !nextUser.grade || !nextUser.level);
 
-    setCurrentScreen(shouldGoToOnboarding ? 'cadeteOnboarding' : 'dashboard');
+    if (role === 'driver') {
+      // Motorista vai direto para o dashboard do motorista
+      setCurrentScreen('dashboard');
+    } else {
+      // Cadete pode precisar de onboarding
+      const shouldGoToOnboarding =
+        !nextUser.isDBUser || !nextUser.stop || !nextUser.course || !nextUser.grade || !nextUser.level;
+      setCurrentScreen(shouldGoToOnboarding ? 'cadeteOnboarding' : 'dashboard');
+    }
   };
 
   const handleLogout = async () => {
-    await AsyncStorage.removeItem('authenticated');
-    await AsyncStorage.removeItem('user');
+    await AsyncStorage.multiRemove(['authenticated', 'user', 'driver_user', 'user_role', 'token']);
     setUserData(null);
     setSelectedRouteId(null);
     setCurrentScreen('login');
@@ -141,7 +156,23 @@ export default function App() {
 
     // Telas autenticadas
     switch (currentScreen) {
-      case 'dashboard' :
+      case 'dashboard':
+        if (userData?.role === 'driver') {
+          return (
+            <ProtectedRoute>
+              <View className="flex-1">
+                <DriverDashboard
+                  driverId={userData.id}
+                  driverName={userData.name}
+                />
+                <BottomTabBar
+                  activeTab="dashboard"
+                  onTabPress={handleTabPress}
+                />
+              </View>
+            </ProtectedRoute>
+          );
+        }
         return (
           <ProtectedRoute>
           <View className="flex-1">
@@ -183,11 +214,12 @@ export default function App() {
           return (
             <ProtectedRoute>
             <View className="flex-1">
-              <DriverProfileAPI 
+              <DriverProfileAPI
                 driverId={userData.id}
                 onBack={() => setCurrentScreen('dashboard')}
+                onLogout={handleLogout}
               />
-              <BottomTabBar 
+              <BottomTabBar
                 activeTab="profile"
                 onTabPress={handleTabPress}
               />
@@ -286,16 +318,31 @@ export default function App() {
       }
 
       default:
+        // Fallback - respeita o papel do utilizador
+        if (userData?.role === 'driver') {
+          return (
+            <View className="flex-1">
+              <DriverDashboard
+                driverId={userData.id}
+                driverName={userData.name}
+              />
+              <BottomTabBar
+                activeTab="dashboard"
+                onTabPress={handleTabPress}
+              />
+            </View>
+          );
+        }
         return (
           <View className="flex-1">
-            <TransportDashboardAPI 
+            <TransportDashboardAPI
               studentName={userData?.name || 'Estudante'}
               onRouteSelect={(route) => {
                 setSelectedRouteId(route.id);
                 setCurrentScreen('routeDetail');
               }}
             />
-            <BottomTabBar 
+            <BottomTabBar
               activeTab="dashboard"
               onTabPress={handleTabPress}
             />

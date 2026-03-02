@@ -3,7 +3,8 @@ import { makeRedirectUri } from 'expo-auth-session';
 import { API_BASE_URL } from '@env';
 import { jwtDecode } from 'jwt-decode';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Cadete } from 'types/api';
+import axios from 'axios';
+import { Cadete, Driver } from 'types/api';
 
 interface loginIntraResponse {
   type: 'success' | 'cancel' | 'dismiss';
@@ -30,6 +31,65 @@ interface CadeteTokenPayload {
 }
 
 export const authService = {
+  // POST /api/42/driver/login - Login do motorista com username + password
+  driverLogin: async (credentials: { username: string; password: string }): Promise<Driver> => {
+    try {
+      // Some environments return only { token } — handle both shapes
+      const response = await axios.post<any>(
+        `${API_BASE_URL}/api/auth/42/driver/login`,
+        credentials,
+        { headers: { 'Content-Type': 'application/json' } }
+      );
+
+      console.log('Resposta do login do motorista:', response.data);
+
+      const token: string | undefined = response.data?.token ?? response.data;
+      let driver: Driver | undefined = response.data?.driver;
+
+      if (!token && !driver) {
+        throw new Error('Resposta de login inválida do servidor');
+      }
+
+      if (!driver && token) {
+        // Decode token to extract basic driver info
+        interface DriverTokenPayload {
+          id: number;
+          username?: string | null;
+          email?: string | null;
+          full_name?: string | null;
+          phone?: number | string | null;
+          photo?: string | null;
+        }
+
+        const payload = jwtDecode<DriverTokenPayload>(token);
+
+        driver = {
+          id: payload.id,
+          full_name: payload.full_name ?? payload.username ?? null,
+          username: payload.username ?? payload.full_name ?? null,
+          email: payload.email ?? null,
+          photo: payload.photo ?? null,
+          phone: typeof payload.phone === 'string' ? Number(payload.phone) : payload.phone ?? null,
+          coordinates: [],
+          current_route: null,
+        } as Driver;
+      }
+
+      // Persist token and driver info
+      await AsyncStorage.multiSet([
+        ['driver_user', JSON.stringify(driver)],
+        ['authenticated', 'true'],
+        ['token', token ?? ''],
+        ['user_role', 'driver'],
+      ]);
+
+      return driver!;
+    } catch (err: any) {
+      console.error('Erro no driverLogin:', err?.response?.data ?? err.message ?? err);
+      throw err;
+    }
+  },
+
   // GET /api/auth/42/login - Iniciar login OAuth 42
   login42: async (): Promise<loginIntraResponse> => {
 
