@@ -1,15 +1,15 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { View, Text, StyleSheet, Platform, Animated, Easing } from 'react-native';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { View, Text, StyleSheet, Platform } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import MapView, { Marker, Polyline, PROVIDER_GOOGLE, Region } from 'react-native-maps';
-import MapViewDirections from 'react-native-maps-directions';
 import * as Location from 'expo-location';
 import { FontAwesome5, Ionicons, MaterialIcons } from '@expo/vector-icons';
 
-const GOOGLE_MAPS_APIKEY = 'AIzaSyAlm3Es35ecfHTp4-gb7MjAfoqEcWuKXX0';
-
 // Coordenadas da 42 Luanda
 const LUANDA_42 = { latitude: -8.838333, longitude: 13.234444 };
+
+// Recalcular rota quando o motorista se afasta mais de 50 m do ponto de origem
+const RECALC_THRESHOLD_M = 1;
 
 const BUS_ROUTE_POINTS = [
   { latitude: -8.8386, longitude: 13.2347 },
@@ -34,6 +34,55 @@ function haversineKm(
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
+type LatLng = { latitude: number; longitude: number };
+
+function decodePolyline(encoded: string): LatLng[] {
+  const points: LatLng[] = [];
+  let index = 0;
+  let lat = 0;
+  let lng = 0;
+  while (index < encoded.length) {
+    let shift = 0, result = 0, byte: number;
+    do {
+      byte = encoded.charCodeAt(index++) - 63;
+      result |= (byte & 0x1f) << shift;
+      shift += 5;
+    } while (byte >= 0x20);
+    lat += result & 1 ? ~(result >> 1) : result >> 1;
+
+    shift = 0; result = 0;
+    do {
+      byte = encoded.charCodeAt(index++) - 63;
+      result |= (byte & 0x1f) << shift;
+      shift += 5;
+    } while (byte >= 0x20);
+    lng += result & 1 ? ~(result >> 1) : result >> 1;
+
+    points.push({ latitude: lat / 1e5, longitude: lng / 1e5 });
+  }
+  return points;
+}
+
+/** Chama a API OSRM e devolve os pontos da polyline da rota de condução */
+async function fetchOSRMRoute(
+  origin: LatLng,
+  destination: LatLng
+): Promise<LatLng[]> {
+  const url =
+    `https://router.project-osrm.org/route/v1/driving/` +
+    `${origin.longitude},${origin.latitude};` +
+    `${destination.longitude},${destination.latitude}` +
+    `?overview=full`;
+
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`OSRM HTTP ${res.status}`);
+  const json = await res.json();
+  if (json.code !== 'Ok' || !json.routes?.length) {
+    throw new Error('OSRM: sem rota disponível');
+  }
+  return decodePolyline(json.routes[0].geometry);
+}
+
 interface MapScreenProps {
   studentName?: string;
   role?: 'driver' | 'cadete';
@@ -42,14 +91,35 @@ interface MapScreenProps {
 export const MapScreen = ({ studentName = 'Utilizador', role = 'cadete' }: MapScreenProps) => {
   const isDriver = role === 'driver';
 
-  /* ── Estado ── */
   const [mapReady, setMapReady] = useState(false);
-  const [driverCoords, setDriverCoords] = useState<{ latitude: number; longitude: number } | null>(null);
+  const [driverCoords, setDriverCoords] = useState<LatLng | null>(null);
+  const [routeCoords, setRouteCoords] = useState<LatLng[]>([]);
   const [distance, setDistance] = useState<number | null>(null);
+  const [routeStatus, setRouteStatus] = useState<'idle' | 'loading' | 'ok' | 'error'>('idle');
+
   const mapRef = useRef<MapView>(null);
   const locationSubRef = useRef<Location.LocationSubscription | null>(null);
+  const lastFetchOriginRef = useRef<LatLng | null>(null);
+  const isFetchingRef = useRef(false);
 
-  /* ── Student mock ── */
+  const calcRoute = useCallback(async (origin: LatLng) => {
+    if (isFetchingRef.current) return;
+    isFetchingRef.current = true;
+    setRouteStatus('loading');
+    try {
+      const points = await fetchOSRMRoute(origin, LUANDA_42);
+      setRouteCoords(points);
+      lastFetchOriginRef.current = origin;
+      setRouteStatus('ok');
+    } catch (e) {
+      console.warn('OSRM erro:', e);
+      setRouteStatus('error');
+      setRouteCoords([origin, LUANDA_42]);
+    } finally {
+      isFetchingRef.current = false;
+    }
+  }, []);
+
   const [busPointIndex, setBusPointIndex] = useState(0);
   useEffect(() => {
     if (isDriver) return;
@@ -57,7 +127,6 @@ export const MapScreen = ({ studentName = 'Utilizador', role = 'cadete' }: MapSc
     return () => clearInterval(id);
   }, [isDriver]);
 
-  /* ── Driver GPS ── */
   useEffect(() => {
     if (!isDriver) return;
     let mounted = true;
@@ -67,18 +136,27 @@ export const MapScreen = ({ studentName = 'Utilizador', role = 'cadete' }: MapSc
       if (status !== 'granted') return;
 
       locationSubRef.current = await Location.watchPositionAsync(
-        { accuracy: Location.Accuracy.High, timeInterval: 5000, distanceInterval: 10 },
+        { accuracy: Location.Accuracy.High, timeInterval: 1000, distanceInterval: 1 },
         (loc) => {
           if (!mounted) return;
-          const coords = { latitude: loc.coords.latitude, longitude: loc.coords.longitude };
+          const coords: LatLng = { latitude: loc.coords.latitude, longitude: loc.coords.longitude };
           setDriverCoords(coords);
+
           const d = haversineKm(coords.latitude, coords.longitude, LUANDA_42.latitude, LUANDA_42.longitude);
           setDistance(d);
-          // Segue suavemente o motorista no mapa
+
           mapRef.current?.animateToRegion(
             { ...coords, latitudeDelta: 0.025, longitudeDelta: 0.025 },
             800
           );
+
+          // Recalcular rota se ainda não calculou OU se moveu mais de 50 m
+          const prev = lastFetchOriginRef.current;
+          const movedEnough = !prev ||
+            haversineKm(prev.latitude, prev.longitude, coords.latitude, coords.longitude) * 1000 >= RECALC_THRESHOLD_M;
+          if (movedEnough) {
+            calcRoute(coords);
+          }
         }
       );
     };
@@ -88,7 +166,7 @@ export const MapScreen = ({ studentName = 'Utilizador', role = 'cadete' }: MapSc
       mounted = false;
       locationSubRef.current?.remove();
     };
-  }, [isDriver]);
+  }, [isDriver, calcRoute]);
 
   /* ── Ponto de origem inicial para o mapa ── */
   const initialRegion: Region = {
@@ -142,14 +220,12 @@ export const MapScreen = ({ studentName = 'Utilizador', role = 'cadete' }: MapSc
           {/* ── MODO MOTORISTA ── */}
           {isDriver && mapReady && (
             <>
-              {/* Marcador da 42 Luanda */}
               <Marker coordinate={LUANDA_42} title="42 Luanda" description="Campus 42 School Angola">
                 <View style={styles.schoolMarker}>
                   <Text style={styles.schoolMarkerText}>42</Text>
                 </View>
               </Marker>
 
-              {/* Marcador do motorista (posição atual) */}
               {driverCoords && (
                 <Marker coordinate={driverCoords} title="A sua posição" description="Localização em tempo real">
                   <View style={styles.driverMarker}>
@@ -158,16 +234,14 @@ export const MapScreen = ({ studentName = 'Utilizador', role = 'cadete' }: MapSc
                 </Marker>
               )}
 
-              {/* Polyline via Directions API (como no InteractiveMap) */}
-              {driverCoords && (
-                <MapViewDirections
-                  origin={driverCoords}
-                  destination={LUANDA_42}
-                  apikey={GOOGLE_MAPS_APIKEY}
+              {/* Polyline calculada pela API OSRM */}
+              {routeCoords.length >= 2 && (
+                <Polyline
+                  coordinates={routeCoords}
+                  strokeColor="#0f172a"
+                  fillColor='#00babc'
                   strokeWidth={4}
-                  strokeColor="#00babc"
-                  optimizeWaypoints
-                  onError={(msg) => console.warn('Directions error:', msg)}
+                  lineDashPattern={routeStatus === 'error' ? [8, 6] : undefined}
                 />
               )}
             </>
@@ -176,7 +250,7 @@ export const MapScreen = ({ studentName = 'Utilizador', role = 'cadete' }: MapSc
           {/* ── MODO ESTUDANTE ── */}
           {!isDriver && mapReady && (
             <>
-              <Polyline coordinates={BUS_ROUTE_POINTS} strokeColor="#00babc" strokeWidth={4} />
+              <Polyline coordinates={BUS_ROUTE_POINTS} strokeColor="#00babc" fillColor='#00babc' strokeWidth={4} />
               <Marker coordinate={busPosition} title="Autocarro 42" description="Rastreio automático em tempo real">
                 <View style={styles.driverMarker}>
                   <FontAwesome5 name="bus" size={16} color="white" />
@@ -186,11 +260,19 @@ export const MapScreen = ({ studentName = 'Utilizador', role = 'cadete' }: MapSc
           )}
         </MapView>
 
-        {/* Loading overlay enquanto aguarda GPS (driver sem coords) */}
+        {/* Overlay: aguardar GPS */}
         {isDriver && !driverCoords && (
           <View style={styles.gpsWait}>
             <Ionicons name="locate" size={22} color="#00babc" />
             <Text style={styles.gpsWaitText}>A obter localização GPS...</Text>
+          </View>
+        )}
+
+        {/* Overlay: a calcular rota OSRM */}
+        {isDriver && driverCoords && routeStatus === 'loading' && routeCoords.length === 0 && (
+          <View style={styles.gpsWait}>
+            <MaterialIcons name="directions" size={20} color="#00babc" />
+            <Text style={styles.gpsWaitText}>A calcular rota...</Text>
           </View>
         )}
       </View>
@@ -200,7 +282,13 @@ export const MapScreen = ({ studentName = 'Utilizador', role = 'cadete' }: MapSc
         <View style={styles.footerRow}>
           <Ionicons name="radio" size={14} color="#10b981" />
           <Text style={styles.footerLabel}>
-            {isDriver ? 'GPS ativo · atualiza a cada 5 s' : 'Rastreio automático ativo'}
+            {isDriver
+              ? routeStatus === 'loading'
+                ? 'A recalcular rota...'
+                : routeStatus === 'error'
+                  ? 'Rota directa (sem rede)'
+                  : 'GPS ativo · recalcula cada 1 m'
+              : 'Rastreio automático ativo'}
           </Text>
         </View>
         {isDriver && distance !== null && (
