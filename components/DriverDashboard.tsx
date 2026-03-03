@@ -355,11 +355,6 @@ export const DriverDashboard = ({ driverId, driverName }: DriverDashboardProps) 
                 <Text style={styles.infoLabel}>Estado</Text>
                 <Text style={[styles.infoValue, { color: SUCCESS }]}>GPS Ativo · A enviar posição</Text>
               </View>
-              <View style={styles.infoRow}>
-                <Ionicons name="refresh" size={16} color={ACCENT} />
-                <Text style={styles.infoLabel}>Atualizações</Text>
-                <Text style={styles.infoValue}>{updateCount} enviadas</Text>
-              </View>
               {lastCoords && (
                 <View style={styles.coordBox}>
                   <Text style={styles.coordLabel}>Última posição</Text>

@@ -19,7 +19,7 @@ import LoginIntra from './LoginIntra';
 import { authService } from '../services/authService';
 
 interface LoginScreenProps {
-  onLogin: (userData: { name: string; email: string }) => void;
+  onLogin: (userData: { name: string; email: string }) => void | Promise<void>;
 }
 
 const ACCENT = '#00babc';
@@ -45,7 +45,7 @@ export const LoginScreen = ({ onLogin }: LoginScreenProps) => {
     setIsLoading(true);
     try {
       const driver = await authService.driverLogin({ username, password });
-      onLogin({ name: driver.full_name ?? driver.username ?? 'Motorista', email: driver.email ?? username });
+      await onLogin({ name: driver.full_name ?? driver.username ?? 'Motorista', email: driver.email ?? username });
     } catch (err: any) {
       const msg =
         err?.response?.data?.message ??

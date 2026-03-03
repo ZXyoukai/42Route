@@ -88,6 +88,7 @@ export default function App() {
   const [selectedRouteId, setSelectedRouteId] = useState<number | null>(null);
 
   const handleLogin = async (data: { name: string; email: string }) => {
+    try {
     // Detecta o tipo de utilizador pelo papel guardado no login
     const [userDataString, driverDataString, savedRole] = await Promise.all([
       AsyncStorage.getItem('user'),
@@ -132,6 +133,11 @@ export default function App() {
       const shouldGoToOnboarding =
         !nextUser.isDBUser || !nextUser.stop || !nextUser.course || !nextUser.grade || !nextUser.level;
       setCurrentScreen(shouldGoToOnboarding ? 'cadeteOnboarding' : 'dashboard');
+    }
+    } catch (e: any) {
+      console.error('Erro em handleLogin:', e?.message ?? e);
+      // Re-throw so LoginScreen's catch block can handle it and clear the spinner
+      throw e;
     }
   };
 
@@ -249,7 +255,10 @@ export default function App() {
         return (
           <ProtectedRoute>
             <View className="flex-1">
-              <MapScreen studentName={userData?.name || 'Estudante'} />
+              <MapScreen
+                studentName={userData?.name || 'Utilizador'}
+                role={userData?.role === 'driver' ? 'driver' : 'cadete'}
+              />
               <BottomTabBar
                 activeTab="map"
                 onTabPress={handleTabPress}
