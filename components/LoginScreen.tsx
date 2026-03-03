@@ -45,9 +45,7 @@ export const LoginScreen = ({ onLogin }: LoginScreenProps) => {
     setIsLoading(true);
     try {
       const driver = await authService.driverLogin({ username, password });
-      showSuccess('Login Realizado!', `Bem-vindo, ${driver.full_name ?? driver.username ?? 'Motorista'}!`, () => {
-        onLogin({ name: driver.full_name ?? driver.username ?? 'Motorista', email: driver.email ?? username });
-      });
+      onLogin({ name: driver.full_name ?? driver.username ?? 'Motorista', email: driver.email ?? username });
     } catch (err: any) {
       const msg =
         err?.response?.data?.message ??

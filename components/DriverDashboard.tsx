@@ -8,13 +8,17 @@ import {
   Animated,
   Easing,
   Alert,
+  Modal,
+  ActivityIndicator,
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { Ionicons, MaterialIcons, FontAwesome5 } from '@expo/vector-icons';
 import * as Location from 'expo-location';
 import { driverService } from '../services/driverService';
-import { Driver } from '../types/api';
+import { routeService } from '../services/routeService';
+import { Driver, Route } from '../types/api';
 import { BusLoadingScreen } from './BusLoadingScreen';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const ACCENT = '#00babc';
 const BG = '#0f172a';
@@ -37,6 +41,13 @@ export const DriverDashboard = ({ driverId, driverName }: DriverDashboardProps) 
   const [lastCoords, setLastCoords] = useState<{ lat: number; long: number } | null>(null);
   const [locationError, setLocationError] = useState<string | null>(null);
   const [updateCount, setUpdateCount] = useState(0);
+
+  /* ── Seleção de Rota ─────────────────────────────────────────── */
+  const [showRouteModal, setShowRouteModal] = useState(false);
+  const [allRoutes, setAllRoutes] = useState<Route[]>([]);
+  const [loadingRoutes, setLoadingRoutes] = useState(false);
+  const [activeRoute, setActiveRoute] = useState<Route | null>(null);
+  const [tripLoading, setTripLoading] = useState(false);
 
   /* ── Animações ──────────────────────────────────────────────── */
   const pulseAnim = useRef(new Animated.Value(1)).current;
@@ -87,9 +98,19 @@ export const DriverDashboard = ({ driverId, driverName }: DriverDashboardProps) 
     const load = async () => {
       try {
         setLoading(true);
-        const data = await driverService.getById(driverId);
-        setDriver(data);
-      } catch {
+        const LocalDriver = await AsyncStorage.getItem('driver_user');
+        if (LocalDriver) {
+          const parsed = JSON.parse(LocalDriver);
+          setDriver(parsed);
+        } else if (!driverId) {
+          throw new Error('ID do motorista não fornecido');
+        } else {
+          const data = await driverService.getById(driverId);
+          console.log('Dados do motorista carregados:', data);
+          setDriver(data);
+        }
+      } catch (err) {
+        console.error('Erro ao carregar dados do motorista:', err);
         /* silent – UI shows fallback */
       } finally {
         setLoading(false);
@@ -134,12 +155,40 @@ export const DriverDashboard = ({ driverId, driverName }: DriverDashboardProps) 
     };
   }, [isTracking, driverId]);
 
+  /* ── Abrir modal de seleção de rota ─────────────────────────── */
+  const openRouteModal = async () => {
+    setLoadingRoutes(true);
+    setShowRouteModal(true);
+    try {
+      const routes = await routeService.getAll();
+      setAllRoutes(routes);
+    } catch {
+      setAllRoutes([]);
+    } finally {
+      setLoadingRoutes(false);
+    }
+  };
+
+  const handleSelectRoute = async (route: Route) => {
+    setShowRouteModal(false);
+    setTripLoading(true);
+    try {
+      await driverService.assignRoute(driverId, { id: route.id });
+    } catch (err) {
+      console.warn('assignRoute falhou (continua localmente):', err);
+    } finally {
+      setTripLoading(false);
+    }
+    setActiveRoute(route);
+    setTripActive(true);
+    setIsTracking(true);
+    setUpdateCount(0);
+  };
+
   /* ── Iniciar / Terminar Viagem ─────────────────────────────── */
   const handleToggleTrip = () => {
     if (!tripActive) {
-      setTripActive(true);
-      setIsTracking(true);
-      setUpdateCount(0);
+      openRouteModal();
     } else {
       Alert.alert(
         'Terminar Viagem',
@@ -149,11 +198,20 @@ export const DriverDashboard = ({ driverId, driverName }: DriverDashboardProps) 
           {
             text: 'Terminar',
             style: 'destructive',
-            onPress: () => {
+            onPress: async () => {
+              setTripLoading(true);
+              try {
+                await driverService.leaveRoute(driverId);
+              } catch (err) {
+                console.warn('leaveRoute falhou (continua localmente):', err);
+              } finally {
+                setTripLoading(false);
+              }
               setTripActive(false);
               setIsTracking(false);
               setLastCoords(null);
               setUpdateCount(0);
+              setActiveRoute(null);
             },
           },
         ]
@@ -162,6 +220,7 @@ export const DriverDashboard = ({ driverId, driverName }: DriverDashboardProps) 
   };
 
   if (loading) return <BusLoadingScreen msg="A carregar dados do motorista..." />;
+  if (tripLoading) return <BusLoadingScreen msg={tripActive ? 'A terminar viagem...' : 'A iniciar viagem...'} />;
 
   const hour = new Date().getHours();
   const greeting = hour < 12 ? 'Bom dia' : hour < 18 ? 'Boa tarde' : 'Boa noite';
@@ -172,13 +231,66 @@ export const DriverDashboard = ({ driverId, driverName }: DriverDashboardProps) 
     <View style={styles.root}>
       <StatusBar style="light" backgroundColor={BG} />
 
+      {/* ── Modal de Seleção de Rota ───────────────────────────── */}
+      <Modal
+        visible={showRouteModal}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setShowRouteModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalSheet}>
+            <View style={styles.modalHandle} />
+
+            <View style={styles.modalHeader}>
+              <MaterialIcons name="route" size={22} color={ACCENT} />
+              <Text style={styles.modalTitle}>Escolher Rota</Text>
+              <TouchableOpacity onPress={() => setShowRouteModal(false)} style={styles.modalClose}>
+                <Ionicons name="close" size={20} color={MUTED} />
+              </TouchableOpacity>
+            </View>
+
+            <Text style={styles.modalSub}>Seleciona a rota que vais percorrer nesta viagem.</Text>
+
+            {loadingRoutes ? (
+              <ActivityIndicator color={ACCENT} size="large" style={{ marginVertical: 32 }} />
+            ) : allRoutes.length === 0 ? (
+              <Text style={[styles.modalSub, { textAlign: 'center', marginTop: 24 }]}>Nenhuma rota disponível.</Text>
+            ) : (
+              <ScrollView style={{ maxHeight: 400 }} showsVerticalScrollIndicator={false}>
+                {allRoutes.map((route) => (
+                  <TouchableOpacity
+                    key={route.id}
+                    style={styles.routeOption}
+                    onPress={() => handleSelectRoute(route)}
+                    activeOpacity={0.8}
+                  >
+                    <View style={styles.routeOptionLeft}>
+                      <Text style={styles.routeOptionName}>{route.route_name}</Text>
+                      {route.description ? (
+                        <Text style={styles.routeOptionDesc} numberOfLines={1}>{route.description}</Text>
+                      ) : null}
+                      <View style={styles.routeOptionMeta}>
+                        <Ionicons name="location" size={12} color={MUTED} />
+                        <Text style={styles.routeOptionMetaText}>{route.stops?.length ?? 0} paragens</Text>
+                      </View>
+                    </View>
+                    <Ionicons name="chevron-forward" size={20} color={ACCENT} />
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
+            )}
+          </View>
+        </View>
+      </Modal>
+
       <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: 28 }} showsVerticalScrollIndicator={false}>
 
         {/* ── Header ──────────────────────────────────────────── */}
         <View style={styles.header}>
           <View style={styles.headerLeft}>
             <Text style={styles.greeting}>{greeting},</Text>
-            <Text style={styles.driverName}>{firstName} <Text style={{ color: ACCENT }}>👋</Text></Text>
+            <Text style={styles.driverName}>{firstName} </Text>
             <Text style={styles.role}>Motorista · 42 Luanda</Text>
           </View>
 
@@ -266,38 +378,36 @@ export const DriverDashboard = ({ driverId, driverName }: DriverDashboardProps) 
           )}
         </View>
 
-        {/* ── Rota Atual ──────────────────────────────────────── */}
-        {driver?.current_route ? (
+        {/* ── Rota da Viagem Atual ──────────────────────────────── */}
+        {activeRoute ? (
           <View style={styles.card}>
             <View style={styles.cardHeader}>
               <MaterialIcons name="route" size={20} color={ACCENT} />
-              <Text style={styles.cardTitle}>Rota Atribuída</Text>
+              <Text style={styles.cardTitle}>Rota em Curso</Text>
+              <View style={[styles.metaItem, { backgroundColor: 'rgba(16,185,129,0.12)', borderColor: SUCCESS }]}>
+                <FontAwesome5 name="bus" size={11} color={SUCCESS} />
+                <Text style={[styles.metaText, { color: SUCCESS }]}>Em Curso</Text>
+              </View>
             </View>
 
             <View style={styles.routeBox}>
-              <Text style={styles.routeName}>{driver.current_route.route_name}</Text>
-              {driver.current_route.description && (
-                <Text style={styles.routeDesc}>{driver.current_route.description}</Text>
+              <Text style={styles.routeName}>{activeRoute.route_name}</Text>
+              {activeRoute.description && (
+                <Text style={styles.routeDesc}>{activeRoute.description}</Text>
               )}
               <View style={styles.routeMeta}>
                 <View style={styles.metaItem}>
                   <Ionicons name="location" size={14} color={ACCENT} />
-                  <Text style={styles.metaText}>{driver.current_route.stops?.length ?? 0} paragens</Text>
-                </View>
-                <View style={[styles.metaItem, { backgroundColor: tripActive ? 'rgba(16,185,129,0.12)' : 'rgba(0,186,188,0.12)', borderColor: tripActive ? SUCCESS : ACCENT }]}>
-                  <FontAwesome5 name="bus" size={12} color={tripActive ? SUCCESS : ACCENT} />
-                  <Text style={[styles.metaText, { color: tripActive ? SUCCESS : ACCENT }]}>
-                    {tripActive ? 'Em Curso' : 'Aguarda Início'}
-                  </Text>
+                  <Text style={styles.metaText}>{activeRoute.stops?.length ?? 0} paragens</Text>
                 </View>
               </View>
             </View>
 
             {/* Lista de paragens */}
-            {driver.current_route.stops && driver.current_route.stops.length > 0 && (
+            {activeRoute.stops && activeRoute.stops.length > 0 && (
               <View style={{ marginTop: 12 }}>
                 <Text style={styles.stopsLabel}>Paragens</Text>
-                {driver.current_route.stops.map((stop, i) => (
+                {activeRoute.stops.map((stop, i) => (
                   <View key={stop.id} style={styles.stopRow}>
                     <View style={styles.stopBullet}>
                       <Text style={styles.stopBulletText}>{i + 1}</Text>
@@ -306,10 +416,10 @@ export const DriverDashboard = ({ driverId, driverName }: DriverDashboardProps) 
                       <Text style={styles.stopName}>{stop.stop_name ?? 'Paragem'}</Text>
                       {stop.distrit && <Text style={styles.stopDistrit}>{stop.distrit}</Text>}
                     </View>
-                    <View style={[styles.cadetesBadge]}>
+                    {/* <View style={styles.cadetesBadge}>
                       <Ionicons name="people" size={12} color={ACCENT} />
                       <Text style={styles.cadetesBadgeText}>{stop.cadetes?.length ?? 0}</Text>
-                    </View>
+                    </View> */}
                   </View>
                 ))}
               </View>
@@ -319,9 +429,9 @@ export const DriverDashboard = ({ driverId, driverName }: DriverDashboardProps) 
           <View style={styles.card}>
             <View style={styles.cardHeader}>
               <MaterialIcons name="route" size={20} color={MUTED} />
-              <Text style={[styles.cardTitle, { color: MUTED }]}>Sem Rota Atribuída</Text>
+              <Text style={[styles.cardTitle, { color: MUTED }]}>Sem Viagem Ativa</Text>
             </View>
-            <Text style={styles.noRoute}>Aguarda que o administrador atribua uma rota.</Text>
+            <Text style={styles.noRoute}>Toca em "Iniciar Viagem" para escolher uma rota e começar.</Text>
           </View>
         )}
 
@@ -342,6 +452,13 @@ export const DriverDashboard = ({ driverId, driverName }: DriverDashboardProps) 
               <FontAwesome5 name="at" size={14} color={MUTED} />
               <Text style={styles.infoLabel}>Username</Text>
               <Text style={styles.infoValue}>{driver.username}</Text>
+            </View>
+          )}
+          {driver?.email && (
+            <View style={styles.infoRow}>
+              <Ionicons name="mail" size={14} color={MUTED} />
+              <Text style={styles.infoLabel}>Email</Text>
+              <Text style={styles.infoValue}>{driver.email}</Text>
             </View>
           )}
           {driver?.phone && (
@@ -640,5 +757,83 @@ const styles = StyleSheet.create({
     fontSize: 13,
     textAlign: 'center',
     paddingVertical: 8,
+  },
+
+  /* ── Modal ── */
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    justifyContent: 'flex-end',
+  },
+  modalSheet: {
+    backgroundColor: '#1e293b',
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    paddingHorizontal: 20,
+    paddingBottom: 36,
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderColor: '#334155',
+  },
+  modalHandle: {
+    width: 40,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: '#475569',
+    alignSelf: 'center',
+    marginBottom: 16,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 6,
+  },
+  modalTitle: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: '700',
+    flex: 1,
+  },
+  modalClose: {
+    padding: 4,
+  },
+  modalSub: {
+    color: MUTED,
+    fontSize: 13,
+    marginBottom: 16,
+  },
+  routeOption: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#0f172a',
+    borderRadius: 14,
+    padding: 14,
+    marginBottom: 10,
+    borderWidth: 1,
+    borderColor: '#334155',
+  },
+  routeOptionLeft: {
+    flex: 1,
+    gap: 3,
+  },
+  routeOptionName: {
+    color: '#fff',
+    fontSize: 15,
+    fontWeight: '600',
+  },
+  routeOptionDesc: {
+    color: MUTED,
+    fontSize: 12,
+  },
+  routeOptionMeta: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    marginTop: 4,
+  },
+  routeOptionMetaText: {
+    color: MUTED,
+    fontSize: 11,
   },
 });

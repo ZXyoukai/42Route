@@ -1,4 +1,5 @@
 import axios, { AxiosInstance, AxiosError } from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
 const API_BASE_URL = process.env.API_BASE_URL || 'http://localhost:3000';
@@ -14,13 +15,12 @@ const api: AxiosInstance = axios.create({
 
 // Request interceptor for adding auth token and logging
 api.interceptors.request.use(
-  (config) => {
-    // You can add auth token here when implemented
-    // const token = await getAuthToken();
-    // if (token) {
-    //   config.headers.Authorization = `Bearer ${token}`;
-    // }
-    
+  async (config) => {
+    const token = await AsyncStorage.getItem('token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+
     console.log(`🚀 API Request: ${config.method?.toUpperCase()} ${config.url}`);
     return config;
   },

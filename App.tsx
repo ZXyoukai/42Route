@@ -136,7 +136,17 @@ export default function App() {
   };
 
   const handleLogout = async () => {
-    await AsyncStorage.multiRemove(['authenticated', 'user', 'driver_user', 'user_role', 'token']);
+    try {
+      await AsyncStorage.multiRemove([
+        'authenticated',
+        'user',
+        'driver_user',
+        'user_role',
+        'token',
+      ]);
+    } catch (err) {
+      console.warn('Erro ao limpar AsyncStorage no logout:', err);
+    }
     setUserData(null);
     setSelectedRouteId(null);
     setCurrentScreen('login');
@@ -168,6 +178,8 @@ export default function App() {
                 <BottomTabBar
                   activeTab="dashboard"
                   onTabPress={handleTabPress}
+                  role="driver"
+                  onLogout={handleLogout}
                 />
               </View>
             </ProtectedRoute>
@@ -208,25 +220,14 @@ export default function App() {
 
       case 'profile':
         if (!userData) return null;
-        
-        // Renderiza perfil baseado no tipo de usuário
+
+        // Motoristas não têm tab de perfil — redireciona
         if (userData.role === 'driver') {
-          return (
-            <ProtectedRoute>
-            <View className="flex-1">
-              <DriverProfileAPI
-                driverId={userData.id}
-                onBack={() => setCurrentScreen('dashboard')}
-                onLogout={handleLogout}
-              />
-              <BottomTabBar
-                activeTab="profile"
-                onTabPress={handleTabPress}
-              />
-            </View>
-            </ProtectedRoute>
-          );
-        } else if (userData.role === 'cadete') {
+          setCurrentScreen('dashboard');
+          return null;
+        }
+
+        if (userData.role === 'cadete') {
           return (
               <ProtectedRoute>
             <View className="flex-1">
@@ -252,6 +253,8 @@ export default function App() {
               <BottomTabBar
                 activeTab="map"
                 onTabPress={handleTabPress}
+                role={userData?.role === 'driver' ? 'driver' : 'cadete'}
+                onLogout={userData?.role === 'driver' ? handleLogout : undefined}
               />
             </View>
           </ProtectedRoute>
@@ -265,6 +268,8 @@ export default function App() {
               <BottomTabBar
                 activeTab="schedule"
                 onTabPress={handleTabPress}
+                role={userData?.role === 'driver' ? 'driver' : 'cadete'}
+                onLogout={userData?.role === 'driver' ? handleLogout : undefined}
               />
             </View>
           </ProtectedRoute>

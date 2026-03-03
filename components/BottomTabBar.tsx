@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, TouchableOpacity, Text } from 'react-native';
+import { View, TouchableOpacity, Text, Alert } from 'react-native';
 import { Ionicons, MaterialIcons, FontAwesome5 } from '@expo/vector-icons';
 
 export type TabName = 'dashboard' | 'map' | 'schedule' | 'profile';
@@ -7,10 +7,14 @@ export type TabName = 'dashboard' | 'map' | 'schedule' | 'profile';
 interface BottomTabBarProps {
   activeTab: TabName;
   onTabPress: (tab: TabName) => void;
+  role?: 'driver' | 'cadete';
+  onLogout?: () => void;
 }
 
-export const BottomTabBar = ({ activeTab, onTabPress }: BottomTabBarProps) => {
-  const tabs = [
+export const BottomTabBar = ({ activeTab, onTabPress, role, onLogout }: BottomTabBarProps) => {
+  const isDriver = role === 'driver';
+
+  const baseTabs = [
     {
       name: 'dashboard' as TabName,
       label: 'Início',
@@ -29,13 +33,14 @@ export const BottomTabBar = ({ activeTab, onTabPress }: BottomTabBarProps) => {
       icon: 'schedule',
       iconType: 'MaterialIcons' as const
     },
-    {
+    ...(!isDriver ? [{
       name: 'profile' as TabName,
       label: 'Perfil',
       icon: 'person',
       iconType: 'Ionicons' as const
-    }
+    }] : []),
   ];
+  const tabs = baseTabs;
 
   const renderIcon = (iconType: 'Ionicons' | 'MaterialIcons' | 'FontAwesome5', iconName: string, isActive: boolean) => {
     const color = isActive ? '#00babc' : '#64748b';
@@ -80,6 +85,30 @@ export const BottomTabBar = ({ activeTab, onTabPress }: BottomTabBarProps) => {
           </TouchableOpacity>
         );
       })}
+
+      {isDriver && onLogout && (
+        <TouchableOpacity
+          className="flex-1 items-center py-2 px-1 rounded-xl mx-1"
+          onPress={() =>
+            Alert.alert(
+              'Terminar Sessão',
+              'Tens a certeza que queres sair?',
+              [
+                { text: 'Cancelar', style: 'cancel' },
+                { text: 'Sair', style: 'destructive', onPress: onLogout },
+              ]
+            )
+          }
+          activeOpacity={0.7}
+        >
+          <View className="p-1 rounded-lg">
+            <Ionicons name="log-out-outline" size={22} color="#ef4444" />
+          </View>
+          <Text className="text-xs font-medium mt-1" style={{ color: '#ef4444' }}>
+            Sair
+          </Text>
+        </TouchableOpacity>
+      )}
     </View>
   );
 };

@@ -30,6 +30,16 @@ interface CadeteTokenPayload {
   isDBUser?: boolean | null;
 }
 
+interface DriverTokenPayload {
+  id: number;
+  full_name?: string | null;
+  username?: string | null;
+  email?: string | null;
+  phone?: number | string | null;
+  photo?: string | null;
+  role?: string | null;
+}
+
 export const authService = {
   // POST /api/42/driver/login - Login do motorista com username + password
   driverLogin: async (credentials: { username: string; password: string }): Promise<Driver> => {
@@ -43,6 +53,9 @@ export const authService = {
 
       console.log('Resposta do login do motorista:', response.data);
 
+      const real_content = jwtDecode(response.data.token); // Verifica se o token é decodificável
+
+      console.log('Conteúdo decodificado do token:', real_content);
       const token: string | undefined = response.data?.token ?? response.data;
       let driver: Driver | undefined = response.data?.driver;
 
@@ -51,16 +64,6 @@ export const authService = {
       }
 
       if (!driver && token) {
-        // Decode token to extract basic driver info
-        interface DriverTokenPayload {
-          id: number;
-          username?: string | null;
-          email?: string | null;
-          full_name?: string | null;
-          phone?: number | string | null;
-          photo?: string | null;
-        }
-
         const payload = jwtDecode<DriverTokenPayload>(token);
 
         driver = {
