@@ -12,7 +12,11 @@ interface RouteStatusCardProps {
 }
 
 const RouteStatusCard = ({ route, onPress }: RouteStatusCardProps) => {
-  const activeDrivers = route.drivers?.filter(d => d.current_route?.id === route.id) || [];
+  useEffect(() => {
+
+  }, [])
+  console.log(`Renderizando RouteStatusCard para rota ${route.drivers}`);
+  const totalDrivers = route.drivers?.length;
   const totalStops = route.stops?.length || 0;
   
   return (
@@ -27,9 +31,9 @@ const RouteStatusCard = ({ route, onPress }: RouteStatusCardProps) => {
             <Text className="text-slate-400 text-sm mt-1">{route.description}</Text>
           )}
         </View>
-        <View className={`px-3 py-1 rounded-full ${activeDrivers.length > 0 ? 'bg-emerald-900/30 border border-emerald-600' : 'bg-slate-700'}`}>
-          <Text className={`text-xs font-bold ${activeDrivers.length > 0 ? 'text-emerald-400' : 'text-slate-400'}`}>
-            {activeDrivers.length > 0 ? 'ATIVO' : 'PARADO'}
+        <View className={`px-3 py-1 rounded-full ${totalDrivers > 0 ? 'bg-emerald-900/30 border border-emerald-600' : 'bg-slate-700'}`}>
+          <Text className={`text-xs font-bold ${totalDrivers > 0 ? 'text-emerald-400' : 'text-slate-400'}`}>
+            {totalDrivers > 0 ? 'ATIVO' : 'PARADO'}
           </Text>
         </View>
       </View>
@@ -42,7 +46,7 @@ const RouteStatusCard = ({ route, onPress }: RouteStatusCardProps) => {
         
         <View className="flex-row items-center">
           <FontAwesome5 name="bus" size={14} color="#00babc" />
-          <Text className="text-slate-300 ml-2 text-sm">{activeDrivers.length} motorista(s)</Text>
+          <Text className="text-slate-300 ml-2 text-sm">{totalDrivers} motorista(s)</Text>
         </View>
       </View>
     </TouchableOpacity>

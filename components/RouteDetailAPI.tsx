@@ -280,7 +280,7 @@ useEffect(() => {
           initialRegion={initialRegion}
         >
           {routeCoords.length > 1 && (
-            <Polyline coordinates={routeCoords} strokeColor="#2563eb" strokeWidth={5} />
+            <Polyline coordinates={routeCoords} strokeColor="#00babc" fillColor='#00babc' strokeWidth={5} />
           )}
           {validStops.map((stop, index) => (
             <Marker

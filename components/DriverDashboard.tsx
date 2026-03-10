@@ -143,7 +143,9 @@ export const DriverDashboard = ({ driverId, driverName }: DriverDashboardProps) 
           setUpdateCount((c) => c + 1);
           try {
             await driverService.updateLocation(driverId, { lat: latitude, long: longitude });
-          } catch { /* silent */ }
+          } catch (err) {
+            console.warn('updateLocation falhou:', err);
+          }
         }
       );
     };
@@ -173,7 +175,7 @@ export const DriverDashboard = ({ driverId, driverName }: DriverDashboardProps) 
     setShowRouteModal(false);
     setTripLoading(true);
     try {
-      await driverService.assignRoute(driverId, { id: route.id });
+      await driverService.assignRoute(driverId, { current_route_id: route.id });
     } catch (err) {
       console.warn('assignRoute falhou (continua localmente):', err);
     } finally {

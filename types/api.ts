@@ -142,7 +142,7 @@ export interface UpdateDriverLocationRequest {
 }
 
 export interface AssignRouteRequest {
-  id: number;
+  current_route_id: number;
 }
 
 // Simplified types for UI

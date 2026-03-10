@@ -48,7 +48,7 @@ export const driverService = {
 
   // POST /api/driver/assign/route/{id} - Atribuir rota ao motorista
   assignRoute: async (id: number, data: AssignRouteRequest): Promise<any> => {
-    console.log(`Atribuindo rota ${data.id} ao motorista ${id}`);
+    console.log(`Atribuindo rota ${data.current_route_id} ao motorista ${id}`);
     const response = await api.post(`/driver/assign/route/${id}`, data);
     return response.data;
   },
