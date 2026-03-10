@@ -16,6 +16,7 @@ import { Ionicons, MaterialIcons, FontAwesome5 } from '@expo/vector-icons';
 import * as Location from 'expo-location';
 import { driverService } from '../services/driverService';
 import { routeService } from '../services/routeService';
+import { socketService } from '../services/socketService';
 import { Driver, Route } from '../types/api';
 import { BusLoadingScreen } from './BusLoadingScreen';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -142,10 +143,13 @@ export const DriverDashboard = ({ driverId, driverName }: DriverDashboardProps) 
           setLastCoords({ lat: latitude, long: longitude });
           setUpdateCount((c) => c + 1);
           try {
+            // REST API – persiste coordenadas no DB
             await driverService.updateLocation(driverId, { lat: latitude, long: longitude });
           } catch (err) {
-            console.warn('updateLocation falhou:', err);
+            console.warn('updateLocation REST falhou:', err);
           }
+          // WebSocket – emite localização em tempo real para os cadetes da rota
+          socketService.driverUpdateLocation(driverId, latitude, longitude);
         }
       );
     };
@@ -181,6 +185,8 @@ export const DriverDashboard = ({ driverId, driverName }: DriverDashboardProps) 
     } finally {
       setTripLoading(false);
     }
+    // Entra no room WebSocket da rota escolhida
+    socketService.driverJoinRoute(driverId);
     setActiveRoute(route);
     setTripActive(true);
     setIsTracking(true);

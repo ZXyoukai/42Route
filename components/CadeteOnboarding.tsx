@@ -14,7 +14,7 @@ import { useMiniBusStops } from '../hooks/useMiniBusStops';
 import { Cadete } from '../types/api';
 import { useCustomAlert } from './CustomAlert';
 import { BusLoadingScreen } from './BusLoadingScreen';
-import { api } from 'services';
+import { api, cadeteService } from 'services';
 
 const ACCENT = '#00babc';
 const BG = '#0f172a';
@@ -137,6 +137,18 @@ export const CadeteOnboarding = ({ initialUser, onComplete }: CadeteOnboardingPr
       id: initialUser.id,
     };
     try {
+      // Persiste no backend
+      try {
+        await cadeteService.update(initialUser.id, {
+          full_name: updatedUser.full_name ?? undefined,
+          city: updatedUser.city ?? undefined,
+          distrit: updatedUser.distrit ?? undefined,
+          phone: updatedUser.phone ?? undefined,
+          stop_id: selectedStopId ?? undefined,
+        });
+      } catch (apiErr) {
+        console.warn('Falha ao atualizar cadete na API (salvo localmente):', apiErr);
+      }
       await AsyncStorage.setItem('user', JSON.stringify(updatedUser));
       showSuccess('Cadastro concluído!', 'O teu perfil foi configurado com sucesso.', () => {
         onComplete(updatedUser);

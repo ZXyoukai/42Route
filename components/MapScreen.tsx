@@ -4,20 +4,14 @@ import { StatusBar } from 'expo-status-bar';
 import MapView, { Marker, Polyline, PROVIDER_GOOGLE, Region } from 'react-native-maps';
 import * as Location from 'expo-location';
 import { FontAwesome5, Ionicons, MaterialIcons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { socketService, DriverLocationPayload, TransportLocationPayload } from '../services/socketService';
 
 // Coordenadas da 42 Luanda
 const LUANDA_42 = { latitude: -8.838333, longitude: 13.234444 };
 
 // Recalcular rota quando o motorista se afasta mais de 50 m do ponto de origem
 const RECALC_THRESHOLD_M = 1;
-
-const BUS_ROUTE_POINTS = [
-  { latitude: -8.8386, longitude: 13.2347 },
-  { latitude: -8.8369, longitude: 13.2389 },
-  { latitude: -8.8352, longitude: 13.2441 },
-  { latitude: -8.8338, longitude: 13.2482 },
-  { latitude: -8.832, longitude: 13.2524 },
-];
 
 function haversineKm(
   lat1: number, lon1: number,
@@ -93,6 +87,8 @@ export const MapScreen = ({ studentName = 'Utilizador', role = 'cadete' }: MapSc
 
   const [mapReady, setMapReady] = useState(false);
   const [driverCoords, setDriverCoords] = useState<LatLng | null>(null);
+  // live bus position received via WebSocket (cadete mode)
+  const [liveDriverCoords, setLiveDriverCoords] = useState<LatLng | null>(null);
   const [routeCoords, setRouteCoords] = useState<LatLng[]>([]);
   const [distance, setDistance] = useState<number | null>(null);
   const [routeStatus, setRouteStatus] = useState<'idle' | 'loading' | 'ok' | 'error'>('idle');
@@ -120,11 +116,39 @@ export const MapScreen = ({ studentName = 'Utilizador', role = 'cadete' }: MapSc
     }
   }, []);
 
-  const [busPointIndex, setBusPointIndex] = useState(0);
+  // ── Cadete: ouvir localização do motorista via WebSocket ──────────────────
   useEffect(() => {
     if (isDriver) return;
-    const id = setInterval(() => setBusPointIndex(i => (i + 1) % BUS_ROUTE_POINTS.length), 2500);
-    return () => clearInterval(id);
+
+    const onDriverLoc = (payload: DriverLocationPayload) => {
+      const coords: LatLng = { latitude: payload.lat, longitude: payload.long };
+      setLiveDriverCoords(coords);
+      mapRef.current?.animateToRegion(
+        { ...coords, latitudeDelta: 0.04, longitudeDelta: 0.04 },
+        800
+      );
+    };
+
+    const onTransportLoc = (payload: TransportLocationPayload) => {
+      const coords: LatLng = { latitude: payload.lat, longitude: payload.long };
+      setLiveDriverCoords(coords);
+    };
+
+    // Entrar na sala via cadete id guardado
+    AsyncStorage.getItem('user').then((raw) => {
+      if (raw) {
+        const user = JSON.parse(raw);
+        if (user?.id) socketService.cadeteJoinRoute(user.id);
+      }
+    });
+
+    socketService.onDriverLocation(onDriverLoc);
+    socketService.onTransportLocation(onTransportLoc);
+
+    return () => {
+      socketService.offDriverLocation(onDriverLoc);
+      socketService.offTransportLocation(onTransportLoc);
+    };
   }, [isDriver]);
 
   useEffect(() => {
@@ -175,8 +199,6 @@ export const MapScreen = ({ studentName = 'Utilizador', role = 'cadete' }: MapSc
     latitudeDelta: 0.04,
     longitudeDelta: 0.04,
   };
-
-  const busPosition = BUS_ROUTE_POINTS[busPointIndex];
 
   return (
     <View style={styles.root}>
@@ -250,12 +272,25 @@ export const MapScreen = ({ studentName = 'Utilizador', role = 'cadete' }: MapSc
           {/* ── MODO ESTUDANTE ── */}
           {!isDriver && mapReady && (
             <>
-              <Polyline coordinates={BUS_ROUTE_POINTS} strokeColor="#00babc" fillColor='#00babc' strokeWidth={4} />
-              <Marker coordinate={busPosition} title="Autocarro 42" description="Rastreio automático em tempo real">
-                <View style={styles.driverMarker}>
-                  <FontAwesome5 name="bus" size={16} color="white" />
-                </View>
-              </Marker>
+              {/* Linha da rota OSRM se disponível */}
+              {routeCoords.length >= 2 && (
+                <Polyline coordinates={routeCoords} strokeColor="#00babc" fillColor="#00babc" strokeWidth={4} />
+              )}
+              {/* Posição do autocarro recebida via WebSocket */}
+              {liveDriverCoords ? (
+                <Marker coordinate={liveDriverCoords} title="Autocarro 42" description="Localização em tempo real">
+                  <View style={styles.driverMarker}>
+                    <FontAwesome5 name="bus" size={16} color="white" />
+                  </View>
+                </Marker>
+              ) : (
+                /* Marcador fixo na 42 enquanto sem sinal */
+                <Marker coordinate={LUANDA_42} title="Campus 42 Luanda" description="Aguardando localização do autocarro">
+                  <View style={styles.schoolMarker}>
+                    <Text style={styles.schoolMarkerText}>42</Text>
+                  </View>
+                </Marker>
+              )}
             </>
           )}
         </MapView>
@@ -267,7 +302,6 @@ export const MapScreen = ({ studentName = 'Utilizador', role = 'cadete' }: MapSc
             <Text style={styles.gpsWaitText}>A obter localização GPS...</Text>
           </View>
         )}
-
         {/* Overlay: a calcular rota OSRM */}
         {isDriver && driverCoords && routeStatus === 'loading' && routeCoords.length === 0 && (
           <View style={styles.gpsWait}>
@@ -288,7 +322,9 @@ export const MapScreen = ({ studentName = 'Utilizador', role = 'cadete' }: MapSc
                 : routeStatus === 'error'
                   ? 'Rota directa (sem rede)'
                   : 'GPS ativo · recalcula cada 1 m'
-              : 'Rastreio automático ativo'}
+              : liveDriverCoords
+                ? 'Autocarro em tempo real · WebSocket ativo'
+                : 'Aguardando localização do autocarro...'}
           </Text>
         </View>
         {isDriver && distance !== null && (
@@ -299,7 +335,9 @@ export const MapScreen = ({ studentName = 'Utilizador', role = 'cadete' }: MapSc
           </Text>
         )}
         {!isDriver && (
-          <Text style={styles.footerAccent}>Autocarro 42</Text>
+          <Text style={styles.footerAccent}>
+            {liveDriverCoords ? 'Autocarro 42 · em rota' : 'Autocarro 42'}
+          </Text>
         )}
       </View>
     </View>

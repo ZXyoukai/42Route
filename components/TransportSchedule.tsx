@@ -1,45 +1,41 @@
 import {
-  useState
+  useState,
+  useEffect,
 } from 'react';
 import { BusLoadingScreen } from './BusLoadingScreen';
-import { Image, Text, View, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { Image, Text, View, ScrollView, TouchableOpacity, RefreshControl } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { useCustomAlert } from './CustomAlert';
-import {
-  ScheduleInfo
-} from './interfaces';
+import { useRoutes } from '../hooks/useRoutes';
+import { Route } from '../types/api';
+import { ScheduleInfo } from './interfaces';
 
 
 interface TransportScheduleProps {
   onBack?: () => void;
 }
 
+/** Converte uma Route da API num ScheduleInfo para a UI */
+function routeToScheduleInfo(route: Route): ScheduleInfo {
+  const hasDriver = (route.drivers?.length ?? 0) > 0;
+  return {
+    routeName: route.route_name,
+    routeId: `RT${String(route.id).padStart(3, '0')}`,
+    departureTime: '--:--',
+    arrivalTime: '--:--',
+    duration: '--',
+    stops: route.stops?.length ?? 0,
+    frequency: hasDriver ? 'Em rota' : 'Sem motorista',
+    isActive: hasDriver,
+  };
+}
+
 export const TransportSchedule = ({ onBack }: TransportScheduleProps) => {
   const { AlertComponent, showSuccess, showError, showWarning, showInfo } = useCustomAlert();
-  const [loading] = useState<boolean>(false);
-  const weekdays: ScheduleInfo[] = [
-    {
-      routeName: 'Rota Manhã',
-      routeId: 'RT001',
-      departureTime: '06:30',
-      arrivalTime: '07:15',
-      duration: '45 min',
-      stops: 4,
-      frequency: 'Partida única',
-      isActive: true,
-    },
-    {
-      routeName: 'Rota Tarde',
-      routeId: 'RT002',
-      departureTime: '10:00',
-      arrivalTime: '10:45',
-      duration: '45 min',
-      stops: 4,
-      frequency: 'Partida única',
-      isActive: true,
-    },
-  ];
+  const { routes, loading, error, fetchRoutes } = useRoutes();
+
+  const weekdays: ScheduleInfo[] = routes.map(routeToScheduleInfo);
 
   const handleRoutePress = (route: ScheduleInfo) => {
     if (!route.isActive) {
@@ -177,10 +173,17 @@ export const TransportSchedule = ({ onBack }: TransportScheduleProps) => {
       </View>
     </TouchableOpacity>
   );
+  const [refreshing, setRefreshing] = useState(false);
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await fetchRoutes();
+    setRefreshing(false);
+  };
+
   return (
     <View className="flex-1 bg-slate-900">
       <StatusBar style="light" />
-      {loading && <BusLoadingScreen msg="A carregar horários..." />}
+      {loading && !refreshing && <BusLoadingScreen msg="A carregar horários..." />}
       
       {/* Header */}
       <View className="bg-gradient-to-br pt-12 pb-6 px-6 border-b-2 border-[#00babc]">
@@ -204,11 +207,40 @@ export const TransportSchedule = ({ onBack }: TransportScheduleProps) => {
         </View>
       </View>
 
-      <ScrollView className="flex-1 px-6 py-6">
-        {/* Horários de Segunda a Sexta */}
+      <ScrollView
+        className="flex-1 px-6 py-6"
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor="#00babc"
+            colors={['#00babc']}
+          />
+        }
+      >
+        {/* Rotas (Horários) */}
         <View className="mb-8">
           <Text className="text-white text-2xl font-bold mb-4">Segunda a Sexta-feira</Text>
-          {weekdays.map(renderScheduleCard)}
+          {error ? (
+            <View className="bg-red-900/20 border border-red-700 rounded-2xl p-5 mb-4">
+              <Text className="text-red-400 font-bold mb-1">Erro ao carregar horários</Text>
+              <Text className="text-red-300 text-sm">{error}</Text>
+              <TouchableOpacity
+                onPress={fetchRoutes}
+                className="mt-3 px-4 py-2 rounded-xl"
+                style={{ backgroundColor: '#00babc', alignSelf: 'flex-start' }}
+              >
+                <Text className="text-white text-xs font-bold">Tentar novamente</Text>
+              </TouchableOpacity>
+            </View>
+          ) : weekdays.length === 0 && !loading ? (
+            <View className="bg-slate-800 border border-slate-700 rounded-2xl p-5 mb-4 items-center">
+              <MaterialIcons name="directions-bus" size={40} color="#64748b" />
+              <Text className="text-slate-400 mt-3 text-center">Nenhuma rota disponível de momento.</Text>
+            </View>
+          ) : (
+            weekdays.map(renderScheduleCard)
+          )}
         </View>
 
 
