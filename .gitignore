@@ -43,6 +43,9 @@ apk*
 *.swp
 *.swo
 
+# Local integration review docs
+INTEGRATION_STATUS.md
+
 # Build artifacts from prebuild
 ios/
 
