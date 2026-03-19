@@ -8,13 +8,12 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
-  StyleSheet,
+  ActivityIndicator,
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
-import { Ionicons, MaterialIcons, FontAwesome5 } from '@expo/vector-icons';
+import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { useCustomAlert } from './CustomAlert';
 import logoWhite from '../assets/route_logo-w.png';
-import logoBlack from '../assets/route_logo-d.png';
 import LoginIntra from './LoginIntra';
 import { authService } from '../services/authService';
 
@@ -23,10 +22,6 @@ interface LoginScreenProps {
 }
 
 const ACCENT = '#00babc';
-const BG = '#0f172a';
-const CARD = '#1e293b';
-const BORDER = '#334155';
-const MUTED = '#64748b';
 
 export const LoginScreen = ({ onLogin }: LoginScreenProps) => {
   const [username, setUsername] = useState('');
@@ -34,8 +29,9 @@ export const LoginScreen = ({ onLogin }: LoginScreenProps) => {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [showIntraLogin, setShowIntraLogin] = useState(false);
+  const [focusedField, setFocusedField] = useState<string | null>(null);
 
-  const { AlertComponent, showError, showSuccess } = useCustomAlert();
+  const { AlertComponent, showError } = useCustomAlert();
 
   const handleLogin = async () => {
     if (!username || !password) {
@@ -50,8 +46,8 @@ export const LoginScreen = ({ onLogin }: LoginScreenProps) => {
       const msg =
         err?.response?.data?.message ??
         err?.response?.data?.error ??
-        'Credenciais inválidas. Tente novamente.';
-      showError('Erro ao entrar', msg);
+        'Credenciais inválidas. Verifique os dados e tente novamente.';
+      showError('Acesso Negado', msg);
     } finally {
       setIsLoading(false);
     }
@@ -62,57 +58,50 @@ export const LoginScreen = ({ onLogin }: LoginScreenProps) => {
   }
 
   return (
-    <View style={styles.root}>
-      <StatusBar style="light" backgroundColor={BG} />
+    <View className="flex-1 bg-slate-900">
+      <StatusBar style="light" backgroundColor="#0f172a" />
 
-      <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+      <KeyboardAvoidingView className="flex-1" behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
         <ScrollView
-          style={{ flex: 1 }}
+          className="flex-1"
           contentContainerStyle={{ flexGrow: 1 }}
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
         >
           {/* ── Logo / Brand ─────────────────────────────────── */}
-          <View style={styles.brand}>
-            <View style={styles.logoBox}>
+          <View className="items-center pt-20 pb-8 px-6">
+            <View className="rounded-3xl px-6 py-4 mb-5 shadow-lg shadow-[#00babc]/50">
               <Image source={logoWhite} style={{ width: 120, height: 56 }} resizeMode="contain" />
             </View>
-            <Text style={styles.brandSub}>Sistema de Transporte · 42 Luanda</Text>
+            <Text className="text-white text-2xl font-bold mb-1.5 tracking-wide">Bem-vindo de volta</Text>
+            <Text className="text-slate-500 text-sm text-center">Sistema de Transporte Institucional · 42 Luanda</Text>
           </View>
 
-          <View style={styles.body}>
-            {/* ── Separador ─────────────────────────────────── */}
-            <View style={styles.dividerRow}>
-              <View style={styles.dividerLine} />
-              <Text style={styles.dividerLabel}>Escolha como entrar</Text>
-              <View style={styles.dividerLine} />
-            </View>
-
-            {/* ══════════════════════════════════════════════════
-                CARD 1 — Motorista (email + password)
-            ══════════════════════════════════════════════════ */}
-            <View style={styles.card}>
-              {/* Role chip */}
-              <View style={styles.roleRow}>
-                <View style={styles.roleIconWrap}>
-                  <FontAwesome5 name="id-card" size={16} color={ACCENT} />
-                </View>
-                <View>
-                  <Text style={styles.roleTitle}>Motorista</Text>
-                  <Text style={styles.roleSub}>Acesso com credenciais institucionais</Text>
-                </View>
-              </View>
+          <View className="px-5 pb-10">
+            <View className="bg-slate-800 rounded-[24px] p-6 border border-slate-700 mb-2 shadow-md shadow-black/15">
+              <Text className="text-white text-lg font-bold mb-5 text-center tracking-wide">Acesso à Plataforma</Text>
 
               {/* Email */}
-              <View style={styles.fieldWrap}>
-                <View style={styles.fieldRow}>
-                  <MaterialIcons name="person" size={18} color={MUTED} style={{ marginRight: 10 }} />
+              <View
+                className={`bg-slate-900 rounded-2xl border-2 mb-3.5 ${
+                  focusedField === 'username' ? 'border-[#00babc] bg-[#00babc]/5' : 'border-slate-700'
+                }`}
+              >
+                <View className="flex-row items-center px-4 py-3.5">
+                  <MaterialIcons
+                    name="person"
+                    size={20}
+                    color={focusedField === 'username' ? ACCENT : '#64748b'}
+                    style={{ marginRight: 12 }}
+                  />
                   <TextInput
-                    style={styles.input}
+                    className="flex-1 text-white text-[15px]"
                     placeholder="Nome de utilizador"
-                    placeholderTextColor={MUTED}
+                    placeholderTextColor="#64748b"
                     value={username}
                     onChangeText={setUsername}
+                    onFocus={() => setFocusedField('username')}
+                    onBlur={() => setFocusedField(null)}
                     autoCapitalize="none"
                     autoComplete="username"
                   />
@@ -120,97 +109,83 @@ export const LoginScreen = ({ onLogin }: LoginScreenProps) => {
               </View>
 
               {/* Password */}
-              <View style={[styles.fieldWrap, { marginBottom: 18 }]}>
-                <View style={styles.fieldRow}>
-                  <Ionicons name="lock-closed" size={18} color={MUTED} style={{ marginRight: 10 }} />
+              <View
+                className={`bg-slate-900 rounded-2xl border-2 mb-3 ${
+                  focusedField === 'password' ? 'border-[#00babc] bg-[#00babc]/5' : 'border-slate-700'
+                }`}
+              >
+                <View className="flex-row items-center px-4 py-3.5">
+                  <Ionicons
+                    name="lock-closed"
+                    size={20}
+                    color={focusedField === 'password' ? ACCENT : '#64748b'}
+                    style={{ marginRight: 12 }}
+                  />
                   <TextInput
-                    style={styles.input}
+                    className="flex-1 text-white text-[15px]"
                     placeholder="Palavra-passe"
-                    placeholderTextColor={MUTED}
+                    placeholderTextColor="#64748b"
                     value={password}
                     onChangeText={setPassword}
+                    onFocus={() => setFocusedField('password')}
+                    onBlur={() => setFocusedField(null)}
                     secureTextEntry={!showPassword}
                     autoComplete="password"
                   />
                   <TouchableOpacity onPress={() => setShowPassword(!showPassword)} style={{ padding: 4 }}>
-                    <Ionicons name={showPassword ? 'eye-off' : 'eye'} size={18} color={MUTED} />
+                    <Ionicons name={showPassword ? 'eye-off' : 'eye'} size={20} color={focusedField === 'password' ? ACCENT : '#64748b'} />
                   </TouchableOpacity>
                 </View>
               </View>
 
+              <TouchableOpacity className="self-end mb-5">
+                <Text className="text-slate-500 text-[14px] font-medium">Esqueceu a senha?</Text>
+              </TouchableOpacity>
+
               <TouchableOpacity
-                style={[styles.btn, isLoading && styles.btnDisabled]}
+                className={`rounded-2xl py-4 items-center ${
+                  isLoading ? 'bg-slate-600 shadow-none' : 'bg-[#00babc] shadow-md shadow-[#00babc]/30'
+                }`}
                 onPress={handleLogin}
                 disabled={isLoading}
                 activeOpacity={0.85}
               >
                 {isLoading ? (
-                  <View style={styles.btnInner}>
-                    <View style={styles.spinner} />
-                    <Text style={styles.btnText}>A entrar...</Text>
+                  <View className="flex-row items-center gap-2 justify-center">
+                    <ActivityIndicator size="small" color="#fff" />
+                    <Text className="text-white text-base font-bold ml-2">A entrar...</Text>
                   </View>
                 ) : (
-                  <View style={styles.btnInner}>
-                    <FontAwesome5 name="id-card" size={16} color="#fff" />
-                    <Text style={styles.btnText}>Entrar como Motorista</Text>
+                  <View className="flex-row items-center gap-2 justify-center">
+                    <Text className="text-white text-base font-bold">Entrar como Motorista</Text>
                   </View>
                 )}
               </TouchableOpacity>
 
-              <TouchableOpacity style={{ alignSelf: 'center', marginTop: 10 }}>
-                <Text style={styles.forgotText}>Esqueceu a palavra-passe?</Text>
-              </TouchableOpacity>
-            </View>
-
-            {/* ── OR divider ────────────────────────────────── */}
-            <View style={styles.orRow}>
-              <View style={styles.orLine} />
-              <Text style={styles.orText}>OU</Text>
-              <View style={styles.orLine} />
-            </View>
-
-            {/* ══════════════════════════════════════════════════
-                CARD 2 — Cadete / Intra 42
-            ══════════════════════════════════════════════════ */}
-            <View style={[styles.card, styles.cardAccent]}>
-              <View style={styles.roleRow}>
-                <View style={[styles.roleIconWrap, { backgroundColor: 'rgba(0,186,188,0.18)' }]}>
-                  <FontAwesome5 name="user-graduate" size={16} color={ACCENT} />
-                </View>
-                <View>
-                  <Text style={styles.roleTitle}>Cadete 42</Text>
-                  <Text style={styles.roleSub}>Autenticação via Intra da 42</Text>
-                </View>
+              {/* ── OR divider ────────────────────────────────── */}
+              <View className="flex-row items-center my-5 px-2.5">
+                <View className="flex-1 h-px bg-slate-700" />
+                <Text className="text-slate-500 text-xs font-semibold mx-4 tracking-[1px]">OU ENTÃO</Text>
+                <View className="flex-1 h-px bg-slate-700" />
               </View>
 
-              <View style={styles.intraLogoRow}>
-                <Image source={logoBlack} style={{ width: 48, height: 48 }} resizeMode="contain" />
-                <View style={{ flex: 1 }}>
-                  <Text style={styles.intraTitle}>Login com Intra 42</Text>
-                  <Text style={styles.intraSub}>
-                    Usa as tuas credenciais da plataforma 42 para entrar de forma segura.
-                  </Text>
-                </View>
-              </View>
-
+              {/* ── Intra Button ──────────────────────────────── */}
               <TouchableOpacity
-                style={styles.btnOutline}
+                className="rounded-2xl py-4 items-center border-2 border-[#00babc] bg-[#00babc]/5"
                 onPress={() => setShowIntraLogin(true)}
                 activeOpacity={0.85}
               >
-                <View style={styles.btnInner}>
-                  <Ionicons name="shield-checkmark" size={18} color={ACCENT} />
-                  <Text style={styles.btnOutlineText}>Entrar com Intra 42</Text>
+                <View className="flex-row items-center justify-center">
+                  <Image source={logoWhite} style={{ width: 22, height: 22, marginRight: 8, tintColor: ACCENT }} resizeMode="contain" />
+                  <Text className="text-[#00babc] text-base font-bold">Cadetes: Login com Intra 42</Text>
                 </View>
               </TouchableOpacity>
             </View>
 
             {/* ── Footer info ───────────────────────────────── */}
-            <View style={styles.footer}>
-              <MaterialIcons name="security" size={14} color="#10b981" />
-              <Text style={styles.footerText}>
-                Ligação segura · dados protegidos na 42 Luanda
-              </Text>
+            <View className="flex-row items-center justify-center gap-2 mt-6">
+              <MaterialIcons name="security" size={16} color="#10b981" />
+              <Text className="text-slate-500 text-[13px] font-medium">Ambiente seguro · 42 Luanda</Text>
             </View>
           </View>
         </ScrollView>
@@ -221,145 +196,5 @@ export const LoginScreen = ({ onLogin }: LoginScreenProps) => {
   );
 };
 
-const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: BG },
 
-  brand: {
-    alignItems: 'center',
-    paddingTop: 72,
-    paddingBottom: 28,
-    paddingHorizontal: 24,
-  },
-  logoBox: {
-    backgroundColor: ACCENT,
-    borderRadius: 24,
-    paddingHorizontal: 20,
-    paddingVertical: 14,
-    marginBottom: 16,
-    shadowColor: ACCENT,
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.35,
-    shadowRadius: 16,
-    elevation: 12,
-  },
-  brandSub: { color: MUTED, fontSize: 14, textAlign: 'center' },
-
-  body: { paddingHorizontal: 20, paddingBottom: 32 },
-
-  dividerRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 16 },
-  dividerLine: { flex: 1, height: 1, backgroundColor: BORDER },
-  dividerLabel: { color: MUTED, fontSize: 12, marginHorizontal: 12 },
-
-  card: {
-    backgroundColor: CARD,
-    borderRadius: 20,
-    padding: 20,
-    borderWidth: 1,
-    borderColor: BORDER,
-    marginBottom: 4,
-  },
-  cardAccent: {
-    borderColor: 'rgba(0,186,188,0.35)',
-    backgroundColor: 'rgba(0,186,188,0.04)',
-  },
-
-  roleRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    marginBottom: 18,
-    paddingBottom: 14,
-    borderBottomWidth: 1,
-    borderBottomColor: BORDER,
-  },
-  roleIconWrap: {
-    width: 40,
-    height: 40,
-    borderRadius: 12,
-    backgroundColor: 'rgba(0,186,188,0.1)',
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: 'rgba(0,186,188,0.25)',
-  },
-  roleTitle: { color: '#fff', fontSize: 15, fontWeight: '700' },
-  roleSub: { color: MUTED, fontSize: 12, marginTop: 1 },
-
-  fieldWrap: {
-    backgroundColor: BG,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: BORDER,
-    marginBottom: 12,
-  },
-  fieldRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 14,
-    paddingVertical: 13,
-  },
-  input: { flex: 1, color: '#fff', fontSize: 14 },
-
-  btn: {
-    backgroundColor: ACCENT,
-    borderRadius: 14,
-    paddingVertical: 15,
-    alignItems: 'center',
-    shadowColor: ACCENT,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 6,
-  },
-  btnDisabled: { backgroundColor: '#475569', shadowOpacity: 0 },
-  btnInner: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-  btnText: { color: '#fff', fontSize: 15, fontWeight: '700' },
-
-  btnOutline: {
-    borderRadius: 14,
-    paddingVertical: 15,
-    alignItems: 'center',
-    borderWidth: 2,
-    borderColor: ACCENT,
-  },
-  btnOutlineText: { color: ACCENT, fontSize: 15, fontWeight: '700' },
-
-  forgotText: { color: ACCENT, fontSize: 13 },
-
-  orRow: { flexDirection: 'row', alignItems: 'center', marginVertical: 14 },
-  orLine: { flex: 1, height: 1, backgroundColor: BORDER },
-  orText: { color: MUTED, fontSize: 11, fontWeight: '600', marginHorizontal: 12 },
-
-  intraLogoRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 14,
-    backgroundColor: BG,
-    borderRadius: 14,
-    padding: 14,
-    marginBottom: 16,
-    borderWidth: 1,
-    borderColor: BORDER,
-  },
-  intraTitle: { color: '#fff', fontSize: 14, fontWeight: '700', marginBottom: 3 },
-  intraSub: { color: MUTED, fontSize: 12, lineHeight: 16 },
-
-  spinner: {
-    width: 18,
-    height: 18,
-    borderRadius: 9,
-    borderWidth: 2,
-    borderColor: '#fff',
-    borderTopColor: 'transparent',
-  },
-
-  footer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 6,
-    marginTop: 20,
-  },
-  footerText: { color: MUTED, fontSize: 12 },
-});
 

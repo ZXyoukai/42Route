@@ -97,9 +97,9 @@ export default function LoginIntra({ onback, onLogin }: LoginIntraProps) {
       <View style={s.center}>
 
         {/* Shield hero */}
-        <Animated.View style={[s.shieldWrap, { transform: [{ scale: shieldPulse }] }]}>
+        {/* <Animated.View style={[s.shieldWrap, { transform: [{ scale: shieldPulse }] }]}>
           <Ionicons name="shield-checkmark" size={56} color={ACCENT} />
-        </Animated.View>
+        </Animated.View> */}
 
         {/* 42 logo + title */}
         <Image source={require('../assets/route_logo-w.png')} style={{ width: 80, height: 36, marginBottom: 10 }} resizeMode="contain" />
