@@ -78,7 +78,7 @@ export const LoginScreen = ({ onLogin }: LoginScreenProps) => {
           </View>
 
           <View className="px-5 pb-10">
-            <View className="bg-slate-800 rounded-[24px] p-6 border border-slate-700 mb-2 shadow-md shadow-black/15">
+            <View className=" rounded-[24px] p-6 mb-2 shadow-md shadow-black/15">
               <Text className="text-white text-lg font-bold mb-5 text-center tracking-wide">Acesso à Plataforma</Text>
 
               {/* Email */}

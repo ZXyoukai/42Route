@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Image, Text, View, ScrollView, TouchableOpacity, Switch, StyleSheet } from 'react-native';
+import { Image, Text, View, ScrollView, TouchableOpacity, Switch } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { Ionicons, MaterialIcons, FontAwesome5 } from '@expo/vector-icons';
 import { useCustomAlert } from './CustomAlert';
@@ -16,6 +16,7 @@ export const StudentProfileAPI = ({ onBack, onLogout }: StudentProfileProps) => 
   const [locationEnabled, setLocationEnabled] = useState(true);
   const [autoAlerts, setAutoAlerts] = useState(false);
   const [userData, setUserData] = useState<Cadete | null>(null);
+  const [expandedSection, setExpandedSection] = useState<string | null>('info');
   const { AlertComponent, showSuccess, showError, showWarning, showInfo } = useCustomAlert();
 
   useEffect(() => {
@@ -140,113 +141,127 @@ export const StudentProfileAPI = ({ onBack, onLogout }: StudentProfileProps) => 
   };
 
   return (
-    <View style={s.root}>
+    <View className="flex-1 bg-slate-950">
       <StatusBar style="light" backgroundColor="#0f172a" />
 
       {/* ── Hero ─────────────────────────────────────────────── */}
-      <View style={s.hero}>
+      <View className="bg-slate-800 items-center pt-[60px] pb-6 px-5 border-b border-slate-700">
         {/* Back */}
-        <TouchableOpacity onPress={onBack} style={s.backBtn} activeOpacity={0.7}>
+        <TouchableOpacity onPress={onBack} className="absolute top-14 left-5 w-10 h-10 rounded-full bg-slate-950/90 border border-slate-700 items-center justify-center" activeOpacity={0.7}>
           <Ionicons name="arrow-back" size={20} color="#fff" />
         </TouchableOpacity>
 
         {/* Avatar */}
-        <View style={s.avatarWrap}>
+        <View className="relative mb-[14px]">
           {userData?.avatar?.link ? (
-            <Image source={{ uri: userData.avatar.link }} style={s.avatarImg} />
+            <Image source={{ uri: userData.avatar.link }} className="w-[88px] h-[88px] rounded-full border-4 border-cyan-500" />
           ) : (
-            <View style={s.avatarFallback}>
-              <Text style={s.avatarText}>{studentInfo.initials}</Text>
+            <View className="w-[88px] h-[88px] rounded-full bg-cyan-500/20 border-4 border-cyan-500 items-center justify-center">
+              <Text className="text-cyan-500 text-3xl font-black">{studentInfo.initials}</Text>
             </View>
           )}
           {/* Status dot */}
-          <View style={[s.statusDot, studentInfo.isComplete ? s.dotGreen : s.dotAmber]} />
+          <View className={`absolute bottom-1 right-1 w-4 h-4 rounded-full border-2 border-slate-800 ${studentInfo.isComplete ? 'bg-green-500' : 'bg-amber-400'}`} />
         </View>
 
-        <Text style={s.heroName}>{studentInfo.name}</Text>
-        <Text style={s.heroEmail}>{studentInfo.email}</Text>
+        <Text className="text-white text-2xl font-black text-center">{studentInfo.name}</Text>
+        <Text className="text-slate-600 text-xs mt-0.5 mb-3">{studentInfo.email}</Text>
 
         {/* Badges row */}
-        <View style={s.badgesRow}>
-          <View style={s.badge}>
+        <View className="flex-row gap-2 flex-wrap justify-center">
+          <View className="flex-row items-center gap-1 px-2.5 py-1 rounded-full ">
             <FontAwesome5 name="graduation-cap" size={10} color="#00babc" />
-            <Text style={s.badgeText}>Cadete</Text>
+            <Text className="text-cyan-500 text-[11px] font-semibold">Cadete</Text>
           </View>
-          <View style={s.badge}>
+          <View className="flex-row items-center gap-1 px-2.5 py-1 rounded-full ">
             <MaterialIcons name="directions-bus" size={11} color="#00babc" />
-            <Text style={s.badgeText}>{studentInfo.preferredRoute}</Text>
+            <Text className="text-cyan-500 text-[11px] font-semibold">{studentInfo.preferredRoute}</Text>
           </View>
-          <View style={[s.badge, studentInfo.isComplete ? s.badgeGreen : s.badgeAmber]}>
+          <View className={`flex-row items-center gap-1 px-2.5 py-1 rounded-full ${studentInfo.isComplete ? '' : ''}`}>
             <Ionicons
               name={studentInfo.isComplete ? 'checkmark-circle' : 'time-outline'}
               size={11}
               color={studentInfo.isComplete ? '#22c55e' : '#f59e0b'}
             />
-            <Text style={[s.badgeText, studentInfo.isComplete ? { color: '#22c55e' } : { color: '#f59e0b' }]}>
+            <Text className={`text-[11px] font-semibold ${studentInfo.isComplete ? 'text-green-500' : 'text-amber-400'}`}>
               {studentInfo.isComplete ? 'Perfil completo' : 'Cadastro pendente'}
             </Text>
           </View>
         </View>
       </View>
 
-      <ScrollView style={s.scroll} showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 32 }}>
+      <ScrollView className="flex-1 px-4 pt-3.5" showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 32 }}>
 
         {/* ── Stats grid ───────────────────────────────────────── */}
-        <View style={s.statsGrid}>
+        <View className="flex-row gap-2.5 mb-6">
           <StatCard value={`Lv. ${studentInfo.level}`} label="Nível" icon={<FontAwesome5 name="layer-group" size={16} color="#00babc" />} />
           <StatCard value={studentInfo.grade} label="Nota" icon={<MaterialIcons name="grade" size={18} color="#00babc" />} />
           <StatCard value="42" label="Viagens" icon={<MaterialIcons name="directions-bus" size={18} color="#00babc" />} />
           <StatCard value="98%" label="Pontualidade" icon={<Ionicons name="checkmark-circle" size={17} color="#00babc" />} />
         </View>
 
-        {/* ── Informações ─────────────────────────────────────── */}
-        <Card title="Informações" icon={<Ionicons name="person-circle-outline" size={18} color="#00babc" />}>
+        {/* ── Expandable Sections ──────────────────────────── */}
+        <ExpandableSection
+          title="Informações"
+          icon={<Ionicons name="person-circle-outline" size={18} color="#00babc" />}
+          isExpanded={expandedSection === 'info'}
+          onPress={() => setExpandedSection(expandedSection === 'info' ? null : 'info')}
+        >
           <InfoRow icon={<MaterialIcons name="school" size={16} color="#00babc" />} label="Curso" value={studentInfo.course} />
           <InfoRow icon={<Ionicons name="location-outline" size={16} color="#00babc" />} label="Cidade / Distrito" value={`${studentInfo.city} / ${studentInfo.distrit}`} />
           <InfoRow icon={<MaterialIcons name="place" size={16} color="#00babc" />} label="Paragem" value={studentInfo.selectedStop} accent />
           <InfoRow icon={<MaterialIcons name="route" size={16} color="#00babc" />} label="Rota" value={studentInfo.preferredRoute} accent />
-        </Card>
+        </ExpandableSection>
 
-        {/* ── Notificações ─────────────────────────────────────── */}
-        <Card title="Notificações" icon={<Ionicons name="notifications-outline" size={18} color="#00babc" />}>
+        <ExpandableSection
+          title="Notificações"
+          icon={<Ionicons name="notifications-outline" size={18} color="#00babc" />}
+          isExpanded={expandedSection === 'notif'}
+          onPress={() => setExpandedSection(expandedSection === 'notif' ? null : 'notif')}
+        >
           <ToggleRow
             icon={<Ionicons name="notifications" size={15} color="#00babc" />}
-            label="Notificações Push"
-            sub="Alertas sobre os teus autocarros"
+            label="Push"
+            sub="Alertas dos autocarros"
             value={notificationsEnabled}
             onChange={handleNotificationChange}
           />
           <ToggleRow
             icon={<Ionicons name="location" size={15} color="#00babc" />}
             label="Localização"
-            sub="Funcionalidades baseadas em GPS"
+            sub="Funcionalidades GPS"
             value={locationEnabled}
             onChange={handleLocationChange}
           />
           <ToggleRow
             icon={<MaterialIcons name="alarm" size={15} color="#00babc" />}
-            label="Alertas Automáticos"
-            sub="Notificação 10 min antes da chegada"
+            label="Alertas"
+            sub="10 min antes da chegada"
             value={autoAlerts}
             onChange={setAutoAlerts}
+            isLast
           />
-        </Card>
+        </ExpandableSection>
 
-        {/* ── Ações ────────────────────────────────────────────── */}
-        <Card title="Mais opções" icon={<MaterialIcons name="tune" size={18} color="#00babc" />}>
-          <ActionRow icon={<MaterialIcons name="route" size={17} color="#00babc" />} label="Alterar Rota Preferida" onPress={handleRouteChange} />
-          <ActionRow icon={<MaterialIcons name="schedule" size={17} color="#00babc" />} label="Horários Personalizados" onPress={handleScheduleCustom} />
-          <ActionRow icon={<MaterialIcons name="emoji-events" size={17} color="#00babc" />} label="Conquistas e Badges" onPress={handleAchievements} />
-          <ActionRow icon={<MaterialIcons name="help-outline" size={17} color="#00babc" />} label="Ajuda e Suporte" onPress={handleSupport} />
-        </Card>
+        <ExpandableSection
+          title="Ações"
+          icon={<MaterialIcons name="tune" size={18} color="#00babc" />}
+          isExpanded={expandedSection === 'actions'}
+          onPress={() => setExpandedSection(expandedSection === 'actions' ? null : 'actions')}
+        >
+          <ActionRow icon={<MaterialIcons name="route" size={17} color="#00babc" />} label="Alterar Rota" onPress={handleRouteChange} />
+          <ActionRow icon={<MaterialIcons name="schedule" size={17} color="#00babc" />} label="Horários" onPress={handleScheduleCustom} />
+          <ActionRow icon={<MaterialIcons name="emoji-events" size={17} color="#00babc" />} label="Conquistas" onPress={handleAchievements} />
+          <ActionRow icon={<MaterialIcons name="help-outline" size={17} color="#00babc" />} label="Suporte" onPress={handleSupport} isLast />
+        </ExpandableSection>
 
         {/* ── Logout ────────────────────────────────────────────── */}
-        <TouchableOpacity style={s.logoutBtn} onPress={handleLogout} activeOpacity={0.8}>
+        <TouchableOpacity className="flex-row items-center justify-center gap-2.5 bg-red-500/10 rounded-2xl py-3.5 mt-6 border border-red-500/30" onPress={handleLogout} activeOpacity={0.8}>
           <MaterialIcons name="logout" size={18} color="#ef4444" />
-          <Text style={s.logoutText}>Terminar Sessão</Text>
+          <Text className="text-red-500 text-[15px] font-bold">Sair</Text>
         </TouchableOpacity>
 
-        <Text style={s.version}>42Routes v1.0.0 · © 2024 42 Luanda</Text>
+        <Text className="text-slate-700 text-xs text-center mt-6">42Routes v1.0.0 · © 2024 42 Luanda</Text>
       </ScrollView>
 
       {AlertComponent}
@@ -265,28 +280,47 @@ const StatCard = ({
   label: string;
   icon: React.ReactNode;
 }) => (
-  <View style={s.statCard}>
-    <View style={s.statIconWrap}>{icon}</View>
-    <Text style={s.statValue}>{value}</Text>
-    <Text style={s.statLabel}>{label}</Text>
+  <View className="flex-1 rounded-xl p-3 items-center gap-1">
+    <View className="w-[34px] h-[34px] rounded-lg bg-cyan-500/10 items-center justify-center mb-0.5">{icon}</View>
+    <Text className="text-white text-sm font-black">{value}</Text>
+    <Text className="text-slate-600 text-[9px] text-center">{label}</Text>
   </View>
 );
 
-const Card = ({
+const ExpandableSection = ({
   title,
   icon,
+  isExpanded,
+  onPress,
   children,
 }: {
   title: string;
   icon: React.ReactNode;
+  isExpanded: boolean;
+  onPress: () => void;
   children: React.ReactNode;
 }) => (
-  <View style={s.card}>
-    <View style={s.cardHeader}>
-      <View style={s.cardIconWrap}>{icon}</View>
-      <Text style={s.cardTitle}>{title}</Text>
-    </View>
-    {children}
+  <View className="mb-3 bg-slate-800/50 rounded-xl  overflow-hidden">
+    <TouchableOpacity
+      onPress={onPress}
+      className="flex-row items-center justify-between px-4 py-3.5"
+      activeOpacity={0.7}
+    >
+      <View className="flex-row items-center gap-3 flex-1">
+        <View className="w-8 h-8 rounded-lg bg-cyan-500/10 items-center justify-center">{icon}</View>
+        <Text className="text-white font-semibold text-[15px]">{title}</Text>
+      </View>
+      <Ionicons
+        name={isExpanded ? 'chevron-up' : 'chevron-down'}
+        size={20}
+        color="#64748b"
+      />
+    </TouchableOpacity>
+    {isExpanded && (
+      <View className="border-t border-slate-700/50 bg-slate-900/30">
+        {children}
+      </View>
+    )}
   </View>
 );
 
@@ -301,11 +335,11 @@ const InfoRow = ({
   value: string;
   accent?: boolean;
 }) => (
-  <View style={s.infoRow}>
-    <View style={[s.infoIconWrap, accent && s.infoIconAccent]}>{icon}</View>
-    <View style={{ flex: 1 }}>
-      <Text style={s.infoLabel}>{label}</Text>
-      <Text style={[s.infoValue, accent && { color: '#00babc' }]}>{value}</Text>
+  <View className="flex-row items-center gap-3 px-4 py-3 border-b border-slate-700/30 last:border-b-0">
+    <View className={`w-[28px] h-[28px] rounded-lg items-center justify-center ${accent ? 'bg-cyan-500/15' : 'bg-cyan-500/8'}`}>{icon}</View>
+    <View className="flex-1">
+      <Text className="text-slate-600 text-xs mb-0.5 font-medium">{label}</Text>
+      <Text className={`text-sm font-semibold ${accent ? 'text-cyan-400' : 'text-slate-100'}`}>{value}</Text>
     </View>
   </View>
 );
@@ -316,18 +350,20 @@ const ToggleRow = ({
   sub,
   value,
   onChange,
+  isLast,
 }: {
   icon: React.ReactNode;
   label: string;
   sub: string;
   value: boolean;
   onChange: (v: boolean) => void;
+  isLast?: boolean;
 }) => (
-  <View style={s.toggleRow}>
-    <View style={s.infoIconWrap}>{icon}</View>
-    <View style={{ flex: 1 }}>
-      <Text style={s.infoValue}>{label}</Text>
-      <Text style={s.infoLabel}>{sub}</Text>
+  <View className={`flex-row items-center gap-3 px-4 py-3 ${!isLast ? 'border-b border-slate-700/30' : ''}`}>
+    <View className="w-[28px] h-[28px] rounded-lg bg-cyan-500/8 items-center justify-center flex-shrink-0">{icon}</View>
+    <View className="flex-1">
+      <Text className="text-sm font-semibold text-slate-100">{label}</Text>
+      <Text className="text-xs text-slate-600 mt-0.5">{sub}</Text>
     </View>
     <Switch
       value={value}
@@ -342,15 +378,21 @@ const ActionRow = ({
   icon,
   label,
   onPress,
+  isLast,
 }: {
   icon: React.ReactNode;
   label: string;
   onPress: () => void;
+  isLast?: boolean;
 }) => (
-  <TouchableOpacity style={s.actionRow} onPress={onPress} activeOpacity={0.7}>
-    <View style={s.infoIconWrap}>{icon}</View>
-    <Text style={[s.infoValue, { flex: 1 }]}>{label}</Text>
-    <Ionicons name="chevron-forward" size={16} color="#475569" />
+  <TouchableOpacity
+    className={`flex-row items-center gap-3 px-4 py-3 ${!isLast ? 'border-b border-slate-700/30' : ''}`}
+    onPress={onPress}
+    activeOpacity={0.6}
+  >
+    <View className="w-[28px] h-[28px] rounded-lg bg-cyan-500/8 items-center justify-center flex-shrink-0">{icon}</View>
+    <Text className="flex-1 text-sm font-semibold text-slate-100">{label}</Text>
+    <Ionicons name="chevron-forward" size={16} color="#64748b" />
   </TouchableOpacity>
 );
 
@@ -360,189 +402,3 @@ const BG = '#0f172a';
 const CARD = '#1e293b';
 const BORDER = '#334155';
 const MUTED = '#64748b';
-
-const s = StyleSheet.create({
-  root: { flex: 1, backgroundColor: BG },
-
-  // Hero
-  hero: {
-    backgroundColor: CARD,
-    alignItems: 'center',
-    paddingTop: 60,
-    paddingBottom: 24,
-    paddingHorizontal: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: BORDER,
-  },
-  backBtn: {
-    position: 'absolute',
-    top: 56,
-    left: 20,
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: 'rgba(15,23,42,0.9)',
-    borderWidth: 1,
-    borderColor: '#334155',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  avatarWrap: { position: 'relative', marginBottom: 14 },
-  avatarImg: { width: 88, height: 88, borderRadius: 44, borderWidth: 3, borderColor: ACCENT },
-  avatarFallback: {
-    width: 88,
-    height: 88,
-    borderRadius: 44,
-    backgroundColor: 'rgba(0,186,188,0.12)',
-    borderWidth: 3,
-    borderColor: ACCENT,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  avatarText: { color: ACCENT, fontSize: 30, fontWeight: '800' },
-  statusDot: {
-    position: 'absolute',
-    bottom: 4,
-    right: 4,
-    width: 16,
-    height: 16,
-    borderRadius: 8,
-    borderWidth: 2,
-    borderColor: CARD,
-  },
-  dotGreen: { backgroundColor: '#22c55e' },
-  dotAmber: { backgroundColor: '#f59e0b' },
-  heroName: { color: '#fff', fontSize: 22, fontWeight: '800', textAlign: 'center' },
-  heroEmail: { color: MUTED, fontSize: 13, marginTop: 3, marginBottom: 12 },
-  badgesRow: { flexDirection: 'row', gap: 8, flexWrap: 'wrap', justifyContent: 'center' },
-  badge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 5,
-    backgroundColor: 'rgba(0,186,188,0.1)',
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: 'rgba(0,186,188,0.25)',
-  },
-  badgeGreen: { backgroundColor: 'rgba(34,197,94,0.1)', borderColor: 'rgba(34,197,94,0.3)' },
-  badgeAmber: { backgroundColor: 'rgba(245,158,11,0.1)', borderColor: 'rgba(245,158,11,0.3)' },
-  badgeText: { color: ACCENT, fontSize: 11, fontWeight: '600' },
-
-  scroll: { flex: 1, paddingHorizontal: 16, paddingTop: 14 },
-
-  // Stats
-  statsGrid: {
-    flexDirection: 'row',
-    gap: 10,
-    marginBottom: 14,
-  },
-  statCard: {
-    flex: 1,
-    backgroundColor: CARD,
-    borderRadius: 16,
-    padding: 12,
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: BORDER,
-    gap: 4,
-  },
-  statIconWrap: {
-    width: 34,
-    height: 34,
-    borderRadius: 10,
-    backgroundColor: 'rgba(0,186,188,0.1)',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 2,
-  },
-  statValue: { color: '#fff', fontSize: 14, fontWeight: '800' },
-  statLabel: { color: MUTED, fontSize: 10, textAlign: 'center' },
-
-  // Cards
-  card: {
-    backgroundColor: CARD,
-    borderRadius: 20,
-    padding: 16,
-    marginBottom: 14,
-    borderWidth: 1,
-    borderColor: BORDER,
-  },
-  cardHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-    marginBottom: 14,
-    paddingBottom: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: BORDER,
-  },
-  cardIconWrap: {
-    width: 32,
-    height: 32,
-    borderRadius: 9,
-    backgroundColor: 'rgba(0,186,188,0.1)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  cardTitle: { color: '#fff', fontSize: 15, fontWeight: '700' },
-
-  // Info rows
-  infoRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    paddingVertical: 9,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(51,65,85,0.6)',
-  },
-  infoIconWrap: {
-    width: 30,
-    height: 30,
-    borderRadius: 8,
-    backgroundColor: 'rgba(0,186,188,0.08)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  infoIconAccent: { backgroundColor: 'rgba(0,186,188,0.15)' },
-  infoLabel: { color: MUTED, fontSize: 11, marginBottom: 1 },
-  infoValue: { color: '#e2e8f0', fontSize: 14, fontWeight: '600' },
-
-  // Toggle
-  toggleRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    paddingVertical: 9,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(51,65,85,0.6)',
-  },
-
-  // Action
-  actionRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(51,65,85,0.6)',
-  },
-
-  // Logout
-  logoutBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 10,
-    backgroundColor: 'rgba(239,68,68,0.1)',
-    borderRadius: 16,
-    paddingVertical: 15,
-    marginBottom: 14,
-    borderWidth: 1,
-    borderColor: 'rgba(239,68,68,0.3)',
-  },
-  logoutText: { color: '#ef4444', fontSize: 15, fontWeight: '700' },
-
-  version: { color: '#475569', fontSize: 11, textAlign: 'center', marginBottom: 8 },
-});

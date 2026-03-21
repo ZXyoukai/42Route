@@ -258,6 +258,7 @@ export default function App() {
               <MapScreen
                 studentName={userData?.name || 'Utilizador'}
                 role={userData?.role === 'driver' ? 'driver' : 'cadete'}
+                onBack={() => setCurrentScreen('dashboard')}
               />
               <BottomTabBar
                 activeTab="map"
@@ -273,7 +274,7 @@ export default function App() {
         return (
           <ProtectedRoute>
             <View className="flex-1">
-              <TransportSchedule />
+              <TransportSchedule onBack={() => setCurrentScreen('dashboard')} />
               <BottomTabBar
                 activeTab="schedule"
                 onTabPress={handleTabPress}

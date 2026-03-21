@@ -86,7 +86,7 @@ export const TransportSchedule = ({ onBack }: TransportScheduleProps) => {
     <TouchableOpacity
       key={`${schedule.routeId}-${schedule.departureTime}`}
       className={`rounded-2xl p-5 mb-4 shadow-lg border ${
-        schedule.isActive ? 'bg-slate-800 border-slate-700' : 'bg-slate-800/50 border-slate-600'
+        schedule.isActive ? 'border-1-2 border-gray-300' : ''
       }`}
       activeOpacity={0.7}
       onPress={() => handleRoutePress(schedule)}
@@ -183,9 +183,10 @@ export const TransportSchedule = ({ onBack }: TransportScheduleProps) => {
   return (
     <View className="flex-1 bg-slate-900">
       <StatusBar style="light" />
-      {loading && !refreshing && <BusLoadingScreen msg="A carregar horários..." />}
       
+      {loading && !refreshing && <BusLoadingScreen msg="A carregar horários..." />}
       {/* Header */}
+      {!loading  &&
       <View className="bg-gradient-to-br pt-12 pb-6 px-6 border-b-2 border-[#00babc]">
         <View className="flex justify-between">
           <TouchableOpacity
@@ -195,17 +196,14 @@ export const TransportSchedule = ({ onBack }: TransportScheduleProps) => {
           >
             <Ionicons name="arrow-back" size={20} color="#fff" />
           </TouchableOpacity>
-          <Image
-            source={require('../assets/route_logo-w.png')}
-            className="h-10"
-            resizeMode="contain"
-          />
         </View>
         <View>
-          <Text className="text-white text-3xl font-bold mb-2">Horários</Text>
+          <Text className="text-white text-3xl font-bold mb-2 mt-2">Horários</Text>
           <Text className="text-cyan-100 text-base">Consulte os horários de todos os autocarros</Text>
         </View>
-      </View>
+      </View>}
+
+      {!loading  &&
 
       <ScrollView
         className="flex-1 px-6 py-6"
@@ -249,7 +247,7 @@ export const TransportSchedule = ({ onBack }: TransportScheduleProps) => {
           <Text className="text-white text-2xl font-bold mb-4">Contactos Úteis</Text>
           
           <TouchableOpacity 
-            className="bg-red-900/30 rounded-2xl p-5 mb-4 border border-red-700"
+            className="bg-red-900/30 rounded-2xl p-5 mb-4 "
             onPress={handleEmergencyContact}
           >
             <View className="flex-row items-center justify-between">
@@ -265,7 +263,7 @@ export const TransportSchedule = ({ onBack }: TransportScheduleProps) => {
           </TouchableOpacity>
 
           <TouchableOpacity 
-            className="bg-slate-800 rounded-2xl p-5 mb-4 shadow-lg border border-slate-700"
+            className="bg-slate-800 rounded-2xl p-5 mb-4 shadow-lg "
             onPress={handleSupportContact}
           >
             <View className="flex-row items-center justify-between">
@@ -286,10 +284,11 @@ export const TransportSchedule = ({ onBack }: TransportScheduleProps) => {
           <Text className="text-slate-500 text-sm">Última atualização: 15 Ago 2025</Text>
           <Text className="text-slate-600 text-xs">Os horários estão sujeitos a alterações</Text>
         </View>
-      </ScrollView>
+      </ScrollView>}
       
       {/* Custom Alert Component */}
       {AlertComponent}
+      
     </View>
   );
 };

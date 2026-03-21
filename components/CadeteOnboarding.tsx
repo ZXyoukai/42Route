@@ -168,7 +168,7 @@ export const CadeteOnboarding = ({ initialUser, onComplete }: CadeteOnboardingPr
 
       {/* ── Hero header ─────────────────────────────────────── */}
       <View className="flex-row items-center pt-[56px] px-5 pb-4 border-b border-slate-800 gap-4">
-        <View className="w-16 h-16 rounded-full bg-[#00babc]/10 border-2 border-[#00babc] items-center justify-center">
+        <View className="w-16 h-16 rounded-full border-l-2 border-[#00babc] items-center justify-center">
           <Text className="text-[#00babc] text-[22px] font-extrabold">{initials}</Text>
         </View>
         <View className="flex-1">
@@ -176,7 +176,7 @@ export const CadeteOnboarding = ({ initialUser, onComplete }: CadeteOnboardingPr
           <Text className="text-white text-[17px] font-bold" numberOfLines={1}>
             {initialUser.full_name || initialUser.username}
           </Text>
-          <View className="flex-row items-center mt-1.5 gap-1.5 bg-[#00babc]/10 self-start px-2.5 py-1 rounded-full border border-[#00babc]/30">
+          <View className="flex-row  mt-1.5 gap-1.5  self-start py-1 rounded-full">
             <FontAwesome5 name="user-graduate" size={10} color="#00babc" />
             <Text className="text-[#00babc] text-[11px] font-semibold uppercase tracking-wider">Cadete · 42 Luanda</Text>
           </View>
@@ -184,16 +184,7 @@ export const CadeteOnboarding = ({ initialUser, onComplete }: CadeteOnboardingPr
       </View>
 
       {/* ── Progress pills ──────────────────────────────────── */}
-      <View className="flex-row justify-around items-center py-3 px-6 border-b border-slate-800 bg-slate-900/50">
-        {['Dados Pessoais', 'Academia', 'Paragem'].map((label, i) => (
-          <View key={i} className="items-center gap-1.5">
-            <View className="w-7 h-7 rounded-full bg-[#00babc] items-center justify-center shadow-sm shadow-[#00babc]/30">
-              <Text className="text-white text-[12px] font-bold">{i + 1}</Text>
-            </View>
-            <Text className="text-slate-400 text-[10px] uppercase font-semibold">{label}</Text>
-          </View>
-        ))}
-      </View>
+      
 
       <ScrollView
         className="flex-1 px-4 pt-3"
@@ -286,7 +277,7 @@ export const CadeteOnboarding = ({ initialUser, onComplete }: CadeteOnboardingPr
         </View> */}
 
         {/* ── Paragem ─────────────────────────────────────────── */}
-        <View className="bg-slate-800 rounded-[20px] p-5 mb-4 border border-slate-700">
+        <View className=" rounded-[20px] p-5 mb-4 ">
           <Section
             icon={<MaterialIcons name="directions-bus" size={18} color="#00babc" />}
             title="A Minha Paragem"
@@ -354,7 +345,7 @@ export const CadeteOnboarding = ({ initialUser, onComplete }: CadeteOnboardingPr
 
         {/* ── Selected summary ────────────────────────────────── */}
         {selectedStop && (
-          <View className="flex-row items-center gap-2.5 bg-[#00babc]/10 rounded-[14px] px-4 py-3 mb-5 border border-[#00babc]/30">
+          <View className="flex-row items-center  gap-2.5  rounded-[14px] px-4 py-3 ">
             <Ionicons name="checkmark-circle" size={18} color="#00babc" />
             <Text className="text-[#94a3b8] text-[13px] flex-1">
               Paragem selecionada:{' '}

@@ -94,12 +94,12 @@ export const CustomAlert = ({
       <View className="flex-1 bg-slate-900/80 justify-center items-center px-6">
         {/* Alert Container */}
         <View 
-          className={`bg-slate-800 rounded-[28px] p-6 w-full max-w-sm border-2 ${config.alertBorder} shadow-2xl shadow-black/40`}
+          className={`bg-slate-800 rounded-[28px] p-6 w-full max-w-sm  ${config.alertBorder} shadow-2xl shadow-black/40`}
         >
           {/* Header com Ícone */}
           <View className="items-center mb-6">
             <View 
-              className={`w-16 h-16 rounded-[20px] items-center justify-center mb-5 border-2 ${config.iconBg} ${config.iconBorder}`}
+              className={`w-16 h-16 rounded-[20px] items-center justify-center `}
             >
               <Ionicons 
                 name={config.icon as any} 

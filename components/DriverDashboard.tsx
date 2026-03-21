@@ -337,7 +337,7 @@ export const DriverDashboard = ({ driverId, driverName }: DriverDashboardProps) 
         </View>
 
         {/* ── GPS / Localização ───────────────────────────────── */}
-        <View className="mx-4 mb-3.5 bg-slate-800 rounded-[20px] p-[18px] border border-slate-700">
+        <View className="mx-4 mb-3.5  rounded-[20px] p-[18px]">
           <View className="flex-row items-center gap-2 mb-3.5">
             <Ionicons name="location" size={20} color={ACCENT} />
             <Text className="text-white text-[16px] font-bold flex-1">Partilha de Localização</Text>
@@ -376,7 +376,7 @@ export const DriverDashboard = ({ driverId, driverName }: DriverDashboardProps) 
 
         {/* ── Rota da Viagem Atual ──────────────────────────────── */}
         {activeRoute ? (
-          <View className="mx-4 mb-3.5 bg-slate-800 rounded-[20px] p-[18px] border border-slate-700">
+          <View className="mx-4 mb-3.5 rounded-[20px] p-[18px]">
             <View className="flex-row items-center gap-2 mb-3.5">
               <MaterialIcons name="route" size={20} color={ACCENT} />
               <Text className="text-white text-[16px] font-bold flex-1">Rota em Curso</Text>
@@ -422,7 +422,7 @@ export const DriverDashboard = ({ driverId, driverName }: DriverDashboardProps) 
             )}
           </View>
         ) : (
-          <View className="mx-4 mb-3.5 bg-slate-800 rounded-[20px] p-[18px] border border-slate-700">
+          <View className="mx-4 mb-3.5 rounded-[20px] p-[18px]">
             <View className="flex-row items-center gap-2 mb-3.5">
               <MaterialIcons name="route" size={20} color={MUTED} />
               <Text className="text-slate-400 text-[16px] font-bold flex-1">Sem Viagem Ativa</Text>
@@ -432,7 +432,7 @@ export const DriverDashboard = ({ driverId, driverName }: DriverDashboardProps) 
         )}
 
         {/* ── Info do Motorista ────────────────────────────────── */}
-        <View className="mx-4 mb-3.5 bg-slate-800 rounded-[20px] p-[18px] border border-slate-700">
+        <View className="mx-4 mb-3.5  rounded-[20px] p-[18px]">
           <View className="flex-row items-center gap-2 mb-3.5">
             <FontAwesome5 name="id-badge" size={18} color={ACCENT} />
             <Text className="text-white text-[16px] font-bold flex-1">Identificação</Text>

@@ -12,41 +12,52 @@ interface RouteStatusCardProps {
 }
 
 const RouteStatusCard = ({ route, onPress }: RouteStatusCardProps) => {
-  useEffect(() => {
-
-  }, [])
-  console.log(`Renderizando RouteStatusCard para rota ${route.drivers}`);
-  const totalDrivers = route.drivers?.length;
+  const totalDrivers = route.drivers?.length || 0;
   const totalStops = route.stops?.length || 0;
+  const isActive = totalDrivers > 0;
   
   return (
     <TouchableOpacity 
       onPress={onPress}
-      className="bg-slate-800 rounded-2xl p-5 mb-4 border border-slate-700"
+      activeOpacity={0.8}
+      className="bg-slate-800 rounded-[20px] p-[18px] mb-4 shadow-lg"
     >
-      <View className="flex-row justify-between items-start mb-3">
-        <View className="flex-1">
-          <Text className="text-white text-lg font-bold">{route.route_name}</Text>
+      <View className="flex-row justify-between items-start mb-4">
+        <View className="flex-1 pr-3">
+          <Text className="text-white text-[18px] font-bold">{route.route_name}</Text>
           {route.description && (
-            <Text className="text-slate-400 text-sm mt-1">{route.description}</Text>
+            <Text className="text-slate-400 text-[13px] mt-1" numberOfLines={2}>{route.description}</Text>
           )}
         </View>
-        <View className={`px-3 py-1 rounded-full ${totalDrivers > 0 ? 'bg-emerald-900/30 border border-emerald-600' : 'bg-slate-700'}`}>
-          <Text className={`text-xs font-bold ${totalDrivers > 0 ? 'text-emerald-400' : 'text-slate-400'}`}>
-            {totalDrivers > 0 ? 'ATIVO' : 'PARADO'}
+        <View className={`flex-row items-center gap-1.5 px-3 py-1.5 rounded-full border ${isActive ? 'bg-emerald-500/10 border-emerald-500/30' : 'bg-slate-700/50 border-slate-600'}`}>
+          <View className={`w-2 h-2 rounded-full ${isActive ? 'bg-emerald-500' : 'bg-slate-400'}`} />
+          <Text className={`text-[11px] font-bold ${isActive ? 'text-emerald-400' : 'text-slate-400'}`}>
+            {isActive ? 'ATIVO' : 'PARADO'}
           </Text>
         </View>
       </View>
 
-      <View className="flex-row justify-between items-center">
-        <View className="flex-row items-center">
-          <FontAwesome5 name="map-marked-alt" size={14} color="#00babc" />
-          <Text className="text-slate-300 ml-2 text-sm">{totalStops} paragens</Text>
+      <View className="flex-row items-center gap-4 bg-slate-900/50 p-3 rounded-xl border border-slate-700/50">
+        <View className="flex-row items-center flex-1">
+          <View className="w-8 h-8 rounded-full bg-[#00babc]/20 items-center justify-center mr-2 border border-[#00babc]/30">
+            <Ionicons name="location" size={14} color="#00babc" />
+          </View>
+          <View>
+            <Text className="text-slate-400 text-[11px] font-medium">Paragens</Text>
+            <Text className="text-white text-[14px] font-bold">{totalStops}</Text>
+          </View>
         </View>
         
-        <View className="flex-row items-center">
-          <FontAwesome5 name="bus" size={14} color="#00babc" />
-          <Text className="text-slate-300 ml-2 text-sm">{totalDrivers} motorista(s)</Text>
+        <View className="w-[1px] h-8 bg-slate-700" />
+        
+        <View className="flex-row items-center flex-1 pl-2">
+          <View className="w-8 h-8 rounded-full bg-emerald-500/20 items-center justify-center mr-2 border border-emerald-500/30">
+            <FontAwesome5 name="bus" size={12} color="#10b981" />
+          </View>
+          <View>
+            <Text className="text-slate-400 text-[11px] font-medium">Motorista(s)</Text>
+            <Text className="text-white text-[14px] font-bold">{totalDrivers}</Text>
+          </View>
         </View>
       </View>
     </TouchableOpacity>
@@ -97,32 +108,41 @@ export const TransportDashboardAPI = ({ studentName = "Estudante", onRouteSelect
   return (
     <View className="flex-1 bg-slate-900">
       {/* Header */}
-      <View className="border-b-2 border-[#00babc] pt-12 pb-6 px-6">
-        <View className="mb-2">
-          <Text className="text-slate-400 text-sm">Bem-vindo(a),</Text>
-          <Text className="text-white text-2xl font-bold">{studentName}</Text>
+      <View className="bg-slate-800 pt-16 pb-8 px-6 border-b border-slate-700/80 rounded-b-[30px] shadow-2xl">
+        <View className="flex-row justify-between items-center mb-6">
+          <View>
+            <Text className="text-slate-400 text-[13px] font-medium tracking-wide uppercase">Bem-vindo(a),</Text>
+            <Text className="text-white text-[28px] font-bold mt-1">{studentName}</Text>
+            <Text className="text-[#00babc] text-[12px] font-medium mt-1">Dashboard de Transporte</Text>
+          </View>
+ 
         </View>
 
         {/* Quick Stats */}
-        <View className="flex-row justify-between mt-4">
-          <View className="flex-1 bg-slate-800 rounded-xl p-3 mr-2 border border-slate-700">
-            <Text className="text-slate-400 text-xs">Rotas Ativas</Text>
-            <Text className="text-cyan-400 text-2xl font-bold" style={{ color: '#00babc' }}>
-              {activeRoutes.length}
-            </Text>
+        <View className="flex-row justify-between gap-4">
+          <View className="flex-1 bg-slate-900/50 rounded-2xl p-4 border border-slate-700/50 items-center">
+            <View className="w-10 h-10 rounded-full bg-[#00babc]/20 items-center justify-center mb-2 border border-[#00babc]/30">
+              <MaterialIcons name="route" size={20} color="#00babc" />
+            </View>
+            <Text className="text-white text-2xl font-black">{activeRoutes.length}</Text>
+            <Text className="text-slate-400 text-[11px] font-medium uppercase mt-1">Rotas Ativas</Text>
           </View>
-          <View className="flex-1 bg-slate-800 rounded-xl p-3 ml-2 border border-slate-700">
-            <Text className="text-slate-400 text-xs">Motoristas</Text>
-            <Text className="text-emerald-400 text-2xl font-bold">
+          <View className="flex-1 bg-slate-900/50 rounded-2xl p-4 border border-slate-700/50 items-center">
+            <View className="w-10 h-10 rounded-full bg-emerald-500/20 items-center justify-center mb-2 border border-emerald-500/30">
+              <FontAwesome5 name="bus" size={16} color="#10b981" />
+            </View>
+            <Text className="text-white text-2xl font-black">
               {drivers.filter(d => d.current_route).length}
             </Text>
+            <Text className="text-slate-400 text-[11px] font-medium uppercase mt-1">Veículos Movendo</Text>
           </View>
         </View>
       </View>
 
       {/* Routes List */}
       <ScrollView 
-        className="flex-1 px-6 py-4"
+        className="flex-1 px-6 pt-6"
+        showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl 
             refreshing={refreshing} 
@@ -131,15 +151,18 @@ export const TransportDashboardAPI = ({ studentName = "Estudante", onRouteSelect
           />
         }
       >
-        <View className="flex-row justify-between items-center mb-4">
-          <Text className="text-white text-xl font-bold">Rotas Disponíveis</Text>
-          <TouchableOpacity onPress={fetchRoutes}>
-            <Ionicons name="refresh" size={24} color="#00babc" />
+        <View className="flex-row justify-between items-center mb-5">
+          <View className="flex-row items-center gap-2">
+            <MaterialIcons name="format-list-bulleted" size={20} color="#00babc" />
+            <Text className="text-white text-lg font-bold">Rotas Disponíveis</Text>
+          </View>
+          <TouchableOpacity onPress={fetchRoutes} className="bg-slate-800 p-2 rounded-full border border-slate-700 shadow-sm">
+            <Ionicons name="refresh" size={20} color="#00babc" />
           </TouchableOpacity>
         </View>
 
         {routes.length === 0 ? (
-          <View className="bg-slate-800 rounded-2xl p-8 items-center border border-slate-700">
+          <View className="bg-slate-800 rounded-2xl p-8 items-center">
             <FontAwesome5 name="bus-alt" size={48} color="#64748b" />
             <Text className="text-slate-400 text-center mt-4">
               Nenhuma rota disponível no momento

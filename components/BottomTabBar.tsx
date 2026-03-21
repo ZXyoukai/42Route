@@ -71,7 +71,7 @@ export const BottomTabBar = ({ activeTab, onTabPress, role, onLogout }: BottomTa
             onPress={() => onTabPress(tab.name)}
             activeOpacity={0.7}
           >
-            <View className={`p-1 rounded-lg ${isActive ? 'bg-cyan-600/20' : ''}`} style={isActive ? { backgroundColor: 'rgba(0, 186, 188, 0.2)' } : {}}>
+            <View className={`p-1 rounded-lg ${isActive ? '' : ''}`} style={isActive ? { backgroundColor: '' } : {}}>
               {renderIcon(tab.iconType, tab.icon, isActive)}
             </View>
             <Text 

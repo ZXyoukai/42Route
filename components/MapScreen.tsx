@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { View, Text, StyleSheet, Platform } from 'react-native';
+import { View, Text, StyleSheet, Platform, TouchableOpacity } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import MapView, { Marker, Polyline, PROVIDER_GOOGLE, Region } from 'react-native-maps';
 import * as Location from 'expo-location';
@@ -80,9 +80,10 @@ async function fetchOSRMRoute(
 interface MapScreenProps {
   studentName?: string;
   role?: 'driver' | 'cadete';
+  onBack?: () => void;
 }
 
-export const MapScreen = ({ studentName = 'Utilizador', role = 'cadete' }: MapScreenProps) => {
+export const MapScreen = ({ studentName = 'Utilizador', role = 'cadete', onBack }: MapScreenProps) => {
   const isDriver = role === 'driver';
 
   const [mapReady, setMapReady] = useState(false);
@@ -206,31 +207,33 @@ export const MapScreen = ({ studentName = 'Utilizador', role = 'cadete' }: MapSc
 
       {/* Header */}
       <View className="flex-row justify-between items-center px-5 pt-14 pb-4 border-b border-slate-700 bg-slate-900 z-10 shadow-sm shadow-black/20">
-        <View>
-          <Text className="text-white text-[18px] font-bold tracking-wide">Mapa em Tempo Real</Text>
-          <Text className="text-slate-400 text-[12px] mt-1 font-medium">
-            {isDriver ? 'A sua posição · direção à 42 Luanda' : `${studentName}, rastreio automático ativo`}
-          </Text>
+        <View className="flex-row items-center gap-3 flex-1">
+          {onBack && (
+            <TouchableOpacity onPress={onBack} className="w-10 h-10 rounded-full bg-slate-800 border border-slate-700 items-center justify-center" activeOpacity={0.7}>
+              <Ionicons name="arrow-back" size={20} color="#fff" />
+            </TouchableOpacity>
+          )}
+          <View>
+            <Text className="text-white text-[18px] font-bold tracking-wide">Mapa em Tempo Real</Text>
+            <Text className="text-slate-400 text-[12px] mt-1 font-medium">
+              {isDriver ? 'A sua posição · direção à 42 Luanda' : `${studentName}, rastreio automático ativo`}
+            </Text>
+          </View>
         </View>
         {isDriver && distance !== null && (
           <View className="flex-row items-center gap-1.5 bg-[#00babc]/10 border border-[#00babc]/30 rounded-[20px] px-3 py-1.5">
             <MaterialIcons name="directions" size={14} color="#00babc" />
-            <Text className="text-[#00babc] font-bold text-[15px]">
-              {distance < 1
-                ? `${Math.round(distance * 1000)} m`
-                : `${distance.toFixed(1)} km`}
-            </Text>
-            <Text className="text-slate-400 text-[11px]">da 42</Text>
+           
           </View>
         )}
       </View>
 
       {/* Mapa */}
-      <View className="flex-1">
+      <View className="flex-1" style={{ width: '100%', height: '100%' }}>
         <MapView
           ref={mapRef}
           provider={PROVIDER_GOOGLE}
-          className="flex-1"
+          style={{ flex: 1, width: '100%', height: '100%' }}
           initialRegion={initialRegion}
           showsUserLocation={false}
           showsMyLocationButton={false}
@@ -312,31 +315,31 @@ export const MapScreen = ({ studentName = 'Utilizador', role = 'cadete' }: MapSc
       </View>
 
       {/* Footer */}
-      <View className="flex-row justify-between items-center px-5 py-3 border-t border-slate-700 bg-slate-800">
-        <View className="flex-row items-center gap-1.5">
-          <Ionicons name="radio" size={14} color="#10b981" />
-          <Text className="text-slate-300 text-[13px]">
+      <View className="flex-row justify-between items-center px-5 py-2 border-t border-slate-700 bg-slate-800">
+        <View className="flex-row items-center gap-1 flex-1">
+          <Ionicons name="radio" size={12} color="#10b981" />
+          <Text className="text-slate-300 text-[12px] flex-1" numberOfLines={1}>
             {isDriver
               ? routeStatus === 'loading'
-                ? 'A recalcular rota...'
+                ? 'A recalcular...'
                 : routeStatus === 'error'
-                  ? 'Rota directa (sem rede)'
-                  : 'GPS ativo · recalcula cada 1 m'
+                  ? 'Sem rede'
+                  : 'GPS ativo'
               : liveDriverCoords
-                ? 'Autocarro em tempo real · WebSocket ativo'
-                : 'Aguardando localização do autocarro...'}
+                ? 'Autocarro em rota'
+                : 'Aguardando localização...'}
           </Text>
         </View>
         {isDriver && distance !== null && (
-          <Text className="text-[#00babc] font-bold text-[13px]">
+          <Text className="text-[#00babc] font-bold text-[12px] ml-2">
             {distance < 1
-              ? `${Math.round(distance * 1000)} m até à 42`
-              : `${distance.toFixed(1)} km até à 42`}
+              ? `${Math.round(distance * 1000)}m`
+              : `${distance.toFixed(1)}km`}
           </Text>
         )}
         {!isDriver && (
-          <Text className="text-[#00babc] font-bold text-[13px]">
-            {liveDriverCoords ? 'Autocarro 42 · em rota' : 'Autocarro 42'}
+          <Text className="text-[#00babc] font-bold text-[12px] ml-2">
+            {liveDriverCoords ? 'Em rota' : 'Offline'}
           </Text>
         )}
       </View>
