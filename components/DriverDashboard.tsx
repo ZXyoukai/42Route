@@ -17,6 +17,7 @@ import * as Location from 'expo-location';
 import { driverService } from '../services/driverService';
 import { routeService } from '../services/routeService';
 import { socketService } from '../services/socketService';
+import { tripStateService } from '../services/tripStateService';
 import { Driver, Route } from '../types/api';
 import { BusLoadingScreen } from './BusLoadingScreen';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -57,18 +58,32 @@ export const DriverDashboard = ({ driverId, driverName }: DriverDashboardProps) 
 
   const locationSubRef = useRef<Location.LocationSubscription | null>(null);
 
-  /* ── Cleanup quando sai da viagem ou desmonta ─────────────── */
+  /* ── Sincronizar com estado global da viagem ─────────────── */
   useEffect(() => {
-    return () => {
-      // Quando o componente desmonta ou a viagem termina, sai do room
-      if (tripActive || activeRoute) {
-        socketService.driverLeaveRoute(driverId);
+    // Recuperar estado anterior ao montar
+    const globalState = tripStateService.getState();
+    if (globalState.tripActive && globalState.driverId === driverId) {
+      setTripActive(true);
+      setActiveRoute(globalState.activeRoute);
+      setIsTracking(globalState.isTracking);
+    }
+
+    // Inscrever-se a mudanças no estado global
+    const unsubscribe = tripStateService.subscribe((state) => {
+      if (state.driverId === driverId) {
+        setTripActive(state.tripActive);
+        setActiveRoute(state.activeRoute);
+        setIsTracking(state.isTracking);
+      } else if (!state.tripActive) {
+        // Se outro motorista ou ninguém tem viagem ativa, limpar
+        setTripActive(false);
+        setActiveRoute(null);
+        setIsTracking(false);
       }
-      // Limpa subscrição de localização
-      locationSubRef.current?.remove();
-      locationSubRef.current = null;
-    };
-  }, [tripActive, activeRoute, driverId]);
+    });
+
+    return unsubscribe;
+  }, [driverId]);
 
   /* ── Pulso quando viagem ativa ──────────────────────────────── */
   useEffect(() => {
@@ -200,6 +215,8 @@ export const DriverDashboard = ({ driverId, driverName }: DriverDashboardProps) 
     }
     // Entra no room WebSocket da rota escolhida
     socketService.driverJoinRoute(driverId);
+    // Guardar estado global para persistir entre telas
+    tripStateService.startTrip(driverId, route);
     setActiveRoute(route);
     setTripActive(true);
     setIsTracking(true);
@@ -228,6 +245,8 @@ export const DriverDashboard = ({ driverId, driverName }: DriverDashboardProps) 
               } finally {
                 setTripLoading(false);
               }
+              // Terminar viagem no serviço global
+              tripStateService.endTrip();
               socketService.driverLeaveRoute(driverId);
               setTripActive(false);
               setIsTracking(false);

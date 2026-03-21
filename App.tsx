@@ -15,6 +15,7 @@ import { MapScreen } from 'components/MapScreen';
 import { TransportSchedule } from 'components/TransportSchedule';
 import { CadeteOnboarding } from 'components/CadeteOnboarding';
 import { Cadete, MiniBusStop } from 'types/api';
+import { tripStateService } from 'services/tripStateService';
 
 import './global.css';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -155,6 +156,7 @@ export default function App() {
     } catch (err) {
       console.warn('Erro ao limpar AsyncStorage no logout:', err);
     }
+    tripStateService.reset();
     setUserData(null);
     setSelectedRouteId(null);
     setCurrentScreen('login');
