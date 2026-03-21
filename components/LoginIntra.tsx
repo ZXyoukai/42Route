@@ -14,6 +14,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 WebBrowser.maybeCompleteAuthSession();
 
+const ACCENT = '#00babc';
+
 interface LoginIntraProps {
   onback: () => void;
   onLogin: (userData: { name: string; email: string }) => void;

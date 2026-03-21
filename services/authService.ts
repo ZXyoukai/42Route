@@ -137,6 +137,7 @@ export const authService = {
           ['user', JSON.stringify(cadeteUser)],
           ['authenticated', 'true'],
           ['token', token],
+          ['user_role', 'cadete'],
         ]);
       }
     } else if (response.type === 'cancel') {
