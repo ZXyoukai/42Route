@@ -5,7 +5,6 @@ import {
   ScrollView,
   TouchableOpacity,
   TextInput,
-  StyleSheet,
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -41,21 +40,21 @@ const Field = ({
   keyboardType?: 'default' | 'phone-pad' | 'numeric';
   required?: boolean;
 }) => (
-  <View style={styles.fieldWrap}>
-    <View style={styles.fieldLabel}>
+  <View className="mb-4">
+    <View className="flex-row items-center gap-2 mb-2">
       {icon}
-      <Text style={styles.fieldLabelText}>
+      <Text className="text-slate-400 text-[13px] font-medium">
         {label}
-        {required && <Text style={{ color: ACCENT }}> *</Text>}
+        {required && <Text className="text-[#00babc]"> *</Text>}
       </Text>
     </View>
     <TextInput
       value={value}
       onChangeText={onChange}
       placeholder={placeholder}
-      placeholderTextColor={MUTED}
+      placeholderTextColor="#64748b"
       keyboardType={keyboardType}
-      style={styles.input}
+      className="h-[48px] bg-slate-900 rounded-xl px-4 py-3 text-white text-[14px] border border-slate-700"
     />
   </View>
 );
@@ -70,11 +69,13 @@ const Section = ({
   title: string;
   subtitle?: string;
 }) => (
-  <View style={styles.sectionHeader}>
-    <View style={styles.sectionIcon}>{icon}</View>
+  <View className="flex-row items-center gap-3 mb-5 pb-3 border-b border-slate-800">
+    <View className="w-9 h-9 rounded-[10px] bg-[#00babc]/10 border border-[#00babc]/25 items-center justify-center">
+      {icon}
+    </View>
     <View>
-      <Text style={styles.sectionTitle}>{title}</Text>
-      {subtitle && <Text style={styles.sectionSubtitle}>{subtitle}</Text>}
+      <Text className="text-white text-[15px] font-bold">{title}</Text>
+      {subtitle && <Text className="text-slate-400 text-[12px] mt-0.5">{subtitle}</Text>}
     </View>
   </View>
 );
@@ -162,42 +163,42 @@ export const CadeteOnboarding = ({ initialUser, onComplete }: CadeteOnboardingPr
 
   if (saving) return <BusLoadingScreen msg="A guardar o teu perfil..." />;
   return (
-    <View style={styles.root}>
-      <StatusBar style="light" backgroundColor={BG} />
+    <View className="flex-1 bg-slate-900">
+      <StatusBar style="light" backgroundColor="#0f172a" />
 
       {/* ── Hero header ─────────────────────────────────────── */}
-      <View style={styles.hero}>
-        <View style={styles.avatarRing}>
-          <Text style={styles.avatarText}>{initials}</Text>
+      <View className="flex-row items-center pt-[56px] px-5 pb-4 border-b border-slate-800 gap-4">
+        <View className="w-16 h-16 rounded-full bg-[#00babc]/10 border-2 border-[#00babc] items-center justify-center">
+          <Text className="text-[#00babc] text-[22px] font-extrabold">{initials}</Text>
         </View>
-        <View style={{ flex: 1 }}>
-          <Text style={styles.heroGreeting}>Bem-vindo ao 42Routes</Text>
-          <Text style={styles.heroName} numberOfLines={1}>
+        <View className="flex-1">
+          <Text className="text-slate-400 text-[12px] mb-0.5 font-medium">Bem-vindo ao 42Routes</Text>
+          <Text className="text-white text-[17px] font-bold" numberOfLines={1}>
             {initialUser.full_name || initialUser.username}
           </Text>
-          <View style={styles.heroBadge}>
-            <FontAwesome5 name="user-graduate" size={10} color={ACCENT} />
-            <Text style={styles.heroBadgeText}>Cadete · 42 Luanda</Text>
+          <View className="flex-row items-center mt-1.5 gap-1.5 bg-[#00babc]/10 self-start px-2.5 py-1 rounded-full border border-[#00babc]/30">
+            <FontAwesome5 name="user-graduate" size={10} color="#00babc" />
+            <Text className="text-[#00babc] text-[11px] font-semibold uppercase tracking-wider">Cadete · 42 Luanda</Text>
           </View>
         </View>
       </View>
 
       {/* ── Progress pills ──────────────────────────────────── */}
-      <View style={styles.progressRow}>
+      <View className="flex-row justify-around items-center py-3 px-6 border-b border-slate-800 bg-slate-900/50">
         {['Dados Pessoais', 'Academia', 'Paragem'].map((label, i) => (
-          <View key={i} style={styles.progressItem}>
-            <View style={styles.progressDot}>
-              <Text style={styles.progressDotText}>{i + 1}</Text>
+          <View key={i} className="items-center gap-1.5">
+            <View className="w-7 h-7 rounded-full bg-[#00babc] items-center justify-center shadow-sm shadow-[#00babc]/30">
+              <Text className="text-white text-[12px] font-bold">{i + 1}</Text>
             </View>
-            <Text style={styles.progressLabel}>{label}</Text>
+            <Text className="text-slate-400 text-[10px] uppercase font-semibold">{label}</Text>
           </View>
         ))}
       </View>
 
       <ScrollView
-        style={styles.scroll}
+        className="flex-1 px-4 pt-3"
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: 32 }}
+        contentContainerStyle={{ paddingBottom: 40 }}
       >
         {/* ── Dados Pessoais ──────────────────────────────────── */}
         {/* <View style={styles.card}>
@@ -284,23 +285,23 @@ export const CadeteOnboarding = ({ initialUser, onComplete }: CadeteOnboardingPr
           </View>
         </View> */}
 
-        {/* ── Paragem ─────────────────────────────────────────── */};
-        <View style={styles.card}>
+        {/* ── Paragem ─────────────────────────────────────────── */}
+        <View className="bg-slate-800 rounded-[20px] p-5 mb-4 border border-slate-700">
           <Section
-            icon={<MaterialIcons name="directions-bus" size={18} color={ACCENT} />}
+            icon={<MaterialIcons name="directions-bus" size={18} color="#00babc" />}
             title="A Minha Paragem"
             subtitle="Escolhe o ponto de embarque mais próximo"
           />
 
           {stopsLoading ? (
-            <View style={styles.stopsLoading}>
-              <Ionicons name="reload-circle" size={28} color={ACCENT} />
-              <Text style={styles.stopsLoadingText}>A carregar paragens...</Text>
+            <View className="items-center py-6 gap-2">
+              <Ionicons name="reload-circle" size={28} color="#00babc" />
+              <Text className="text-slate-400 text-[14px]">A carregar paragens...</Text>
             </View>
           ) : stops.length === 0 ? (
-            <View style={styles.stopsLoading}>
-              <Ionicons name="warning-outline" size={28} color={MUTED} />
-              <Text style={styles.stopsLoadingText}>Nenhuma paragem disponível</Text>
+            <View className="items-center py-6 gap-2">
+              <Ionicons name="warning-outline" size={28} color="#64748b" />
+              <Text className="text-slate-400 text-[14px]">Nenhuma paragem disponível</Text>
             </View>
           ) : (
             stops.map((stop) => {
@@ -310,39 +311,40 @@ export const CadeteOnboarding = ({ initialUser, onComplete }: CadeteOnboardingPr
                   key={stop.id}
                   onPress={() => setSelectedStopId(stop.id)}
                   activeOpacity={0.75}
-                  style={[styles.stopCard, isSelected && styles.stopCardSelected]}
+                  className={`flex-row items-center bg-slate-900 rounded-[14px] py-3 pr-3.5 mb-2 border ${
+                    isSelected ? 'border-[#00babc] bg-[#00babc]/5' : 'border-slate-700'
+                  } overflow-hidden gap-3`}
                 >
-                  <View style={[styles.stopAccent, isSelected && { backgroundColor: ACCENT }]} />
+                  <View className={`w-1 self-stretch rounded ml-0.5 ${isSelected ? 'bg-[#00babc]' : 'bg-transparent'}`} />
                   <View
-                    style={[
-                      styles.stopIcon,
-                      isSelected && { backgroundColor: 'rgba(0,186,188,0.18)' },
-                    ]}
+                    className={`w-9 h-9 rounded-[10px] items-center justify-center ${
+                      isSelected ? 'bg-[#00babc]/20' : 'bg-white/5'
+                    }`}
                   >
                     <MaterialIcons
                       name="place"
                       size={20}
-                      color={isSelected ? ACCENT : MUTED}
+                      color={isSelected ? "#00babc" : "#64748b"}
                     />
                   </View>
-                  <View style={{ flex: 1 }}>
-                    <Text style={[styles.stopName, isSelected && { color: '#fff' }]}>
+                  <View className="flex-1">
+                    <Text className={`text-[14px] font-semibold ${isSelected ? 'text-white' : 'text-slate-400'}`}>
                       {stop.stop_name ?? `Paragem ${stop.id}`}
                     </Text>
                     {stop.distrit && (
-                      <Text style={styles.stopDistrit}>{stop.distrit}</Text>
+                      <Text className="text-slate-500 text-[12px] mt-0.5">{stop.distrit}</Text>
                     )}
                     {stop.route?.route_name && (
-                      <View style={styles.stopRoutePill}>
-                        <MaterialIcons name="directions-bus" size={10} color={ACCENT} />
-                        <Text style={styles.stopRouteText}>{stop.route.route_name}</Text>
+                      <View className="flex-row items-center gap-1 mt-1.5 self-start bg-[#00babc]/10 px-2 py-0.5 rounded-full border border-[#00babc]/20">
+                        <MaterialIcons name="directions-bus" size={10} color="#00babc" />
+                        <Text className="text-[#00babc] text-[10px] font-semibold uppercase tracking-wider">{stop.route.route_name}</Text>
                       </View>
                     )}
                   </View>
                   {isSelected ? (
-                    <Ionicons name="checkmark-circle" size={22} color={ACCENT} />
+                    <Ionicons name="checkmark-circle" size={22} color="#00babc" />
                   ) : (
-                    <View style={styles.stopRadio} />
+                    <View className="w-5 h-5 rounded-full border-2 border-slate-600" />
                   )}
                 </TouchableOpacity>
               );
@@ -352,22 +354,26 @@ export const CadeteOnboarding = ({ initialUser, onComplete }: CadeteOnboardingPr
 
         {/* ── Selected summary ────────────────────────────────── */}
         {selectedStop && (
-          <View style={styles.selectedBanner}>
-            <Ionicons name="checkmark-circle" size={18} color={ACCENT} />
-            <Text style={styles.selectedBannerText}>
+          <View className="flex-row items-center gap-2.5 bg-[#00babc]/10 rounded-[14px] px-4 py-3 mb-5 border border-[#00babc]/30">
+            <Ionicons name="checkmark-circle" size={18} color="#00babc" />
+            <Text className="text-[#94a3b8] text-[13px] flex-1">
               Paragem selecionada:{' '}
-              <Text style={{ color: '#fff', fontWeight: '700' }}>{selectedStop.stop_name}</Text>
+              <Text className="text-white font-bold">{selectedStop.stop_name}</Text>
             </Text>
           </View>
         )}
 
         {/* ── Submit ──────────────────────────────────────────── */}
-        <TouchableOpacity onPress={handleSave} activeOpacity={0.85} style={styles.submitBtn}>
+        <TouchableOpacity 
+          onPress={handleSave} 
+          activeOpacity={0.85} 
+          className="flex-row items-center justify-center bg-[#00babc] rounded-[16px] py-[16px] mb-3 shadow-md shadow-[#00babc]/30"
+        >
           <FontAwesome5 name="check-circle" size={18} color="#fff" style={{ marginRight: 8 }} />
-          <Text style={styles.submitBtnText}>Finalizar Cadastro</Text>
+          <Text className="text-white font-extrabold text-[16px]">Finalizar Cadastro</Text>
         </TouchableOpacity>
 
-        <Text style={styles.footerNote}>
+        <Text className="text-slate-500 text-[11px] text-center px-6 mb-2">
           Os teus dados são guardados apenas localmente neste dispositivo.
         </Text>
       </ScrollView>
@@ -377,198 +383,3 @@ export const CadeteOnboarding = ({ initialUser, onComplete }: CadeteOnboardingPr
   );
 };
 
-// ── Styles ──────────────────────────────────────────────────────────────────
-const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: BG },
-
-  hero: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingTop: 56,
-    paddingHorizontal: 20,
-    paddingBottom: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: BORDER,
-    gap: 16,
-  },
-  avatarRing: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    backgroundColor: 'rgba(0,186,188,0.12)',
-    borderWidth: 2,
-    borderColor: ACCENT,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  avatarText: { color: ACCENT, fontSize: 22, fontWeight: '800' },
-  heroGreeting: { color: MUTED, fontSize: 12, marginBottom: 2 },
-  heroName: { color: '#fff', fontSize: 17, fontWeight: '700' },
-  heroBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 5,
-    gap: 5,
-    backgroundColor: 'rgba(0,186,188,0.1)',
-    alignSelf: 'flex-start',
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: 'rgba(0,186,188,0.3)',
-  },
-  heroBadgeText: { color: ACCENT, fontSize: 11, fontWeight: '600' },
-
-  progressRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    alignItems: 'center',
-    paddingVertical: 12,
-    paddingHorizontal: 24,
-    borderBottomWidth: 1,
-    borderBottomColor: BORDER,
-  },
-  progressItem: { alignItems: 'center', gap: 5 },
-  progressDot: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    backgroundColor: ACCENT,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  progressDotText: { color: '#fff', fontSize: 12, fontWeight: '700' },
-  progressLabel: { color: MUTED, fontSize: 10 },
-
-  scroll: { flex: 1, paddingHorizontal: 16, paddingTop: 12 },
-
-  card: {
-    backgroundColor: CARD,
-    borderRadius: 20,
-    padding: 18,
-    marginBottom: 14,
-    borderWidth: 1,
-    borderColor: BORDER,
-  },
-
-  sectionHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    marginBottom: 16,
-    paddingBottom: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: BORDER,
-  },
-  sectionIcon: {
-    width: 36,
-    height: 36,
-    borderRadius: 10,
-    backgroundColor: 'rgba(0,186,188,0.1)',
-    borderWidth: 1,
-    borderColor: 'rgba(0,186,188,0.25)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  sectionTitle: { color: '#fff', fontSize: 15, fontWeight: '700' },
-  sectionSubtitle: { color: MUTED, fontSize: 12, marginTop: 1 },
-
-  fieldWrap: { marginBottom: 12 },
-  fieldLabel: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 6 },
-  fieldLabelText: { color: '#94a3b8', fontSize: 13 },
-  input: {
-    backgroundColor: INPUT_BG,
-    borderRadius: 12,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    color: '#fff',
-    fontSize: 14,
-    borderWidth: 1,
-    borderColor: BORDER,
-  },
-  row: { flexDirection: 'row' },
-
-  stopsLoading: { alignItems: 'center', paddingVertical: 24, gap: 8 },
-  stopsLoadingText: { color: MUTED, fontSize: 14 },
-
-  stopCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: INPUT_BG,
-    borderRadius: 14,
-    paddingVertical: 12,
-    paddingRight: 14,
-    marginBottom: 8,
-    borderWidth: 1,
-    borderColor: BORDER,
-    overflow: 'hidden',
-    gap: 12,
-  },
-  stopCardSelected: {
-    borderColor: ACCENT,
-    backgroundColor: 'rgba(0,186,188,0.06)',
-  },
-  stopAccent: { width: 4, alignSelf: 'stretch', backgroundColor: 'transparent', borderRadius: 2, marginLeft: 2 },
-  stopIcon: {
-    width: 36,
-    height: 36,
-    borderRadius: 10,
-    backgroundColor: 'rgba(255,255,255,0.04)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  stopName: { color: '#94a3b8', fontSize: 14, fontWeight: '600' },
-  stopDistrit: { color: MUTED, fontSize: 12, marginTop: 2 },
-  stopRoutePill: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    marginTop: 4,
-    alignSelf: 'flex-start',
-    backgroundColor: 'rgba(0,186,188,0.1)',
-    paddingHorizontal: 7,
-    paddingVertical: 2,
-    borderRadius: 20,
-  },
-  stopRouteText: { color: ACCENT, fontSize: 10, fontWeight: '600' },
-  stopRadio: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    borderWidth: 2,
-    borderColor: BORDER,
-  },
-
-  selectedBanner: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    backgroundColor: 'rgba(0,186,188,0.1)',
-    borderRadius: 12,
-    paddingHorizontal: 14,
-    paddingVertical: 10,
-    marginBottom: 16,
-    borderWidth: 1,
-    borderColor: 'rgba(0,186,188,0.3)',
-  },
-  selectedBannerText: { color: '#94a3b8', fontSize: 13, flex: 1 },
-
-  submitBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: ACCENT,
-    borderRadius: 16,
-    paddingVertical: 16,
-    marginBottom: 12,
-  },
-  submitBtnText: { color: '#fff', fontWeight: '800', fontSize: 16 },
-
-  footerNote: {
-    color: MUTED,
-    fontSize: 11,
-    textAlign: 'center',
-    paddingHorizontal: 24,
-    marginBottom: 8,
-  },
-});

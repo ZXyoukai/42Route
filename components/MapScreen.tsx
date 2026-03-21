@@ -201,36 +201,36 @@ export const MapScreen = ({ studentName = 'Utilizador', role = 'cadete' }: MapSc
   };
 
   return (
-    <View style={styles.root}>
+    <View className="flex-1 bg-slate-900">
       <StatusBar style="light" backgroundColor="#0f172a" />
 
       {/* Header */}
-      <View style={styles.header}>
+      <View className="flex-row justify-between items-center px-5 pt-14 pb-4 border-b border-slate-700 bg-slate-900 z-10 shadow-sm shadow-black/20">
         <View>
-          <Text style={styles.headerTitle}>Mapa em Tempo Real</Text>
-          <Text style={styles.headerSub}>
+          <Text className="text-white text-[18px] font-bold tracking-wide">Mapa em Tempo Real</Text>
+          <Text className="text-slate-400 text-[12px] mt-1 font-medium">
             {isDriver ? 'A sua posição · direção à 42 Luanda' : `${studentName}, rastreio automático ativo`}
           </Text>
         </View>
         {isDriver && distance !== null && (
-          <View style={styles.distanceBadge}>
+          <View className="flex-row items-center gap-1.5 bg-[#00babc]/10 border border-[#00babc]/30 rounded-[20px] px-3 py-1.5">
             <MaterialIcons name="directions" size={14} color="#00babc" />
-            <Text style={styles.distanceText}>
+            <Text className="text-[#00babc] font-bold text-[15px]">
               {distance < 1
                 ? `${Math.round(distance * 1000)} m`
                 : `${distance.toFixed(1)} km`}
             </Text>
-            <Text style={styles.distanceLabel}>da 42</Text>
+            <Text className="text-slate-400 text-[11px]">da 42</Text>
           </View>
         )}
       </View>
 
       {/* Mapa */}
-      <View style={{ flex: 1 }}>
+      <View className="flex-1">
         <MapView
           ref={mapRef}
           provider={PROVIDER_GOOGLE}
-          style={{ flex: 1 }}
+          className="flex-1"
           initialRegion={initialRegion}
           showsUserLocation={false}
           showsMyLocationButton={false}
@@ -243,14 +243,14 @@ export const MapScreen = ({ studentName = 'Utilizador', role = 'cadete' }: MapSc
           {isDriver && mapReady && (
             <>
               <Marker coordinate={LUANDA_42} title="42 Luanda" description="Campus 42 School Angola">
-                <View style={styles.schoolMarker}>
-                  <Text style={styles.schoolMarkerText}>42</Text>
+                <View className="bg-slate-900 rounded-[10px] border-2 border-[#00babc] px-2 py-1">
+                  <Text className="text-[#00babc] font-black text-[14px]">42</Text>
                 </View>
               </Marker>
 
               {driverCoords && (
                 <Marker coordinate={driverCoords} title="A sua posição" description="Localização em tempo real">
-                  <View style={styles.driverMarker}>
+                  <View className="bg-[#00babc] rounded-[20px] w-10 h-10 items-center justify-center border-2 border-white">
                     <FontAwesome5 name="bus" size={16} color="white" />
                   </View>
                 </Marker>
@@ -279,15 +279,15 @@ export const MapScreen = ({ studentName = 'Utilizador', role = 'cadete' }: MapSc
               {/* Posição do autocarro recebida via WebSocket */}
               {liveDriverCoords ? (
                 <Marker coordinate={liveDriverCoords} title="Autocarro 42" description="Localização em tempo real">
-                  <View style={styles.driverMarker}>
+                  <View className="bg-[#00babc] rounded-[20px] w-10 h-10 items-center justify-center border-2 border-white">
                     <FontAwesome5 name="bus" size={16} color="white" />
                   </View>
                 </Marker>
               ) : (
                 /* Marcador fixo na 42 enquanto sem sinal */
                 <Marker coordinate={LUANDA_42} title="Campus 42 Luanda" description="Aguardando localização do autocarro">
-                  <View style={styles.schoolMarker}>
-                    <Text style={styles.schoolMarkerText}>42</Text>
+                  <View className="bg-slate-900 rounded-[10px] border-2 border-[#00babc] px-2 py-1">
+                    <Text className="text-[#00babc] font-black text-[14px]">42</Text>
                   </View>
                 </Marker>
               )}
@@ -297,25 +297,25 @@ export const MapScreen = ({ studentName = 'Utilizador', role = 'cadete' }: MapSc
 
         {/* Overlay: aguardar GPS */}
         {isDriver && !driverCoords && (
-          <View style={styles.gpsWait}>
+          <View className="absolute bottom-4 self-center flex-row items-center gap-2 bg-slate-900/90 rounded-[20px] px-4 py-2.5 border border-[#00babc]/30">
             <Ionicons name="locate" size={22} color="#00babc" />
-            <Text style={styles.gpsWaitText}>A obter localização GPS...</Text>
+            <Text className="text-[#00babc] text-[13px] font-medium">A obter localização GPS...</Text>
           </View>
         )}
         {/* Overlay: a calcular rota OSRM */}
         {isDriver && driverCoords && routeStatus === 'loading' && routeCoords.length === 0 && (
-          <View style={styles.gpsWait}>
+          <View className="absolute bottom-4 self-center flex-row items-center gap-2 bg-slate-900/90 rounded-[20px] px-4 py-2.5 border border-[#00babc]/30">
             <MaterialIcons name="directions" size={20} color="#00babc" />
-            <Text style={styles.gpsWaitText}>A calcular rota...</Text>
+            <Text className="text-[#00babc] text-[13px] font-medium">A calcular rota...</Text>
           </View>
         )}
       </View>
 
       {/* Footer */}
-      <View style={styles.footer}>
-        <View style={styles.footerRow}>
+      <View className="flex-row justify-between items-center px-5 py-3 border-t border-slate-700 bg-slate-800">
+        <View className="flex-row items-center gap-1.5">
           <Ionicons name="radio" size={14} color="#10b981" />
-          <Text style={styles.footerLabel}>
+          <Text className="text-slate-300 text-[13px]">
             {isDriver
               ? routeStatus === 'loading'
                 ? 'A recalcular rota...'
@@ -328,14 +328,14 @@ export const MapScreen = ({ studentName = 'Utilizador', role = 'cadete' }: MapSc
           </Text>
         </View>
         {isDriver && distance !== null && (
-          <Text style={styles.footerDist}>
+          <Text className="text-[#00babc] font-bold text-[13px]">
             {distance < 1
               ? `${Math.round(distance * 1000)} m até à 42`
               : `${distance.toFixed(1)} km até à 42`}
           </Text>
         )}
         {!isDriver && (
-          <Text style={styles.footerAccent}>
+          <Text className="text-[#00babc] font-bold text-[13px]">
             {liveDriverCoords ? 'Autocarro 42 · em rota' : 'Autocarro 42'}
           </Text>
         )}
@@ -344,79 +344,4 @@ export const MapScreen = ({ studentName = 'Utilizador', role = 'cadete' }: MapSc
   );
 };
 
-const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: '#0f172a' },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    borderBottomWidth: 2,
-    borderBottomColor: '#00babc',
-    marginTop: 56,
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-  },
-  headerTitle: { color: '#fff', fontSize: 18, fontWeight: '700' },
-  headerSub: { color: '#a5f3fc', fontSize: 13, marginTop: 2 },
-  distanceBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 5,
-    backgroundColor: 'rgba(0,186,188,0.12)',
-    borderWidth: 1,
-    borderColor: 'rgba(0,186,188,0.35)',
-    borderRadius: 20,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-  },
-  distanceText: { color: '#00babc', fontWeight: '700', fontSize: 15 },
-  distanceLabel: { color: '#64748b', fontSize: 11 },
-  schoolMarker: {
-    backgroundColor: '#0f172a',
-    borderRadius: 10,
-    borderWidth: 2,
-    borderColor: '#00babc',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-  },
-  schoolMarkerText: { color: '#00babc', fontWeight: '900', fontSize: 14 },
-  driverMarker: {
-    backgroundColor: '#00babc',
-    borderRadius: 20,
-    width: 40,
-    height: 40,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 2,
-    borderColor: '#fff',
-  },
-  gpsWait: {
-    position: 'absolute',
-    bottom: 16,
-    alignSelf: 'center',
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    backgroundColor: 'rgba(15,23,42,0.88)',
-    borderRadius: 20,
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderWidth: 1,
-    borderColor: 'rgba(0,186,188,0.3)',
-  },
-  gpsWaitText: { color: '#00babc', fontSize: 13, fontWeight: '500' },
-  footer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-    borderTopWidth: 1,
-    borderTopColor: '#334155',
-    backgroundColor: '#1e293b',
-  },
-  footerRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  footerLabel: { color: '#cbd5e1', fontSize: 13 },
-  footerDist: { color: '#00babc', fontWeight: '700', fontSize: 13 },
-  footerAccent: { color: '#00babc', fontWeight: '700', fontSize: 13 },
-});
+

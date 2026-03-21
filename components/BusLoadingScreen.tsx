@@ -70,17 +70,13 @@ export const BusLoadingScreen = ({ msg = 'Carregando...' }: BusLoadingScreenProp
   const windows = [w1, w2, w3, w4];
 
   return (
-    <View style={{ flex: 1, backgroundColor: '#0f172a', justifyContent: 'center', alignItems: 'center', paddingHorizontal: 40 }}>
+    <View className="flex-1 bg-slate-900 justify-center items-center px-10">
       {/* Bus silhouette */}
-      <View style={{ width: 200, height: 90, marginBottom: 32 }}>
+      <View className="w-[200px] h-[90px] mb-8">
         {/* Body */}
-        <View style={{
-          width: 200, height: 72, backgroundColor: '#1e293b',
-          borderRadius: 14, borderWidth: 2, borderColor: '#334155',
-          overflow: 'hidden',
-        }}>
+        <View className="w-[200px] h-[72px] bg-slate-800 rounded-[14px] border-2 border-slate-700 overflow-hidden">
           {/* Windows — each lights up individually */}
-          <View style={{ flexDirection: 'row', paddingHorizontal: 12, paddingTop: 10, position: 'absolute', top: 0, left: 0, right: 0 }}>
+          <View className="flex-row px-3 pt-2.5 absolute top-0 left-0 right-0">
             {windows.map((anim, i) => {
               const bg = anim.interpolate({
                 inputRange: [0, 1],
@@ -108,46 +104,30 @@ export const BusLoadingScreen = ({ msg = 'Carregando...' }: BusLoadingScreenProp
           </View>
 
           {/* Door */}
-          <View style={{
-            position: 'absolute', bottom: 0, right: 14,
-            width: 16, height: 30,
-            backgroundColor: 'rgba(15,23,42,0.6)',
-            borderRadius: 4, borderWidth: 1, borderColor: '#475569',
-          }} />
+          <View className="absolute bottom-0 right-3.5 w-4 h-[30px] bg-slate-900/60 rounded border border-slate-600" />
 
           {/* Front light */}
-          <View style={{
-            position: 'absolute', top: 24, left: 6,
-            width: 8, height: 8, borderRadius: 4,
-            backgroundColor: '#fbbf24',
-          }} />
+          <View className="absolute top-6 left-1.5 w-2 h-2 rounded-full bg-amber-400" />
         </View>
 
         {/* Wheels */}
-        <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 22, marginTop: 2 }}>
+        <View className="flex-row justify-between px-5 mt-0.5">
           {[0, 1].map(i => (
-            <View key={i} style={{
-              width: 26, height: 26, borderRadius: 13,
-              backgroundColor: '#1e293b', borderWidth: 3, borderColor: '#334155',
-              alignItems: 'center', justifyContent: 'center',
-            }}>
-              <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: '#475569' }} />
+            <View key={i} className="w-[26px] h-[26px] rounded-full bg-slate-800 border-3 border-slate-700 items-center justify-center">
+              <View className="w-2 h-2 rounded-full bg-slate-600" />
             </View>
           ))}
         </View>
       </View>
 
-      <Text style={{ color: '#ffffff', fontWeight: 'bold', fontSize: 16, textAlign: 'center', marginBottom: 6 }}>
+      <Text className="text-white font-bold text-base text-center mb-1.5">
         {msg}
       </Text>
 
       {/* Dots */}
-      <View style={{ flexDirection: 'row', gap: 6, marginTop: 6 }}>
+      <View className="flex-row gap-1.5 mt-1.5">
         {[dot1, dot2, dot3].map((d, i) => (
-          <Animated.View key={i} style={{
-            width: 8, height: 8, borderRadius: 4,
-            backgroundColor: '#00babc', opacity: d,
-          }} />
+          <Animated.View key={i} style={{ opacity: d }} className="w-2 h-2 rounded-full bg-[#00babc]" />
         ))}
       </View>
     </View>

@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, Modal } from 'react-native';
-import { Ionicons, MaterialIcons } from '@expo/vector-icons';
+import { Ionicons } from '@expo/vector-icons';
 
 export type AlertType = 'success' | 'error' | 'warning' | 'info';
 
@@ -26,33 +26,49 @@ const getAlertConfig = (type: AlertType) => {
       return {
         icon: 'checkmark-circle',
         iconColor: '#00babc',
-        titleColor: '#00babc',
-        borderColor: '#00babc',
-        backgroundColor: 'rgba(0, 186, 188, 0.1)',
+        alertBorder: 'border-[#00babc]/30',
+        iconBg: 'bg-[#00babc]/10',
+        iconBorder: 'border-[#00babc]/20',
+        titleColor: 'text-[#00babc]',
+        btnBg: 'bg-[#00babc]',
+        btnShadow: 'shadow-[#00babc]/30',
+        btnBorder: 'border-[#00babc]',
       };
     case 'error':
       return {
         icon: 'close-circle',
-        iconColor: '#ef4444',
-        titleColor: '#ef4444',
-        borderColor: '#ef4444',
-        backgroundColor: 'rgba(239, 68, 68, 0.1)',
+        iconColor: '#f87171',
+        alertBorder: 'border-red-500/30',
+        iconBg: 'bg-red-500/10',
+        iconBorder: 'border-red-500/20',
+        titleColor: 'text-red-400',
+        btnBg: 'bg-red-500',
+        btnShadow: 'shadow-red-500/30',
+        btnBorder: 'border-red-500',
       };
     case 'warning':
       return {
         icon: 'warning',
-        iconColor: '#f59e0b',
-        titleColor: '#f59e0b',
-        borderColor: '#f59e0b',
-        backgroundColor: 'rgba(245, 158, 11, 0.1)',
+        iconColor: '#fbbf24',
+        alertBorder: 'border-amber-500/30',
+        iconBg: 'bg-amber-500/10',
+        iconBorder: 'border-amber-500/20',
+        titleColor: 'text-amber-400',
+        btnBg: 'bg-amber-500',
+        btnShadow: 'shadow-amber-500/30',
+        btnBorder: 'border-amber-500',
       };
     case 'info':
       return {
         icon: 'information-circle',
-        iconColor: '#3b82f6',
-        titleColor: '#3b82f6',
-        borderColor: '#3b82f6',
-        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+        iconColor: '#60a5fa',
+        alertBorder: 'border-blue-500/30',
+        iconBg: 'bg-blue-500/10',
+        iconBorder: 'border-blue-500/20',
+        titleColor: 'text-blue-400',
+        btnBg: 'bg-blue-500',
+        btnShadow: 'shadow-blue-500/30',
+        btnBorder: 'border-blue-500',
       };
   }
 };
@@ -75,61 +91,43 @@ export const CustomAlert = ({
       animationType="fade"
       onRequestClose={onClose}
     >
-      <View className="flex-1 bg-black/50 justify-center items-center px-6">
+      <View className="flex-1 bg-slate-900/80 justify-center items-center px-6">
         {/* Alert Container */}
         <View 
-          className="bg-slate-800 rounded-3xl p-6 w-full max-w-sm shadow-2xl border"
-          style={{ 
-            borderColor: config.borderColor,
-            backgroundColor: '#1e293b',
-          }}
+          className={`bg-slate-800 rounded-[28px] p-6 w-full max-w-sm border-2 ${config.alertBorder} shadow-2xl shadow-black/40`}
         >
           {/* Header com Ícone */}
           <View className="items-center mb-6">
             <View 
-              className="w-16 h-16 rounded-full items-center justify-center mb-4"
-              style={{ 
-                backgroundColor: config.backgroundColor,
-                borderWidth: 2,
-                borderColor: config.borderColor,
-              }}
+              className={`w-16 h-16 rounded-[20px] items-center justify-center mb-5 border-2 ${config.iconBg} ${config.iconBorder}`}
             >
               <Ionicons 
                 name={config.icon as any} 
-                size={32} 
+                size={34} 
                 color={config.iconColor} 
               />
             </View>
             
             <Text 
-              className="text-xl font-bold text-center mb-2"
-              style={{ color: config.titleColor }}
+              className={`text-[20px] font-bold text-center mb-2 tracking-wide ${config.titleColor}`}
             >
               {title}
             </Text>
             
-            <Text className="text-slate-300 text-center text-base leading-relaxed">
+            <Text className="text-slate-400 text-center text-[15px] leading-relaxed">
               {message}
             </Text>
           </View>
 
           {/* Botões */}
-          <View className="space-y-3">
+          <View className="mt-2">
             {/* Botão Primário */}
             <TouchableOpacity
-              className="rounded-2xl py-4 px-6 items-center shadow-lg"
-              style={{
-                backgroundColor: config.iconColor,
-                shadowColor: config.iconColor,
-                shadowOffset: { width: 0, height: 4 },
-                shadowOpacity: 0.3,
-                shadowRadius: 8,
-                elevation: 8,
-              }}
+              className={`rounded-2xl py-4 items-center justify-center shadow-md ${config.btnBg} ${config.btnShadow} ${secondaryButton ? 'mb-3' : ''}`}
               onPress={primaryButton.onPress}
-              activeOpacity={0.8}
+              activeOpacity={0.85}
             >
-              <Text className="text-white font-bold text-lg">
+              <Text className="text-white font-bold text-[16px] tracking-wide">
                 {primaryButton.text}
               </Text>
             </TouchableOpacity>
@@ -137,17 +135,12 @@ export const CustomAlert = ({
             {/* Botão Secundário (opcional) */}
             {secondaryButton && (
               <TouchableOpacity
-                className="rounded-2xl py-4 px-6 items-center border-2"
-                style={{
-                  borderColor: config.borderColor,
-                  backgroundColor: 'transparent',
-                }}
+                className={`rounded-2xl py-4 items-center justify-center border-2 bg-transparent ${config.btnBorder}`}
                 onPress={secondaryButton.onPress}
-                activeOpacity={0.7}
+                activeOpacity={0.85}
               >
                 <Text 
-                  className="font-bold text-lg"
-                  style={{ color: config.iconColor }}
+                  className={`font-bold text-[16px] tracking-wide ${config.titleColor}`}
                 >
                   {secondaryButton.text}
                 </Text>
@@ -155,13 +148,13 @@ export const CustomAlert = ({
             )}
           </View>
 
-          {/* Botão de Fechar */}
+          {/* Botão de Fechar Top-Right */}
           <TouchableOpacity
-            className="absolute top-4 right-4 w-8 h-8 rounded-full bg-slate-700 items-center justify-center"
+            className="absolute top-4 right-4 w-9 h-9 rounded-full bg-slate-700/50 items-center justify-center"
             onPress={onClose}
             activeOpacity={0.7}
           >
-            <Ionicons name="close" size={16} color="#94a3b8" />
+            <Ionicons name="close" size={20} color="#94a3b8" />
           </TouchableOpacity>
         </View>
       </View>

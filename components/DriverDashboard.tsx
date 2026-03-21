@@ -236,7 +236,7 @@ export const DriverDashboard = ({ driverId, driverName }: DriverDashboardProps) 
   const firstName = displayName.split(' ')[0];
 
   return (
-    <View style={styles.root}>
+    <View className="flex-1 bg-slate-900">
       <StatusBar style="light" backgroundColor={BG} />
 
       {/* ── Modal de Seleção de Rota ───────────────────────────── */}
@@ -246,41 +246,41 @@ export const DriverDashboard = ({ driverId, driverName }: DriverDashboardProps) 
         animationType="slide"
         onRequestClose={() => setShowRouteModal(false)}
       >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalSheet}>
-            <View style={styles.modalHandle} />
+        <View className="flex-1 bg-black/60 justify-end">
+          <View className="bg-slate-800 rounded-t-[24px] px-5 pb-9 pt-3 border-t border-slate-700">
+            <View className="w-10 h-1 rounded-full bg-slate-600 self-center mb-4" />
 
-            <View style={styles.modalHeader}>
+            <View className="flex-row items-center gap-2 mb-1.5">
               <MaterialIcons name="route" size={22} color={ACCENT} />
-              <Text style={styles.modalTitle}>Escolher Rota</Text>
-              <TouchableOpacity onPress={() => setShowRouteModal(false)} style={styles.modalClose}>
+              <Text className="text-white text-[18px] font-bold flex-1">Escolher Rota</Text>
+              <TouchableOpacity onPress={() => setShowRouteModal(false)} className="p-1">
                 <Ionicons name="close" size={20} color={MUTED} />
               </TouchableOpacity>
             </View>
 
-            <Text style={styles.modalSub}>Seleciona a rota que vais percorrer nesta viagem.</Text>
+            <Text className="text-slate-400 text-[13px] mb-4">Seleciona a rota que vais percorrer nesta viagem.</Text>
 
             {loadingRoutes ? (
-              <ActivityIndicator color={ACCENT} size="large" style={{ marginVertical: 32 }} />
+              <ActivityIndicator color={ACCENT} size="large" className="my-8" />
             ) : allRoutes.length === 0 ? (
-              <Text style={[styles.modalSub, { textAlign: 'center', marginTop: 24 }]}>Nenhuma rota disponível.</Text>
+              <Text className="text-slate-400 text-[13px] text-center mt-6 mb-4">Nenhuma rota disponível.</Text>
             ) : (
-              <ScrollView style={{ maxHeight: 400 }} showsVerticalScrollIndicator={false}>
+              <ScrollView className="max-h-[400px]" showsVerticalScrollIndicator={false}>
                 {allRoutes.map((route) => (
                   <TouchableOpacity
                     key={route.id}
-                    style={styles.routeOption}
+                    className="flex-row items-center bg-slate-900 rounded-[14px] p-3.5 mb-2.5 border border-slate-700"
                     onPress={() => handleSelectRoute(route)}
                     activeOpacity={0.8}
                   >
-                    <View style={styles.routeOptionLeft}>
-                      <Text style={styles.routeOptionName}>{route.route_name}</Text>
+                    <View className="flex-1 gap-1">
+                      <Text className="text-white text-[15px] font-semibold">{route.route_name}</Text>
                       {route.description ? (
-                        <Text style={styles.routeOptionDesc} numberOfLines={1}>{route.description}</Text>
+                        <Text className="text-slate-400 text-[12px]" numberOfLines={1}>{route.description}</Text>
                       ) : null}
-                      <View style={styles.routeOptionMeta}>
+                      <View className="flex-row items-center gap-1 mt-1">
                         <Ionicons name="location" size={12} color={MUTED} />
-                        <Text style={styles.routeOptionMetaText}>{route.stops?.length ?? 0} paragens</Text>
+                        <Text className="text-slate-400 text-[11px]">{route.stops?.length ?? 0} paragens</Text>
                       </View>
                     </View>
                     <Ionicons name="chevron-forward" size={20} color={ACCENT} />
@@ -292,40 +292,33 @@ export const DriverDashboard = ({ driverId, driverName }: DriverDashboardProps) 
         </View>
       </Modal>
 
-      <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: 28 }} showsVerticalScrollIndicator={false}>
+      <ScrollView className="flex-1 pb-7" showsVerticalScrollIndicator={false}>
 
         {/* ── Header ──────────────────────────────────────────── */}
-        <View style={styles.header}>
-          <View style={styles.headerLeft}>
-            <Text style={styles.greeting}>{greeting},</Text>
-            <Text style={styles.driverName}>{firstName} </Text>
-            <Text style={styles.role}>Motorista · 42 Luanda</Text>
+        <View className="flex-row justify-between items-start pt-[56px] px-5 pb-5 border-b border-slate-700">
+          <View className="flex-1">
+            <Text className="text-slate-400 text-[13px] tracking-wide">{greeting},</Text>
+            <Text className="text-white text-[26px] font-bold mt-0.5">{firstName} </Text>
+            <Text className="text-[#00babc] text-[12px] mt-1 font-medium">Motorista · 42 Luanda</Text>
           </View>
 
           {/* Indicador status live */}
-          <View style={[styles.statusChip, { borderColor: tripActive ? SUCCESS : BORDER }]}>
-            <Animated.View style={[styles.statusDot, { opacity: tripActive ? dotAnim : 1, backgroundColor: tripActive ? SUCCESS : MUTED }]} />
-            <Text style={[styles.statusText, { color: tripActive ? SUCCESS : MUTED }]}>
+          <View className={`flex-row items-center gap-1.5 px-3 py-1.5 rounded-[20px] border bg-slate-800 mt-1.5 ${tripActive ? "border-emerald-500" : "border-slate-700"}`}>
+            <Animated.View style={{ opacity: tripActive ? dotAnim : 1 }} className={`w-2 h-2 rounded-full ${tripActive ? "bg-emerald-500" : "bg-slate-400"}`} />
+            <Text className={`text-[12px] font-semibold ${tripActive ? "text-emerald-500" : "text-slate-400"}`}>
               {tripActive ? 'Em Viagem' : 'Inativo'}
             </Text>
           </View>
         </View>
 
         {/* ── Botão Principal: Iniciar / Terminar ─────────────── */}
-        <View style={styles.actionCenter}>
+        <View className="items-center justify-center py-9">
           {/* Anel pulsante de fundo */}
           <Animated.View
-            style={[
-              styles.pulseRing,
-              {
-                transform: [{ scale: pulseAnim }],
-                opacity: pulseOpacity,
-                borderColor: tripActive ? SUCCESS : ACCENT,
-              },
-            ]}
+            className="absolute w-[180px] h-[180px] rounded-full border-4" style={{ transform: [{ scale: pulseAnim }], opacity: pulseOpacity, borderColor: tripActive ? "#10b981" : "#00babc" }}
           />
           <TouchableOpacity
-            style={[styles.bigBtn, { backgroundColor: tripActive ? SUCCESS : ACCENT }]}
+            className={`w-[170px] h-[170px] rounded-[85px] items-center justify-center gap-1.5 shadow-xl shadow-emerald-500/40 ${tripActive ? "bg-emerald-500" : "bg-[#00babc]" }`}
             onPress={handleToggleTrip}
             activeOpacity={0.85}
           >
@@ -334,94 +327,94 @@ export const DriverDashboard = ({ driverId, driverName }: DriverDashboardProps) 
               size={36}
               color="#fff"
             />
-            <Text style={styles.bigBtnText}>
+            <Text className="text-white text-[15px] font-bold text-center">
               {tripActive ? 'Terminar Viagem' : 'Iniciar Viagem'}
             </Text>
-            <Text style={styles.bigBtnSub}>
+            <Text className="text-white/65 text-[10px] text-center px-4">
               {tripActive ? 'Toca para terminar e parar o GPS' : 'Toca para iniciar e partilhar localização'}
             </Text>
           </TouchableOpacity>
         </View>
 
         {/* ── GPS / Localização ───────────────────────────────── */}
-        <View style={styles.card}>
-          <View style={styles.cardHeader}>
+        <View className="mx-4 mb-3.5 bg-slate-800 rounded-[20px] p-[18px] border border-slate-700">
+          <View className="flex-row items-center gap-2 mb-3.5">
             <Ionicons name="location" size={20} color={ACCENT} />
-            <Text style={styles.cardTitle}>Partilha de Localização</Text>
-            <Animated.View style={[styles.liveDot, { opacity: isTracking ? dotAnim : 1, backgroundColor: isTracking ? ACCENT : MUTED }]} />
+            <Text className="text-white text-[16px] font-bold flex-1">Partilha de Localização</Text>
+            <Animated.View style={{ opacity: isTracking ? dotAnim : 1 }} className={`w-2 h-2 rounded-full style={tripActive ? "bg-emerald-500" : "bg-slate-400"}`} />
           </View>
 
           {locationError ? (
-            <View style={styles.errorRow}>
+            <View className="flex-row items-center gap-2 p-2.5 bg-red-500/10 rounded-[10px]">
               <Ionicons name="warning" size={16} color={DANGER} />
-              <Text style={[styles.errorText]}>{locationError}</Text>
+              <Text className="text-red-500 text-[13px] flex-1">{locationError}</Text>
             </View>
           ) : isTracking ? (
             <>
-              <View style={styles.infoRow}>
+              <View className="flex-row items-center gap-2 py-1.5 border-b border-slate-700/50">
                 <MaterialIcons name="gps-fixed" size={16} color={SUCCESS} />
-                <Text style={styles.infoLabel}>Estado</Text>
-                <Text style={[styles.infoValue, { color: SUCCESS }]}>GPS Ativo · A enviar posição</Text>
+                <Text className="text-slate-400 text-[13px] flex-1">Estado</Text>
+                <Text className="text-emerald-500 text-[13px] font-medium shrink text-right">GPS Ativo · A enviar posição</Text>
               </View>
               {lastCoords && (
-                <View style={styles.coordBox}>
-                  <Text style={styles.coordLabel}>Última posição</Text>
-                  <Text style={styles.coordText}>
+                <View className="mt-2.5 bg-[#00babc]/10 rounded-[10px] p-2.5 border border-[#00babc]/25">
+                  <Text className="text-slate-400 text-[11px] mb-0.5">Última posição</Text>
+                  <Text className="text-[#00babc] font-mono text-[12px]">
                     Lat {lastCoords.lat.toFixed(5)} · Long {lastCoords.long.toFixed(5)}
                   </Text>
                 </View>
               )}
             </>
           ) : (
-            <View style={styles.infoRow}>
+            <View className="flex-row items-center gap-2 py-1.5 border-b border-slate-700/50">
               <MaterialIcons name="gps-off" size={16} color={MUTED} />
-              <Text style={[styles.infoLabel, { color: MUTED }]}>GPS desativado</Text>
-              <Text style={[styles.infoValue, { color: MUTED }]}>Inicia a viagem para partilhar localização</Text>
+              <Text className="text-slate-400 text-[13px] flex-1">GPS desativado</Text>
+              <Text className="text-slate-400 text-[13px] font-medium shrink text-right">Inicia a viagem para partilhar localização</Text>
             </View>
           )}
         </View>
 
         {/* ── Rota da Viagem Atual ──────────────────────────────── */}
         {activeRoute ? (
-          <View style={styles.card}>
-            <View style={styles.cardHeader}>
+          <View className="mx-4 mb-3.5 bg-slate-800 rounded-[20px] p-[18px] border border-slate-700">
+            <View className="flex-row items-center gap-2 mb-3.5">
               <MaterialIcons name="route" size={20} color={ACCENT} />
-              <Text style={styles.cardTitle}>Rota em Curso</Text>
-              <View style={[styles.metaItem, { backgroundColor: 'rgba(16,185,129,0.12)', borderColor: SUCCESS }]}>
+              <Text className="text-white text-[16px] font-bold flex-1">Rota em Curso</Text>
+              <View className="flex-row items-center gap-1 px-2.5 py-1 rounded-[20px] border border-emerald-500 bg-emerald-500/10">
                 <FontAwesome5 name="bus" size={11} color={SUCCESS} />
-                <Text style={[styles.metaText, { color: SUCCESS }]}>Em Curso</Text>
+                <Text className="text-emerald-500 text-[12px] font-medium">Em Curso</Text>
               </View>
             </View>
 
-            <View style={styles.routeBox}>
-              <Text style={styles.routeName}>{activeRoute.route_name}</Text>
+            <View className="bg-[#00babc]/10 rounded-[12px] p-[14px] border border-[#00babc]/20">
+              <Text className="text-[#00babc] text-[17px] font-bold">{activeRoute.route_name}</Text>
               {activeRoute.description && (
-                <Text style={styles.routeDesc}>{activeRoute.description}</Text>
+                <Text className="text-slate-300 text-[13px] mt-1">{activeRoute.description}</Text>
               )}
-              <View style={styles.routeMeta}>
-                <View style={styles.metaItem}>
+              <View className="flex-row gap-2 mt-2.5 flex-wrap">
+                <View className="flex-row items-center gap-1 px-2.5 py-1 rounded-[20px] border border-[#00babc] bg-[#00babc]/10">
                   <Ionicons name="location" size={14} color={ACCENT} />
-                  <Text style={styles.metaText}>{activeRoute.stops?.length ?? 0} paragens</Text>
+                  <Text className="text-[#00babc] text-[12px] font-medium">{activeRoute.stops?.length ?? 0} paragens</Text>
                 </View>
               </View>
             </View>
 
             {/* Lista de paragens */}
             {activeRoute.stops && activeRoute.stops.length > 0 && (
-              <View style={{ marginTop: 12 }}>
-                <Text style={styles.stopsLabel}>Paragens</Text>
+              <View className="mt-3">
+                <Text className="text-slate-400 text-[12px] font-semibold uppercase tracking-widest mb-2">Paragens</Text>
                 {activeRoute.stops.map((stop, i) => (
-                  <View key={stop.id} style={styles.stopRow}>
-                    <View style={styles.stopBullet}>
-                      <Text style={styles.stopBulletText}>{i + 1}</Text>
+                  <View key={stop.id} className="flex-row items-center gap-2.5 py-2 border-b border-slate-700/40">
+                    <View className="w-6 h-6 rounded-full bg-[#00babc]/20 items-center justify-center">
+                      <Text className="text-[#00babc] text-[11px] font-bold">{i + 1}</Text>
                     </View>
-                    <View style={{ flex: 1 }}>
-                      <Text style={styles.stopName}>{stop.stop_name ?? 'Paragem'}</Text>
-                      {stop.distrit && <Text style={styles.stopDistrit}>{stop.distrit}</Text>}
+                    <View className="flex-1">
+                      <Text className="text-white text-[13px] font-medium">{stop.stop_name ?? 'Paragem'}</Text>
+                      {stop.distrit && <Text className="text-slate-400 text-[11px] mt-px">{stop.distrit}</Text>}
                     </View>
-                    {/* <View style={styles.cadetesBadge}>
+                    {/* <View className="flex-row items-center gap-1 px-2 py-[3px] rounded-[12px] bg-[#00babc]/10 border border-[#00babc]/30">
                       <Ionicons name="people" size={12} color={ACCENT} />
-                      <Text style={styles.cadetesBadgeText}>{stop.cadetes?.length ?? 0}</Text>
+                      <Text className="text-[#00babc] text-[11px] font-semibold">{stop.cadetes?.length ?? 0}</Text>
                     </View> */}
                   </View>
                 ))}
@@ -429,52 +422,52 @@ export const DriverDashboard = ({ driverId, driverName }: DriverDashboardProps) 
             )}
           </View>
         ) : (
-          <View style={styles.card}>
-            <View style={styles.cardHeader}>
+          <View className="mx-4 mb-3.5 bg-slate-800 rounded-[20px] p-[18px] border border-slate-700">
+            <View className="flex-row items-center gap-2 mb-3.5">
               <MaterialIcons name="route" size={20} color={MUTED} />
-              <Text style={[styles.cardTitle, { color: MUTED }]}>Sem Viagem Ativa</Text>
+              <Text className="text-slate-400 text-[16px] font-bold flex-1">Sem Viagem Ativa</Text>
             </View>
-            <Text style={styles.noRoute}>Toca em "Iniciar Viagem" para escolher uma rota e começar.</Text>
+            <Text className="text-slate-400 text-[13px] text-center py-2">Toca em "Iniciar Viagem" para escolher uma rota e começar.</Text>
           </View>
         )}
 
         {/* ── Info do Motorista ────────────────────────────────── */}
-        <View style={styles.card}>
-          <View style={styles.cardHeader}>
+        <View className="mx-4 mb-3.5 bg-slate-800 rounded-[20px] p-[18px] border border-slate-700">
+          <View className="flex-row items-center gap-2 mb-3.5">
             <FontAwesome5 name="id-badge" size={18} color={ACCENT} />
-            <Text style={styles.cardTitle}>Identificação</Text>
+            <Text className="text-white text-[16px] font-bold flex-1">Identificação</Text>
           </View>
 
-          <View style={styles.infoRow}>
+          <View className="flex-row items-center gap-2 py-1.5 border-b border-slate-700/50">
             <FontAwesome5 name="user" size={14} color={MUTED} />
-            <Text style={styles.infoLabel}>Nome</Text>
-            <Text style={styles.infoValue}>{driver?.full_name ?? '—'}</Text>
+            <Text className="text-slate-400 text-[13px] flex-1">Nome</Text>
+            <Text className="text-white text-[13px] font-medium shrink text-right">{driver?.full_name ?? '—'}</Text>
           </View>
           {driver?.username && (
-            <View style={styles.infoRow}>
+            <View className="flex-row items-center gap-2 py-1.5 border-b border-slate-700/50">
               <FontAwesome5 name="at" size={14} color={MUTED} />
-              <Text style={styles.infoLabel}>Username</Text>
-              <Text style={styles.infoValue}>{driver.username}</Text>
+              <Text className="text-slate-400 text-[13px] flex-1">Username</Text>
+              <Text className="text-white text-[13px] font-medium shrink text-right">{driver.username}</Text>
             </View>
           )}
           {driver?.email && (
-            <View style={styles.infoRow}>
+            <View className="flex-row items-center gap-2 py-1.5 border-b border-slate-700/50">
               <Ionicons name="mail" size={14} color={MUTED} />
-              <Text style={styles.infoLabel}>Email</Text>
-              <Text style={styles.infoValue}>{driver.email}</Text>
+              <Text className="text-slate-400 text-[13px] flex-1">Email</Text>
+              <Text className="text-white text-[13px] font-medium shrink text-right">{driver.email}</Text>
             </View>
           )}
           {driver?.phone && (
-            <View style={styles.infoRow}>
+            <View className="flex-row items-center gap-2 py-1.5 border-b border-slate-700/50">
               <Ionicons name="call" size={14} color={MUTED} />
-              <Text style={styles.infoLabel}>Telefone</Text>
-              <Text style={styles.infoValue}>{driver.phone}</Text>
+              <Text className="text-slate-400 text-[13px] flex-1">Telefone</Text>
+              <Text className="text-white text-[13px] font-medium shrink text-right">{driver.phone}</Text>
             </View>
           )}
-          <View style={styles.infoRow}>
+          <View className="flex-row items-center gap-2 py-1.5 border-b border-slate-700/50">
             <FontAwesome5 name="id-card" size={14} color={MUTED} />
-            <Text style={styles.infoLabel}>ID</Text>
-            <Text style={styles.infoValue}>#{driverId}</Text>
+            <Text className="text-slate-400 text-[13px] flex-1">ID</Text>
+            <Text className="text-white text-[13px] font-medium shrink text-right">#{driverId}</Text>
           </View>
         </View>
 
@@ -484,359 +477,4 @@ export const DriverDashboard = ({ driverId, driverName }: DriverDashboardProps) 
 };
 
 /* ── Styles ─────────────────────────────────────────────────────── */
-const styles = StyleSheet.create({
-  root: {
-    flex: 1,
-    backgroundColor: BG,
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    paddingTop: 56,
-    paddingHorizontal: 20,
-    paddingBottom: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: BORDER,
-  },
-  headerLeft: {
-    flex: 1,
-  },
-  greeting: {
-    color: MUTED,
-    fontSize: 13,
-    letterSpacing: 0.4,
-  },
-  driverName: {
-    color: '#fff',
-    fontSize: 26,
-    fontWeight: '700',
-    marginTop: 2,
-  },
-  role: {
-    color: ACCENT,
-    fontSize: 12,
-    marginTop: 4,
-    fontWeight: '500',
-  },
-  statusChip: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 20,
-    borderWidth: 1,
-    backgroundColor: CARD,
-    marginTop: 6,
-  },
-  statusDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-  },
-  statusText: {
-    fontSize: 12,
-    fontWeight: '600',
-  },
 
-  /* ── Botão Principal ── */
-  actionCenter: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 36,
-  },
-  pulseRing: {
-    position: 'absolute',
-    width: 180,
-    height: 180,
-    borderRadius: 90,
-    borderWidth: 3,
-  },
-  bigBtn: {
-    width: 170,
-    height: 170,
-    borderRadius: 85,
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 6,
-    shadowColor: ACCENT,
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.45,
-    shadowRadius: 18,
-    elevation: 16,
-  },
-  bigBtnText: {
-    color: '#fff',
-    fontSize: 15,
-    fontWeight: '700',
-    textAlign: 'center',
-  },
-  bigBtnSub: {
-    color: 'rgba(255,255,255,0.65)',
-    fontSize: 10,
-    textAlign: 'center',
-    paddingHorizontal: 16,
-  },
-
-  /* ── Cards ── */
-  card: {
-    marginHorizontal: 16,
-    marginBottom: 14,
-    backgroundColor: CARD,
-    borderRadius: 20,
-    padding: 18,
-    borderWidth: 1,
-    borderColor: BORDER,
-  },
-  cardHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    marginBottom: 14,
-  },
-  cardTitle: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '700',
-    flex: 1,
-  },
-  liveDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-  },
-
-  /* ── Rows ── */
-  infoRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    paddingVertical: 6,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(51,65,85,0.5)',
-  },
-  infoLabel: {
-    color: MUTED,
-    fontSize: 13,
-    flex: 1,
-  },
-  infoValue: {
-    color: '#fff',
-    fontSize: 13,
-    fontWeight: '500',
-    flexShrink: 1,
-    textAlign: 'right',
-  },
-  errorRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    padding: 10,
-    backgroundColor: 'rgba(239,68,68,0.12)',
-    borderRadius: 10,
-  },
-  errorText: {
-    color: DANGER,
-    fontSize: 13,
-    flex: 1,
-  },
-  coordBox: {
-    marginTop: 10,
-    backgroundColor: 'rgba(0,186,188,0.08)',
-    borderRadius: 10,
-    padding: 10,
-    borderWidth: 1,
-    borderColor: 'rgba(0,186,188,0.25)',
-  },
-  coordLabel: {
-    color: MUTED,
-    fontSize: 11,
-    marginBottom: 2,
-  },
-  coordText: {
-    color: ACCENT,
-    fontFamily: 'monospace',
-    fontSize: 12,
-  },
-
-  /* ── Rota ── */
-  routeBox: {
-    backgroundColor: 'rgba(0,186,188,0.07)',
-    borderRadius: 12,
-    padding: 14,
-    borderWidth: 1,
-    borderColor: 'rgba(0,186,188,0.2)',
-  },
-  routeName: {
-    color: ACCENT,
-    fontSize: 17,
-    fontWeight: '700',
-  },
-  routeDesc: {
-    color: '#cbd5e1',
-    fontSize: 13,
-    marginTop: 4,
-  },
-  routeMeta: {
-    flexDirection: 'row',
-    gap: 8,
-    marginTop: 10,
-    flexWrap: 'wrap',
-  },
-  metaItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 5,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 20,
-    borderWidth: 1,
-    backgroundColor: 'rgba(0,186,188,0.12)',
-    borderColor: ACCENT,
-  },
-  metaText: {
-    color: ACCENT,
-    fontSize: 12,
-    fontWeight: '500',
-  },
-  stopsLabel: {
-    color: MUTED,
-    fontSize: 12,
-    fontWeight: '600',
-    textTransform: 'uppercase',
-    letterSpacing: 0.8,
-    marginBottom: 8,
-  },
-  stopRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-    paddingVertical: 8,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(51,65,85,0.4)',
-  },
-  stopBullet: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    backgroundColor: 'rgba(0,186,188,0.2)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  stopBulletText: {
-    color: ACCENT,
-    fontSize: 11,
-    fontWeight: '700',
-  },
-  stopName: {
-    color: '#fff',
-    fontSize: 13,
-    fontWeight: '500',
-  },
-  stopDistrit: {
-    color: MUTED,
-    fontSize: 11,
-    marginTop: 1,
-  },
-  cadetesBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 12,
-    backgroundColor: 'rgba(0,186,188,0.12)',
-    borderWidth: 1,
-    borderColor: 'rgba(0,186,188,0.3)',
-  },
-  cadetesBadgeText: {
-    color: ACCENT,
-    fontSize: 11,
-    fontWeight: '600',
-  },
-  noRoute: {
-    color: MUTED,
-    fontSize: 13,
-    textAlign: 'center',
-    paddingVertical: 8,
-  },
-
-  /* ── Modal ── */
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.6)',
-    justifyContent: 'flex-end',
-  },
-  modalSheet: {
-    backgroundColor: '#1e293b',
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    paddingHorizontal: 20,
-    paddingBottom: 36,
-    paddingTop: 12,
-    borderTopWidth: 1,
-    borderColor: '#334155',
-  },
-  modalHandle: {
-    width: 40,
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: '#475569',
-    alignSelf: 'center',
-    marginBottom: 16,
-  },
-  modalHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    marginBottom: 6,
-  },
-  modalTitle: {
-    color: '#fff',
-    fontSize: 18,
-    fontWeight: '700',
-    flex: 1,
-  },
-  modalClose: {
-    padding: 4,
-  },
-  modalSub: {
-    color: MUTED,
-    fontSize: 13,
-    marginBottom: 16,
-  },
-  routeOption: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#0f172a',
-    borderRadius: 14,
-    padding: 14,
-    marginBottom: 10,
-    borderWidth: 1,
-    borderColor: '#334155',
-  },
-  routeOptionLeft: {
-    flex: 1,
-    gap: 3,
-  },
-  routeOptionName: {
-    color: '#fff',
-    fontSize: 15,
-    fontWeight: '600',
-  },
-  routeOptionDesc: {
-    color: MUTED,
-    fontSize: 12,
-  },
-  routeOptionMeta: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    marginTop: 4,
-  },
-  routeOptionMetaText: {
-    color: MUTED,
-    fontSize: 11,
-  },
-});
