@@ -44,6 +44,7 @@
     "eslint": "^9.25.1",
     "eslint-config-expo": "~10.0.0",
     "eslint-config-prettier": "^10.1.2",
+    "eas-cli": "^15.0.0",
     "prettier": "^3.2.5",
     "prettier-plugin-tailwindcss": "^0.5.11",
     "react-native-dotenv": "^3.4.11",
