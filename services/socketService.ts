@@ -62,9 +62,19 @@ function driverJoinRoute(driverId: number) {
   getSocket().emit('driver:joinRoute', { driverId });
 }
 
+/** Motorista sai do room da sua rota */
+function driverLeaveRoute(driverId: number) {
+  getSocket().emit('driver:leaveRoute', { driverId });
+}
+
 /** Cadete entra no room da sua rota */
 function cadeteJoinRoute(cadeteId: number) {
   getSocket().emit('cadete:joinRoute', { cadeteId });
+}
+
+/** Cadete sai do room da sua rota */
+function cadeteLeaveRoute(cadeteId: number) {
+  getSocket().emit('cadete:leaveRoute', { cadeteId });
 }
 
 /** Motorista emite a sua localização */
@@ -133,7 +143,9 @@ export const socketService = {
   disconnect,
   // Location
   driverJoinRoute,
+  driverLeaveRoute,
   cadeteJoinRoute,
+  cadeteLeaveRoute,
   driverUpdateLocation,
   cadeteUpdateLocation,
   onDriverLocation,

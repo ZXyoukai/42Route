@@ -57,6 +57,19 @@ export const DriverDashboard = ({ driverId, driverName }: DriverDashboardProps) 
 
   const locationSubRef = useRef<Location.LocationSubscription | null>(null);
 
+  /* ── Cleanup quando sai da viagem ou desmonta ─────────────── */
+  useEffect(() => {
+    return () => {
+      // Quando o componente desmonta ou a viagem termina, sai do room
+      if (tripActive || activeRoute) {
+        socketService.driverLeaveRoute(driverId);
+      }
+      // Limpa subscrição de localização
+      locationSubRef.current?.remove();
+      locationSubRef.current = null;
+    };
+  }, [tripActive, activeRoute, driverId]);
+
   /* ── Pulso quando viagem ativa ──────────────────────────────── */
   useEffect(() => {
     let pulseLoop: Animated.CompositeAnimation | null = null;
@@ -215,6 +228,7 @@ export const DriverDashboard = ({ driverId, driverName }: DriverDashboardProps) 
               } finally {
                 setTripLoading(false);
               }
+              socketService.driverLeaveRoute(driverId);
               setTripActive(false);
               setIsTracking(false);
               setLastCoords(null);
