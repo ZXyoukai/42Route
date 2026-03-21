@@ -96,7 +96,9 @@ export default function App() {
       AsyncStorage.getItem('user_role'),
     ]);
 
-    const isDriver = savedRole === 'driver' || !!driverDataString;
+    // Prioridade: savedRole é a fonte de verdade
+    // Se savedRole não definido, usa fallback (compatibilidade com logins antigos)
+    const isDriver = savedRole ? savedRole === 'driver' : !!driverDataString;
     const parsedUser = isDriver
       ? (driverDataString ? JSON.parse(driverDataString) : null)
       : (userDataString ? JSON.parse(userDataString) : null);
