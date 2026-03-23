@@ -51,6 +51,7 @@ export interface Cadete {
   city: string | null;
   distrit: string | null;
   phone: number | null;
+  stop_id : number | null;
   stop: MiniBusStop | null;
   avatar: {
     link: string;
@@ -108,6 +109,22 @@ export interface CreateCadeteRequest {
   isDBUser?: boolean;
 }
 
+
+/*
+model Cadetes {
+  id             Int          @id @default(autoincrement())
+  full_name      String?
+  username       String?      @unique
+  email          String?      @unique
+  city           String?
+  distrit        String?
+  prioritityList Boolean      @default(false)
+  phone          Int?
+  stop_id        Int?
+  stop           MiniBusStop? @relation(fields: [stop_id], references: [id])
+  //messages  Message[]    @relation("CadeteMessages")
+  createdAt      DateTime     @default(now())
+*/
 export interface UpdateCadeteRequest {
   full_name?: string;
   username?: string;
@@ -116,13 +133,6 @@ export interface UpdateCadeteRequest {
   distrit?: string;
   phone?: number;
   stop_id?: number;
-  avatar?: {
-    link: string;
-  };
-  course?: string;
-  level?: number;
-  grade?: string;
-  isDBUser?: boolean;
 }
 
 export interface CreateDriverRequest {

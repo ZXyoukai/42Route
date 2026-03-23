@@ -63,14 +63,16 @@ export const BottomTabBar = ({ activeTab, onTabPress, role, onLogout }: BottomTa
       {tabs.map((tab) => {
         const isActive = activeTab === tab.name;
         return (
+          <>
           <TouchableOpacity
             key={tab.name}
             className={`flex-1 items-center py-2 px-1 rounded-xl mx-1 ${
-              isActive ? 'bg-cyan-900/30' : ''
+              isActive ? '' : ''
             }`}
             onPress={() => onTabPress(tab.name)}
             activeOpacity={0.7}
           >
+            <View className={`absolute w-full h-1 rounded-xl ${isActive ? 'bg-[#00babc]' : ''}  top-0`}></View>
             <View className={`p-1 rounded-lg ${isActive ? '' : ''}`} style={isActive ? { backgroundColor: '' } : {}}>
               {renderIcon(tab.iconType, tab.icon, isActive)}
             </View>
@@ -83,6 +85,7 @@ export const BottomTabBar = ({ activeTab, onTabPress, role, onLogout }: BottomTa
               {tab.label}
             </Text>
           </TouchableOpacity>
+          </>
         );
       })}
 

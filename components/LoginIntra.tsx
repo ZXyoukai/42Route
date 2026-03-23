@@ -66,8 +66,8 @@ export default function LoginIntra({ onback, onLogin }: LoginIntraProps) {
         {/* 42 logo + title */}
         <Image 
           source={require('../assets/route_logo-w.png')} 
-          style={{ width: 80, height: 36, marginBottom: 10 }} 
-          resizeMode="contain" 
+          className='w-28 h-28'
+          resizeMode="contain"
         />
         <Text className="text-white text-2xl font-extrabold text-center mb-2.5">
           Autenticação com Intra 42
@@ -77,7 +77,7 @@ export default function LoginIntra({ onback, onLogin }: LoginIntraProps) {
         </Text>
 
         {/* Process steps */}
-        <View className="w-full  rounded-3xl p-5  mb-6 flex-col gap-y-3.5 shadow-md shadow-black/10">
+        <View className="w-full  rounded-3xl p-5 items-center  mb-6 flex-col gap-y-3.5 shadow-md shadow-black/10">
           {[
             { icon: 'log-in-outline', label: 'Abrir browser da 42' },
             { icon: 'person-circle-outline', label: 'Confirmar identidade' },
@@ -87,7 +87,7 @@ export default function LoginIntra({ onback, onLogin }: LoginIntraProps) {
               <View className="w-6 h-6 rounded-full bg-[#00babc]/15 items-center justify-center mr-3">
                 <Text className="text-[#00babc] text-xs font-bold">{i + 1}</Text>
               </View>
-              <Ionicons name={step.icon as any} size={18} color={ACCENT} style={{ marginRight: 10 }} />
+              <Ionicons name={step.icon as any} size={18} color={ACCENT} className='mr-1' />
               <Text className="text-slate-200 text-[15px]">{step.label}</Text>
             </View>
           ))}

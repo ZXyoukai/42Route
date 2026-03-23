@@ -69,7 +69,7 @@ export const LoginScreen = ({ onLogin }: LoginScreenProps) => {
           keyboardShouldPersistTaps="handled"
         >
           {/* ── Logo / Brand ─────────────────────────────────── */}
-          <View className="items-center pt-20 pb-8 px-6">
+          <View className="items-center pt-20 pb-4 px-6">
             <View className="rounded-3xl px-6 py-4 mb-5 shadow-lg shadow-[#00babc]/50">
               <Image source={logoWhite} style={{ width: 120, height: 56 }} resizeMode="contain" />
             </View>
@@ -79,7 +79,7 @@ export const LoginScreen = ({ onLogin }: LoginScreenProps) => {
 
           <View className="px-5 pb-10">
             <View className=" rounded-[24px] p-6 mb-2 shadow-md shadow-black/15">
-              <Text className="text-white text-lg font-bold mb-5 text-center tracking-wide">Acesso à Plataforma</Text>
+              <Text className="text-white text-lg font-bold mb-5 text-center tracking-wide">Acesse à Plataforma</Text>
 
               {/* Email */}
               <View
@@ -87,7 +87,7 @@ export const LoginScreen = ({ onLogin }: LoginScreenProps) => {
                   focusedField === 'username' ? 'border-[#00babc] bg-[#00babc]/5' : 'border-slate-700'
                 }`}
               >
-                <View className="flex-row items-center px-4 py-3.5">
+                <View className="flex-row items-center px-4 py-4">
                   <MaterialIcons
                     name="person"
                     size={20}
@@ -171,26 +171,24 @@ export const LoginScreen = ({ onLogin }: LoginScreenProps) => {
 
               {/* ── Intra Button ──────────────────────────────── */}
               <TouchableOpacity
-                className="rounded-2xl py-4 items-center border-2 border-[#00babc] bg-[#00babc]/5"
+                className="rounded-2xl py-4 items-center  bg-[#00babc]/5"
                 onPress={() => setShowIntraLogin(true)}
                 activeOpacity={0.85}
               >
                 <View className="flex-row items-center justify-center">
-                  <Image source={logoWhite} style={{ width: 22, height: 22, marginRight: 8, tintColor: ACCENT }} resizeMode="contain" />
                   <Text className="text-[#00babc] text-base font-bold">Cadetes: Login com Intra 42</Text>
                 </View>
               </TouchableOpacity>
             </View>
 
             {/* ── Footer info ───────────────────────────────── */}
-            <View className="flex-row items-center justify-center gap-2 mt-6">
-              <MaterialIcons name="security" size={16} color="#10b981" />
+            <View className="flex-row items-center justify-center gap-2 mt-2">
+              <MaterialIcons name="security" size={16} color="#00babc" />
               <Text className="text-slate-500 text-[13px] font-medium">Ambiente seguro · 42 Luanda</Text>
             </View>
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
-
       {AlertComponent}
     </View>
   );

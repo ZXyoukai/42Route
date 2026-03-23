@@ -27,6 +27,7 @@ interface CadeteTokenPayload {
   course?: string | null;
   level?: number | null;
   grade?: string | null;
+  stop_id?: number | null;
   isDBUser?: boolean | null;
 }
 
@@ -78,7 +79,6 @@ export const authService = {
         } as Driver;
       }
 
-      // Persist token and driver info
       await AsyncStorage.multiSet([
         ['driver_user', JSON.stringify(driver)],
         ['authenticated', 'true'],
@@ -130,6 +130,7 @@ export const authService = {
           course: tokenDecoded.course ?? '',
           level: tokenDecoded.level ?? 0,
           grade: tokenDecoded.grade ?? '',
+          stop_id: tokenDecoded.stop_id ?? null,
           isDBUser: tokenDecoded.isDBUser ?? false,
         };
 

@@ -67,54 +67,63 @@ export const BusLoadingScreen = ({ msg = 'Carregando...' }: BusLoadingScreenProp
     };
   }, []);
 
-  const windows = [w1, w2, w3, w4];
+  const windows = [w1, w2, w3, w3, w4];
 
   return (
     <View className="flex-1 bg-slate-900 justify-center items-center px-10">
       {/* Bus silhouette */}
       <View className="w-[200px] h-[90px] mb-8">
         {/* Body */}
-        <View className="w-[200px] h-[72px] bg-slate-800 rounded-[14px] border-2 border-slate-700 overflow-hidden">
-          {/* Windows — each lights up individually */}
-          <View className="flex-row px-3 pt-2.5 absolute top-0 left-0 right-0">
-            {windows.map((anim, i) => {
-              const bg = anim.interpolate({
-                inputRange: [0, 1],
-                outputRange: ['rgba(15,23,42,0.55)', 'rgba(0,186,188,0.75)'],
-              });
-              const borderC = anim.interpolate({
-                inputRange: [0, 1],
-                outputRange: ['#475569', '#00babc'],
-              });
-              return (
-                <Animated.View
-                  key={i}
-                  style={{
-                    flex: 1,
-                    height: 26,
-                    marginHorizontal: 3,
-                    backgroundColor: bg,
-                    borderRadius: 5,
-                    borderWidth: 1,
-                    borderColor: borderC,
-                  }}
-                />
-              );
-            })}
+        <View className='flex flex-row justify-center'>
+          <View className="w-[200px] h-[72px] bg-slate-800 rounded-[14px]  overflow-hidden">
+            {/* Windows — each lights up individually */}
+            
+            <View className="flex-row px-3 pt-2.5 absolute top-0 left-0 right-0">
+              {windows.map((anim, i) => {
+                const bg = anim.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: ['rgba(15,23,42,0.55)', 'rgba(0,186,188,0.75)'],
+                });
+                const borderC = anim.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: ['#475569', '#00babc'],
+                });
+                return (
+                  <Animated.View
+                    key={i}
+                    style={{
+                      flex: 1,
+                      height: 26,
+                      marginHorizontal: 3,
+                      backgroundColor: bg,
+                      borderRadius: 5,
+                      borderWidth: 1,
+                      borderColor: borderC,
+                    }}
+                  />
+                );
+              })}
+            </View>
+
+            {/* Door */}
+            {/* <View className="absolute bottom-0 right-14 h-8 w-8 bg-slate-900 rounded border border-slate-600" /> */}
+
+            <View className="absolute top- right-0 w-1 h-6 rounded-l-lg bg-slate-500" />
+            {/* Front light */}
           </View>
-
-          {/* Door */}
-          <View className="absolute bottom-0 right-3.5 w-4 h-[30px] bg-slate-900/60 rounded border border-slate-600" />
-
-          {/* Front light */}
-          <View className="absolute top-6 left-1.5 w-2 h-2 rounded-full bg-amber-400" />
+            <View className='flex-1  flex-row h-20'>
+              <View className="top-6 left-0 w-2 h-10 rounded-r-lg bg-slate-400" />
+              {/* <View className="top-6 left-0 w-2 h-10 rounded-r-lg bg-amber-400" />
+              <View className="top-6 left-0 w-2 h-11 rounded-r-lg bg-amber-400" /> */}
+            </View>
         </View>
+          
 
         {/* Wheels */}
         <View className="flex-row justify-between px-5 mt-0.5">
           {[0, 1].map(i => (
             <View key={i} className="w-[26px] h-[26px] rounded-full bg-slate-800 border-3 border-slate-700 items-center justify-center">
-              <View className="w-2 h-2 rounded-full bg-slate-600" />
+              <View className="w-2 h-2 rounded-full bg-slate-400" />
             </View>
           ))}
         </View>
@@ -130,6 +139,7 @@ export const BusLoadingScreen = ({ msg = 'Carregando...' }: BusLoadingScreenProp
           <Animated.View key={i} style={{ opacity: d }} className="w-2 h-2 rounded-full bg-[#00babc]" />
         ))}
       </View>
+      
     </View>
   );
 };

@@ -97,7 +97,7 @@ export const CustomAlert = ({
           className={`bg-slate-800 rounded-[28px] p-6 w-full max-w-sm  ${config.alertBorder} shadow-2xl shadow-black/40`}
         >
           {/* Header com Ícone */}
-          <View className="items-center mb-6">
+          <View className="flex items-center flex-row mb-6">
             <View 
               className={`w-16 h-16 rounded-[20px] items-center justify-center `}
             >
@@ -107,16 +107,18 @@ export const CustomAlert = ({
                 color={config.iconColor} 
               />
             </View>
+            <View className='flex-1 items-center justify-center'>
+              <Text 
+                className={`text-base font-bold text-center mb-2 tracking-wide ${config.titleColor}`}
+              >
+                {title}
+              </Text>
+              <Text className="text-slate-400 text-center text-base leading-relaxed">
+                {message}
+              </Text>
+
+            </View>
             
-            <Text 
-              className={`text-[20px] font-bold text-center mb-2 tracking-wide ${config.titleColor}`}
-            >
-              {title}
-            </Text>
-            
-            <Text className="text-slate-400 text-center text-[15px] leading-relaxed">
-              {message}
-            </Text>
           </View>
 
           {/* Botões */}
@@ -149,13 +151,13 @@ export const CustomAlert = ({
           </View>
 
           {/* Botão de Fechar Top-Right */}
-          <TouchableOpacity
+          {/* <TouchableOpacity
             className="absolute top-4 right-4 w-9 h-9 rounded-full bg-slate-700/50 items-center justify-center"
             onPress={onClose}
             activeOpacity={0.7}
           >
             <Ionicons name="close" size={20} color="#94a3b8" />
-          </TouchableOpacity>
+          </TouchableOpacity> */}
         </View>
       </View>
     </Modal>

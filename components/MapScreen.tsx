@@ -120,7 +120,13 @@ export const MapScreen = ({ studentName = 'Utilizador', role = 'cadete', onBack 
   // ── Cadete: ouvir localização do motorista via WebSocket ──────────────────
   useEffect(() => {
     if (isDriver) return;
-
+    /*
+    id_driver: number;
+  lat: number;
+  long: number;
+  routeId: number;
+  driverName: string | null;
+    */
     const onDriverLoc = (payload: DriverLocationPayload) => {
       const coords: LatLng = { latitude: payload.lat, longitude: payload.long };
       setLiveDriverCoords(coords);
@@ -130,19 +136,21 @@ export const MapScreen = ({ studentName = 'Utilizador', role = 'cadete', onBack 
       );
     };
 
-    const onTransportLoc = (payload: TransportLocationPayload) => {
+    const onTransportLoc =  (payload: TransportLocationPayload) => {
       const coords: LatLng = { latitude: payload.lat, longitude: payload.long };
       setLiveDriverCoords(coords);
     };
 
     // Entrar na sala via cadete id guardado
-    AsyncStorage.getItem('user').then((raw) => {
+
+      const  getUser = async () => await AsyncStorage.getItem('user').then((raw) => {
       if (raw) {
         const user = JSON.parse(raw);
         if (user?.id) socketService.cadeteJoinRoute(user.id);
       }
-    });
-
+    }
+  );
+    getUser();
     socketService.onDriverLocation(onDriverLoc);
     socketService.onTransportLocation(onTransportLoc);
 

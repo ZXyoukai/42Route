@@ -13,7 +13,6 @@ const api: AxiosInstance = axios.create({
   },
 });
 
-// Request interceptor for adding auth token and logging
 api.interceptors.request.use(
   async (config) => {
     const token = await AsyncStorage.getItem('token');
@@ -21,11 +20,11 @@ api.interceptors.request.use(
       config.headers.Authorization = `Bearer ${token}`;
     }
 
-    console.log(`🚀 API Request: ${config.method?.toUpperCase()} ${config.url}`);
+    console.log(`API Request: ${config.method?.toUpperCase()} ${config.url}`);
     return config;
   },
   (error) => {
-    console.error('❌ Request Error:', error);
+    console.error('Request Error:', error);
     return Promise.reject(error);
   }
 );
@@ -33,18 +32,17 @@ api.interceptors.request.use(
 // Response interceptor for error handling
 api.interceptors.response.use(
   (response) => {
-    console.log(`✅ API Response: ${response.config.method?.toUpperCase()} ${response.config.url}`, response.status);
+    console.log(`API Response: ${response.config.method?.toUpperCase()} ${response.config.url}`, response.status);
     return response;
   },
   (error: AxiosError) => {
     if (error.response) {
-      console.error('❌ API Error:', error.response.status, error.response.data);
+      console.error('API Error:', error.response.status, error.response.data);
       
       // Handle specific error codes
       switch (error.response.status) {
         case 401:
           console.error('Unauthorized - Please login again');
-          // Handle logout or token refresh
           break;
         case 404:
           console.error('Resource not found');
@@ -56,10 +54,10 @@ api.interceptors.response.use(
           console.error('An error occurred');
       }
     } else if (error.request) {
-      console.error('❌ Network Error:', error.message);
+      console.error('Network Error:', error.message);
       console.error('No response received from server. Check your internet connection.');
     } else {
-      console.error('❌ Error:', error.message);
+      console.error('Error:', error.message);
     }
     return Promise.reject(error);
   }

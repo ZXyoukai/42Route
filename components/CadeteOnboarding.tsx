@@ -15,14 +15,6 @@ import { useCustomAlert } from './CustomAlert';
 import { BusLoadingScreen } from './BusLoadingScreen';
 import { api, cadeteService } from 'services';
 
-const ACCENT = '#00babc';
-const BG = '#0f172a';
-const CARD = '#1e293b';
-const BORDER = '#334155';
-const MUTED = '#64748b';
-const INPUT_BG = '#0f172a';
-
-// ── Reusable field ──────────────────────────────────────────────────────────
 const Field = ({
   icon,
   label,
@@ -160,7 +152,16 @@ export const CadeteOnboarding = ({ initialUser, onComplete }: CadeteOnboardingPr
       setSaving(false);
     }
   };
+  useEffect(() => {
+    const saveUser = async () => {
+      if (initialUser.isDBUser !== undefined) {
+        await AsyncStorage.setItem('user', JSON.stringify(initialUser));
+        onComplete(initialUser);
+      }
+    };
 
+    saveUser();
+  }, []);
   if (saving) return <BusLoadingScreen msg="A guardar o teu perfil..." />;
   return (
     <View className="flex-1 bg-slate-900">
@@ -191,92 +192,6 @@ export const CadeteOnboarding = ({ initialUser, onComplete }: CadeteOnboardingPr
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 40 }}
       >
-        {/* ── Dados Pessoais ──────────────────────────────────── */}
-        {/* <View style={styles.card}>
-          <Section
-            icon={<Ionicons name="person" size={18} color={ACCENT} />}
-            title="Dados Pessoais"
-            subtitle="Informações básicas do teu perfil"
-          />
-          <Field
-            icon={<Ionicons name="text" size={14} color={MUTED} />}
-            label="Nome completo"
-            value={fullName}
-            onChange={setFullName}
-            placeholder="O teu nome"
-            required
-          />
-          <View style={styles.row}>
-            <View style={{ flex: 1, marginRight: 8 }}>
-              <Field
-                icon={<Ionicons name="location" size={14} color={MUTED} />}
-                label="Cidade"
-                value={city}
-                onChange={setCity}
-                placeholder="Luanda"
-              />
-            </View>
-            <View style={{ flex: 1 }}>
-              <Field
-                icon={<MaterialIcons name="location-city" size={14} color={MUTED} />}
-                label="Distrito"
-                value={distrit}
-                onChange={setDistrit}
-                placeholder="Ex: Talatona"
-              />
-            </View>
-          </View>
-          <Field
-            icon={<Ionicons name="call" size={14} color={MUTED} />}
-            label="Telefone"
-            value={phone}
-            onChange={setPhone}
-            placeholder="923 000 000"
-            keyboardType="phone-pad"
-          />
-        </View> */}
-
-        {/* ── Dados Académicos ────────────────────────────────── */}
-        {/* <View style={styles.card}>
-          <Section
-            icon={<FontAwesome5 name="graduation-cap" size={16} color={ACCENT} />}
-            title="Dados Académicos"
-            subtitle="Informações do teu percurso na 42"
-          />
-          <Field
-            icon={<MaterialIcons name="school" size={14} color={MUTED} />}
-            label="Curso"
-            value={course}
-            onChange={setCourse}
-            placeholder="Ex: Common Core"
-            required
-          />
-          <View style={styles.row}>
-            <View style={{ flex: 1, marginRight: 8 }}>
-              <Field
-                icon={<FontAwesome5 name="layer-group" size={12} color={MUTED} />}
-                label="Nível"
-                value={level}
-                onChange={setLevel}
-                placeholder="Ex: 4"
-                keyboardType="numeric"
-                required
-              />
-            </View>
-            <View style={{ flex: 1 }}>
-              <Field
-                icon={<MaterialIcons name="grade" size={14} color={MUTED} />}
-                label="Nota / Grade"
-                value={grade}
-                onChange={setGrade}
-                placeholder="Ex: B+"
-                required
-              />
-            </View>
-          </View>
-        </View> */}
-
-        {/* ── Paragem ─────────────────────────────────────────── */}
         <View className=" rounded-[20px] p-5 mb-4 ">
           <Section
             icon={<MaterialIcons name="directions-bus" size={18} color="#00babc" />}

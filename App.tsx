@@ -16,7 +16,6 @@ import { TransportSchedule } from 'components/TransportSchedule';
 import { CadeteOnboarding } from 'components/CadeteOnboarding';
 import { Cadete, MiniBusStop } from 'types/api';
 import { tripStateService } from 'services/tripStateService';
-
 import './global.css';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -40,6 +39,7 @@ interface UserData {
   city?: string | null;
   distrit?: string | null;
   phone?: number | null;
+  stop_id: number | null;
   stop?: MiniBusStop | null;
   avatar?: {
     link: string;
@@ -111,6 +111,7 @@ export default function App() {
       name: parsedUser?.username ?? parsedUser?.full_name ?? data.name,
       email: parsedUser?.email ?? data.email,
       role,
+      stop_id: parsedUser?.stop_id,
       full_name: parsedUser?.full_name ?? null,
       username: parsedUser?.username ?? parsedUser?.full_name ?? data.name,
       city: parsedUser?.city ?? null,
@@ -300,6 +301,7 @@ export default function App() {
           distrit: userData.distrit ?? null,
           phone: userData.phone ?? null,
           stop: userData.stop ?? null,
+          stop_id: userData.stop_id ?? null, 
           avatar: userData.avatar ?? { link: '' },
           course: userData.course ?? '',
           level: userData.level ?? 0,
@@ -322,6 +324,7 @@ export default function App() {
                   distrit: updatedUser.distrit,
                   phone: updatedUser.phone,
                   stop: updatedUser.stop,
+                  stop_id: updatedUser.stop_id,
                   avatar: updatedUser.avatar,
                   course: updatedUser.course,
                   level: updatedUser.level,
