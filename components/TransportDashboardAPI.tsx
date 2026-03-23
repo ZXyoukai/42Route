@@ -5,6 +5,7 @@ import { Ionicons, MaterialIcons, FontAwesome5 } from '@expo/vector-icons';
 import { useRoutes } from '../hooks/useRoutes';
 import { useDrivers } from '../hooks/useDrivers';
 import { Route, Driver } from '../types/api';
+import { SCREEN_SUBTITLE } from './screenCopy';
 
 interface RouteStatusCardProps {
   route: Route;
@@ -112,8 +113,10 @@ export const TransportDashboardAPI = ({ studentName = "Estudante", onRouteSelect
         <View className="flex-row justify-between items-center mb-6">
           <View>
             <Text className="text-slate-400 text-[13px] font-medium tracking-wide uppercase">Bem-vindo(a),</Text>
-            <Text className="text-white text-[28px] font-bold mt-1">{studentName}</Text>
-            <Text className="text-[#00babc] text-[12px] font-medium mt-1">Dashboard de Transporte</Text>
+            <Text numberOfLines={1} className="text-white text-[28px] font-bold mt-1">{studentName}</Text>
+            <Text numberOfLines={2} className="text-[#00babc] text-[12px] font-medium mt-1">
+              {SCREEN_SUBTITLE.transportLive}
+            </Text>
           </View>
  
         </View>

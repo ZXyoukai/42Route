@@ -6,6 +6,7 @@ import * as Location from 'expo-location';
 import { FontAwesome5, Ionicons, MaterialIcons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { socketService, DriverLocationPayload, TransportLocationPayload } from '../services/socketService';
+import { SCREEN_SUBTITLE } from './screenCopy';
 
 // Coordenadas da 42 Luanda
 const LUANDA_42 = { latitude: -8.838333, longitude: 13.234444 };
@@ -223,8 +224,8 @@ export const MapScreen = ({ studentName = 'Utilizador', role = 'cadete', onBack 
           )}
           <View>
             <Text className="text-white text-[18px] font-bold tracking-wide">Mapa em Tempo Real</Text>
-            <Text className="text-slate-400 text-[12px] mt-1 font-medium">
-              {isDriver ? 'A sua posição · direção à 42 Luanda' : `${studentName}, rastreio automático ativo`}
+            <Text numberOfLines={2} className="pr-2 mt-1 text-slate-400 text-[12px] font-medium flex-shrink">
+              {SCREEN_SUBTITLE.transportLive}
             </Text>
           </View>
         </View>

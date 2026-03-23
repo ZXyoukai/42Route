@@ -1,134 +1,12 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, ActivityIndicator, ScrollView, TouchableOpacity, Animated, Easing } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
 import { Ionicons, FontAwesome5, MaterialIcons } from '@expo/vector-icons';
 import { StatusBar } from 'expo-status-bar';
 import MapView, { Marker, Polyline, PROVIDER_GOOGLE } from 'react-native-maps';
 import { Route, MiniBusStop } from '../types/api';
 import { routeService } from '../services/routeService';
 import polyline from '@mapbox/polyline';
-
-const BusLoadingScreen = ({ msg }: { msg: string }) => {
-  const fillAnim = useRef(new Animated.Value(0)).current;
-  const dot1 = useRef(new Animated.Value(0.3)).current;
-  const dot2 = useRef(new Animated.Value(0.3)).current;
-  const dot3 = useRef(new Animated.Value(0.3)).current;
-
-  useEffect(() => {
-    // Infinite fill loop
-    Animated.loop(
-      Animated.sequence([
-        Animated.timing(fillAnim, {
-          toValue: 1,
-          duration: 1800,
-          easing: Easing.inOut(Easing.quad),
-          useNativeDriver: false,
-        }),
-        Animated.timing(fillAnim, {
-          toValue: 0,
-          duration: 600,
-          easing: Easing.in(Easing.quad),
-          useNativeDriver: false,
-        }),
-      ])
-    ).start();
-
-    // Staggered dots
-    const makeDot = (anim: Animated.Value, delay: number) =>
-      Animated.loop(
-        Animated.sequence([
-          Animated.delay(delay),
-          Animated.timing(anim, { toValue: 1, duration: 350, useNativeDriver: true }),
-          Animated.timing(anim, { toValue: 0.3, duration: 350, useNativeDriver: true }),
-          Animated.delay(700),
-        ])
-      );
-
-    makeDot(dot1, 0).start();
-    makeDot(dot2, 200).start();
-    makeDot(dot3, 400).start();
-  }, []);
-
-  const fillWidth = fillAnim.interpolate({
-    inputRange: [0, 1],
-    outputRange: ['0%', '100%'],
-  });
-
-  return (
-    <View style={{ flex: 1, backgroundColor: '#0f172a', justifyContent: 'center', alignItems: 'center', paddingHorizontal: 40 }}>
-      {/* Bus silhouette */}
-      <View style={{ width: 200, height: 90, marginBottom: 32 }}>
-        {/* Bus body */}
-        <View style={{
-          width: 200, height: 72, backgroundColor: '#1e293b',
-          borderRadius: 14, borderWidth: 2, borderColor: '#334155',
-          overflow: 'hidden', justifyContent: 'flex-end',
-        }}>
-          {/* Fill */}
-          <Animated.View style={{
-            position: 'absolute', bottom: 0, left: 0,
-            height: '100%', width: fillWidth,
-            backgroundColor: '#00babc', opacity: 0.85,
-            borderRadius: 12,
-          }} />
-
-          {/* Windows row */}
-          <View style={{ flexDirection: 'row', paddingHorizontal: 12, paddingTop: 10, position: 'absolute', top: 0, left: 0, right: 0 }}>
-            {[0,1,2,3].map(i => (
-              <View key={i} style={{
-                flex: 1, height: 26, marginHorizontal: 3,
-                backgroundColor: 'rgba(15,23,42,0.55)',
-                borderRadius: 5, borderWidth: 1, borderColor: '#475569',
-              }} />
-            ))}
-          </View>
-
-          {/* Door */}
-          <View style={{
-            position: 'absolute', bottom: 0, right: 14,
-            width: 16, height: 30,
-            backgroundColor: 'rgba(15,23,42,0.6)',
-            borderRadius: 4, borderWidth: 1, borderColor: '#475569',
-          }} />
-
-          {/* Front light */}
-          <View style={{
-            position: 'absolute', top: 24, left: 6,
-            width: 8, height: 8, borderRadius: 4,
-            backgroundColor: '#fbbf24',
-          }} />
-        </View>
-
-        {/* Wheels */}
-        <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 22, marginTop: 2 }}>
-          {[0,1].map(i => (
-            <View key={i} style={{
-              width: 26, height: 26, borderRadius: 13,
-              backgroundColor: '#1e293b', borderWidth: 3, borderColor: '#334155',
-              alignItems: 'center', justifyContent: 'center',
-            }}>
-              <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: '#475569' }} />
-            </View>
-          ))}
-        </View>
-      </View>
-
-      {/* Message */}
-      <Text style={{ color: '#ffffff', fontWeight: 'bold', fontSize: 16, textAlign: 'center', marginBottom: 6 }}>
-        {msg}
-      </Text>
-
-      {/* Dots */}
-      <View style={{ flexDirection: 'row', gap: 6, marginTop: 6 }}>
-        {[dot1, dot2, dot3].map((d, i) => (
-          <Animated.View key={i} style={{
-            width: 8, height: 8, borderRadius: 4,
-            backgroundColor: '#00babc', opacity: d,
-          }} />
-        ))}
-      </View>
-    </View>
-  );
-};
+import { BusLoadingScreen } from './BusLoadingScreen';
 
 interface RouteDetailAPIProps {
   routeId: number;
@@ -142,7 +20,7 @@ export const RouteDetailAPI = ({ routeId, onBack }: RouteDetailAPIProps) => {
   const [route, setRoute] = useState<Route | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [ msg, setMsg] = useState<string>('Carregando dados da rota...');
+  const [ msg, setMsg] = useState<string>('A carregar dados da rota...');
   const [selectedStop, setSelectedStop] = useState<MiniBusStop | null>(null);
   const [routeCoords, setRouteCoords] = useState<{ latitude: number; longitude: number }[]>([]);
   const [estimatedDistance, setEstimatedDistance] = useState<number | null>(null);

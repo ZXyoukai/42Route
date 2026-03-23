@@ -1,6 +1,7 @@
 module.exports = function (api) {
   api.cache(true);
   let plugins = [
+    'expo-router/babel',
     ['module:react-native-dotenv', {
       moduleName: '@env',
       path: '.env',

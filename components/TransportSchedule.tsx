@@ -1,15 +1,15 @@
 import {
   useState,
-  useEffect,
 } from 'react';
 import { BusLoadingScreen } from './BusLoadingScreen';
-import { Image, Text, View, ScrollView, TouchableOpacity, RefreshControl } from 'react-native';
+import { Text, View, ScrollView, TouchableOpacity, RefreshControl } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { useCustomAlert } from './CustomAlert';
 import { useRoutes } from '../hooks/useRoutes';
 import { Route } from '../types/api';
 import { ScheduleInfo } from './interfaces';
+import { SCREEN_SUBTITLE } from './screenCopy';
 
 
 interface TransportScheduleProps {
@@ -187,7 +187,7 @@ export const TransportSchedule = ({ onBack }: TransportScheduleProps) => {
       {loading && !refreshing && <BusLoadingScreen msg="A carregar horários..." />}
       {/* Header */}
       {!loading  &&
-      <View className="bg-gradient-to-br pt-12 pb-6 px-6 border-b-2 border-[#00babc]">
+      <View className="bg-gradient-to-br flex-row items-center gap-x-3 pt-12 pb-6 px-6 border-b-2 border-[#00babc]">
         <View className="flex justify-between">
           <TouchableOpacity
             onPress={onBack}
@@ -198,8 +198,10 @@ export const TransportSchedule = ({ onBack }: TransportScheduleProps) => {
           </TouchableOpacity>
         </View>
         <View>
-          <Text className="text-white text-3xl font-bold mb-2 mt-2">Horários</Text>
-          <Text className="text-cyan-100 text-base">Consulte os horários de todos os autocarros</Text>
+          <Text className="text-white text-2xl font-bold mb-2 mt-2">Horários</Text>
+          <Text numberOfLines={2} className="text-slate-400 text-[12px] font-medium">
+            {SCREEN_SUBTITLE.transportLive}
+          </Text>
         </View>
       </View>}
 

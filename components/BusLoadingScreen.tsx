@@ -5,7 +5,7 @@ interface BusLoadingScreenProps {
   msg?: string;
 }
 
-export const BusLoadingScreen = ({ msg = 'Carregando...' }: BusLoadingScreenProps) => {
+export const BusLoadingScreen = ({ msg = 'A carregar...' }: BusLoadingScreenProps) => {
   // One Animated.Value per window (0 = dim, 1 = lit)
   const w1 = useRef(new Animated.Value(0)).current;
   const w2 = useRef(new Animated.Value(0)).current;
@@ -67,7 +67,7 @@ export const BusLoadingScreen = ({ msg = 'Carregando...' }: BusLoadingScreenProp
     };
   }, []);
 
-  const windows = [w1, w2, w3, w3, w4];
+  const windows = [w1, w2, w3, w4];
 
   return (
     <View className="flex-1 bg-slate-900 justify-center items-center px-10">
@@ -76,8 +76,7 @@ export const BusLoadingScreen = ({ msg = 'Carregando...' }: BusLoadingScreenProp
         {/* Body */}
         <View className='flex flex-row justify-center'>
           <View className="w-[200px] h-[72px] bg-slate-800 rounded-[14px]  overflow-hidden">
-            {/* Windows — each lights up individually */}
-            
+            {/* Windows */}
             <View className="flex-row px-3 pt-2.5 absolute top-0 left-0 right-0">
               {windows.map((anim, i) => {
                 const bg = anim.interpolate({
@@ -105,16 +104,10 @@ export const BusLoadingScreen = ({ msg = 'Carregando...' }: BusLoadingScreenProp
               })}
             </View>
 
-            {/* Door */}
-            {/* <View className="absolute bottom-0 right-14 h-8 w-8 bg-slate-900 rounded border border-slate-600" /> */}
-
             <View className="absolute top- right-0 w-1 h-6 rounded-l-lg bg-slate-500" />
-            {/* Front light */}
           </View>
             <View className='flex-1  flex-row h-20'>
               <View className="top-6 left-0 w-2 h-10 rounded-r-lg bg-slate-400" />
-              {/* <View className="top-6 left-0 w-2 h-10 rounded-r-lg bg-amber-400" />
-              <View className="top-6 left-0 w-2 h-11 rounded-r-lg bg-amber-400" /> */}
             </View>
         </View>
           
