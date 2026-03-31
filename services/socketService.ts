@@ -37,7 +37,9 @@ let _socket: Socket | null = null;
 
 function getSocket(): Socket {
   if (!_socket || !_socket.connected) {
-    _socket = io(API_BASE_URL, {
+    const baseUrl = (API_BASE_URL?.trim() || 'http://localhost:3000').replace(/\/$/, '');
+
+    _socket = io(baseUrl, {
       transports: ['websocket'],
       autoConnect: true,
     });

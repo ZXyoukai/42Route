@@ -184,7 +184,7 @@ export const TransportSchedule = ({ onBack }: TransportScheduleProps) => {
     <View className="flex-1 bg-slate-900">
       <StatusBar style="light" />
       
-      {loading && !refreshing && <BusLoadingScreen msg="A carregar horários..." />}
+      {(loading || refreshing) && <BusLoadingScreen msg="A carregar horários..." />}
       {/* Header */}
       {!loading  &&
       <View className="bg-gradient-to-br flex-row items-center gap-x-3 pt-12 pb-6 px-6 border-b-2 border-[#00babc]">

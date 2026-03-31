@@ -4,7 +4,6 @@ import {
   Text,
   TouchableOpacity,
   ScrollView,
-  StyleSheet,
   Animated,
   Easing,
   Alert,
@@ -374,7 +373,10 @@ export const DriverDashboard = ({ driverId, driverName }: DriverDashboardProps) 
           <View className="flex-row items-center gap-2 mb-3.5">
             <Ionicons name="location" size={20} color={ACCENT} />
             <Text className="text-white text-[16px] font-bold flex-1">Partilha de Localização</Text>
-            <Animated.View style={{ opacity: isTracking ? dotAnim : 1 }} className={`w-2 h-2 rounded-full style={tripActive ? "bg-emerald-500" : "bg-slate-400"}`} />
+            <Animated.View
+              style={{ opacity: isTracking ? dotAnim : 1 }}
+              className={`w-2 h-2 rounded-full ${tripActive ? 'bg-emerald-500' : 'bg-slate-400'}`}
+            />
           </View>
 
           {locationError ? (

@@ -16,7 +16,6 @@ export const StudentProfileAPI = ({ onBack, onLogout }: StudentProfileProps) => 
   const [locationEnabled, setLocationEnabled] = useState(true);
   const [autoAlerts, setAutoAlerts] = useState(false);
   const [userData, setUserData] = useState<Cadete | null>(null);
-  const [expandedSection, setExpandedSection] = useState<string | null>('info');
   const { AlertComponent, showSuccess, showError, showWarning, showInfo } = useCustomAlert();
 
   useEffect(() => {
@@ -49,8 +48,10 @@ export const StudentProfileAPI = ({ onBack, onLogout }: StudentProfileProps) => 
   const studentInfo = {
     name,
     initials,
-    studentId: userData ? userData.id : '42LUANDA1234',
+    studentId: userData ? String(userData.id) : '42LUANDA1234',
+    username: userData?.username || userData?.full_name || 'cadete42',
     email: userData ? userData.email : 'joao.silva@student.42luanda.ao',
+    phone: userData?.phone ? String(userData.phone) : '+244 000 000 000',
     course: userData?.course || 'Common Core',
     level: userData?.level ?? 0,
     grade: userData?.grade || 'N/D',
@@ -128,6 +129,27 @@ export const StudentProfileAPI = ({ onBack, onLogout }: StudentProfileProps) => 
     );
   };
 
+  const handleEditProfile = () => {
+    showInfo(
+      'Editar perfil',
+      'A edição direta de perfil estará disponível em breve.'
+    );
+  };
+
+  const handleAccessCode = () => {
+    showInfo(
+      'Código de acesso',
+      'Em breve poderá definir um código de entrada para o aplicativo.'
+    );
+  };
+
+  const handleLanguage = () => {
+    showInfo(
+      'Idioma',
+      'A seleção de idioma estará disponível em breve.'
+    );
+  };
+
   const handleLogout = () => {
     showWarning(
       'Terminar Sessão',
@@ -141,127 +163,149 @@ export const StudentProfileAPI = ({ onBack, onLogout }: StudentProfileProps) => 
   };
 
   return (
-    <View className="flex-1 bg-slate-950">
+    <View className="flex-1 bg-slate-900">
       <StatusBar style="light" backgroundColor="#0f172a" />
 
-      {/* ── Hero ─────────────────────────────────────────────── */}
-      <View className="bg-slate-800 items-center pt-[60px] pb-6 px-5 border-b border-slate-700">
-        {/* Back */}
-        <TouchableOpacity onPress={onBack} className="absolute top-14 left-5 w-10 h-10 rounded-full bg-slate-950/90 border border-slate-700 items-center justify-center" activeOpacity={0.7}>
-          <Ionicons name="arrow-back" size={20} color="#fff" />
-        </TouchableOpacity>
+      <ScrollView className="flex-1 bg-slate-900" contentContainerStyle={{ paddingBottom: 28 }} showsVerticalScrollIndicator={false}>
+        <View className="px-5 pt-[58px] pb-5">
+          <View className="items-center mb-6 relative">
+            <TouchableOpacity
+              onPress={onBack}
+              className="absolute left-0 top-0 w-10 h-10 rounded-full bg-slate-900 border border-slate-800 items-center justify-center"
+              activeOpacity={0.75}
+            >
+              <Ionicons name="arrow-back" size={20} color="#fff" />
+            </TouchableOpacity>
+            <Text className="text-white text-[31px] font-bold leading-[36px] text-center">Minha Conta</Text>
+          </View>
 
-        {/* Avatar */}
-        <View className="relative mb-[14px]">
-          {userData?.avatar?.link ? (
-            <Image source={{ uri: userData.avatar.link }} className="w-[88px] h-[88px] rounded-full border-4 border-cyan-500" />
-          ) : (
-            <View className="w-[88px] h-[88px] rounded-full bg-cyan-500/20 border-4 border-cyan-500 items-center justify-center">
-              <Text className="text-cyan-500 text-3xl font-black">{studentInfo.initials}</Text>
+          <View className="items-center mb-5">
+            <View className="relative">
+              {userData?.avatar?.link ? (
+                <Image source={{ uri: userData.avatar.link }} className="w-[96px] h-[96px] rounded-full" />
+              ) : (
+                <View className="w-[96px] h-[96px] rounded-full bg-[#0f172a] border border-slate-700 items-center justify-center">
+                  <Text className="text-cyan-400 text-3xl font-black">{studentInfo.initials}</Text>
+                </View>
+              )}
+
+              <TouchableOpacity
+                onPress={handleEditProfile}
+                className="absolute -right-1 -bottom-1 w-12 h-12 rounded-full bg-slate-800 border border-slate-700 items-center justify-center"
+                activeOpacity={0.8}
+              >
+                <Ionicons name="pencil" size={18} color="#e2e8f0" />
+              </TouchableOpacity>
+
+              <View className={`absolute top-1 right-1 w-3 h-3 rounded-full ${studentInfo.isComplete ? 'bg-emerald-500' : 'bg-amber-400'}`} />
             </View>
-          )}
-          {/* Status dot */}
-          <View className={`absolute bottom-1 right-1 w-4 h-4 rounded-full border-2 border-slate-800 ${studentInfo.isComplete ? 'bg-green-500' : 'bg-amber-400'}`} />
+            <Text className="text-slate-300 text-sm mt-3">@{studentInfo.username}</Text>
         </View>
 
-        <Text className="text-white text-2xl font-black text-center">{studentInfo.name}</Text>
-        <Text className="text-slate-600 text-xs mt-0.5 mb-3">{studentInfo.email}</Text>
+          <View className="bg-slate-950 border border-slate-800 rounded-[26px] overflow-hidden">
+            <SectionLabel title="Informações pessoais" />
 
-        {/* Badges row */}
-        <View className="flex-row gap-2 flex-wrap justify-center">
-          <View className="flex-row items-center gap-1 px-2.5 py-1 rounded-full ">
-            <FontAwesome5 name="graduation-cap" size={10} color="#00babc" />
-            <Text className="text-cyan-500 text-[11px] font-semibold">Cadete</Text>
-          </View>
-          <View className="flex-row items-center gap-1 px-2.5 py-1 rounded-full ">
-            <MaterialIcons name="directions-bus" size={11} color="#00babc" />
-            <Text className="text-cyan-500 text-[11px] font-semibold">{studentInfo.preferredRoute}</Text>
-          </View>
-          <View className={`flex-row items-center gap-1 px-2.5 py-1 rounded-full ${studentInfo.isComplete ? '' : ''}`}>
-            <Ionicons
-              name={studentInfo.isComplete ? 'checkmark-circle' : 'time-outline'}
-              size={11}
-              color={studentInfo.isComplete ? '#22c55e' : '#f59e0b'}
+            <InfoSettingRow
+              icon={<Ionicons name="person-outline" size={22} color="#f8fafc" />}
+              label="Nome"
+              value={studentInfo.name}
             />
-            <Text className={`text-[11px] font-semibold ${studentInfo.isComplete ? 'text-green-500' : 'text-amber-400'}`}>
-              {studentInfo.isComplete ? 'Perfil completo' : 'Cadastro pendente'}
-            </Text>
+            <InfoSettingRow
+              icon={<Ionicons name="call-outline" size={21} color="#f8fafc" />}
+              label="Telefone"
+              value={studentInfo.phone}
+            />
+            <InfoSettingRow
+              icon={<Ionicons name="mail-outline" size={21} color="#f8fafc" />}
+              label="Email"
+              value={studentInfo.email || 'Sem email'}
+              isLast
+            />
+
+            <SectionLabel title="Definições" />
+
+            <ToggleSettingRow
+              icon={<MaterialIcons name="notifications-none" size={22} color="#f8fafc" />}
+              label="Receber notificações"
+              subtitle="Alertas e novidades do transporte"
+              value={notificationsEnabled}
+              onChange={handleNotificationChange}
+            />
+
+            <ToggleSettingRow
+              icon={<MaterialIcons name="location-on" size={22} color="#f8fafc" />}
+              label="Localização"
+              subtitle="Usar GPS para funcionalidades em tempo real"
+              value={locationEnabled}
+              onChange={handleLocationChange}
+            />
+
+            <ToggleSettingRow
+              icon={<MaterialIcons name="visibility-off" size={22} color="#f8fafc" />}
+              label="Modo discreto"
+              subtitle="Ocultar detalhes sensíveis"
+              value={autoAlerts}
+              onChange={setAutoAlerts}
+              isLast
+            />
+
+            <View className="h-px bg-slate-800 mx-5 my-2" />
+
+            <ActionSettingRow
+              icon={<MaterialIcons name="password" size={22} color="#f8fafc" />}
+              label="Código para entrar"
+              subtitle="Alterar código de acesso"
+              onPress={handleAccessCode}
+            />
+
+            <ActionSettingRow
+              icon={<Ionicons name="language-outline" size={22} color="#f8fafc" />}
+              label="Idioma"
+              subtitle="Português"
+              onPress={handleLanguage}
+            />
+
+            <ActionSettingRow
+              icon={<MaterialIcons name="route" size={22} color="#f8fafc" />}
+              label="Rota preferida"
+              subtitle={studentInfo.preferredRoute}
+              onPress={handleRouteChange}
+            />
+
+            <ActionSettingRow
+              icon={<MaterialIcons name="schedule" size={22} color="#f8fafc" />}
+              label="Horários"
+              subtitle="Personalizar alertas"
+              onPress={handleScheduleCustom}
+            />
+
+            <ActionSettingRow
+              icon={<MaterialIcons name="emoji-events" size={22} color="#f8fafc" />}
+              label="Conquistas"
+              subtitle={`Nível ${studentInfo.level} • Nota ${studentInfo.grade}`}
+              onPress={handleAchievements}
+            />
+
+            <ActionSettingRow
+              icon={<MaterialIcons name="support-agent" size={22} color="#f8fafc" />}
+              label="Suporte"
+              subtitle="Contactar equipa"
+              onPress={handleSupport}
+              isLast
+            />
           </View>
+
+          <TouchableOpacity
+            className="flex-row items-center justify-center gap-2.5 bg-red-500/10 rounded-2xl py-3.5 mt-5 "
+            onPress={handleLogout}
+            activeOpacity={0.8}
+          >
+            <MaterialIcons name="logout" size={18} color="#ef4444" />
+            <Text className="text-red-500 text-[15px] font-bold">Sair</Text>
+          </TouchableOpacity>
+
+          <Text className="text-slate-500 text-xs text-center mt-6">42Routes v1.0.0 · © 2024 42 Luanda</Text>
         </View>
-      </View>
-
-      <ScrollView className="flex-1 px-4 pt-3.5" showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 32 }}>
-
-        {/* ── Stats grid ───────────────────────────────────────── */}
-        <View className="flex-row gap-2.5 mb-6">
-          <StatCard value={`Lv. ${studentInfo.level}`} label="Nível" icon={<FontAwesome5 name="layer-group" size={16} color="#00babc" />} />
-          <StatCard value={studentInfo.grade} label="Nota" icon={<MaterialIcons name="grade" size={18} color="#00babc" />} />
-          <StatCard value="42" label="Viagens" icon={<MaterialIcons name="directions-bus" size={18} color="#00babc" />} />
-          <StatCard value="98%" label="Pontualidade" icon={<Ionicons name="checkmark-circle" size={17} color="#00babc" />} />
-        </View>
-
-        {/* ── Expandable Sections ──────────────────────────── */}
-        <ExpandableSection
-          title="Informações"
-          icon={<Ionicons name="person-circle-outline" size={18} color="#00babc" />}
-          isExpanded={expandedSection === 'info'}
-          onPress={() => setExpandedSection(expandedSection === 'info' ? null : 'info')}
-        >
-          <InfoRow icon={<MaterialIcons name="school" size={16} color="#00babc" />} label="Curso" value={studentInfo.course} />
-          <InfoRow icon={<Ionicons name="location-outline" size={16} color="#00babc" />} label="Cidade / Distrito" value={`${studentInfo.city} / ${studentInfo.distrit}`} />
-          <InfoRow icon={<MaterialIcons name="place" size={16} color="#00babc" />} label="Paragem" value={studentInfo.selectedStop} accent />
-          <InfoRow icon={<MaterialIcons name="route" size={16} color="#00babc" />} label="Rota" value={studentInfo.preferredRoute} accent />
-        </ExpandableSection>
-
-        <ExpandableSection
-          title="Notificações"
-          icon={<Ionicons name="notifications-outline" size={18} color="#00babc" />}
-          isExpanded={expandedSection === 'notif'}
-          onPress={() => setExpandedSection(expandedSection === 'notif' ? null : 'notif')}
-        >
-          <ToggleRow
-            icon={<Ionicons name="notifications" size={15} color="#00babc" />}
-            label="Push"
-            sub="Alertas dos autocarros"
-            value={notificationsEnabled}
-            onChange={handleNotificationChange}
-          />
-          <ToggleRow
-            icon={<Ionicons name="location" size={15} color="#00babc" />}
-            label="Localização"
-            sub="Funcionalidades GPS"
-            value={locationEnabled}
-            onChange={handleLocationChange}
-          />
-          <ToggleRow
-            icon={<MaterialIcons name="alarm" size={15} color="#00babc" />}
-            label="Alertas"
-            sub="10 min antes da chegada"
-            value={autoAlerts}
-            onChange={setAutoAlerts}
-            isLast
-          />
-        </ExpandableSection>
-
-        <ExpandableSection
-          title="Ações"
-          icon={<MaterialIcons name="tune" size={18} color="#00babc" />}
-          isExpanded={expandedSection === 'actions'}
-          onPress={() => setExpandedSection(expandedSection === 'actions' ? null : 'actions')}
-        >
-          <ActionRow icon={<MaterialIcons name="route" size={17} color="#00babc" />} label="Alterar Rota" onPress={handleRouteChange} />
-          <ActionRow icon={<MaterialIcons name="schedule" size={17} color="#00babc" />} label="Horários" onPress={handleScheduleCustom} />
-          <ActionRow icon={<MaterialIcons name="emoji-events" size={17} color="#00babc" />} label="Conquistas" onPress={handleAchievements} />
-          <ActionRow icon={<MaterialIcons name="help-outline" size={17} color="#00babc" />} label="Suporte" onPress={handleSupport} isLast />
-        </ExpandableSection>
-
-        {/* ── Logout ────────────────────────────────────────────── */}
-        <TouchableOpacity className="flex-row items-center justify-center gap-2.5 bg-red-500/10 rounded-2xl py-3.5 mt-6 border border-red-500/30" onPress={handleLogout} activeOpacity={0.8}>
-          <MaterialIcons name="logout" size={18} color="#ef4444" />
-          <Text className="text-red-500 text-[15px] font-bold">Sair</Text>
-        </TouchableOpacity>
-
-        <Text className="text-slate-700 text-xs text-center mt-6">42Routes v1.0.0 · © 2024 42 Luanda</Text>
       </ScrollView>
 
       {AlertComponent}
@@ -269,136 +313,90 @@ export const StudentProfileAPI = ({ onBack, onLogout }: StudentProfileProps) => 
   );
 };
 
-// ── Sub-components ──────────────────────────────────────────────────────────
-
-const StatCard = ({
-  value,
-  label,
-  icon,
-}: {
-  value: string;
-  label: string;
-  icon: React.ReactNode;
-}) => (
-  <View className="flex-1 rounded-xl p-3 items-center gap-1">
-    <View className="w-[34px] h-[34px] rounded-lg bg-cyan-500/10 items-center justify-center mb-0.5">{icon}</View>
-    <Text className="text-white text-sm font-black">{value}</Text>
-    <Text className="text-slate-600 text-[9px] text-center">{label}</Text>
+const SectionLabel = ({ title }: { title: string }) => (
+  <View className="px-5 pt-6 pb-2">
+    <Text className="text-slate-300 text-[18px] font-semibold text-center">{title}</Text>
   </View>
 );
 
-const ExpandableSection = ({
-  title,
-  icon,
-  isExpanded,
-  onPress,
-  children,
-}: {
-  title: string;
-  icon: React.ReactNode;
-  isExpanded: boolean;
-  onPress: () => void;
-  children: React.ReactNode;
-}) => (
-  <View className="mb-3 bg-slate-800/50 rounded-xl  overflow-hidden">
-    <TouchableOpacity
-      onPress={onPress}
-      className="flex-row items-center justify-between px-4 py-3.5"
-      activeOpacity={0.7}
-    >
-      <View className="flex-row items-center gap-3 flex-1">
-        <View className="w-8 h-8 rounded-lg bg-cyan-500/10 items-center justify-center">{icon}</View>
-        <Text className="text-white font-semibold text-[15px]">{title}</Text>
-      </View>
-      <Ionicons
-        name={isExpanded ? 'chevron-up' : 'chevron-down'}
-        size={20}
-        color="#64748b"
-      />
-    </TouchableOpacity>
-    {isExpanded && (
-      <View className="border-t border-slate-700/50 bg-slate-900/30">
-        {children}
-      </View>
-    )}
-  </View>
-);
-
-const InfoRow = ({
+const InfoSettingRow = ({
   icon,
   label,
   value,
-  accent,
+  isLast,
 }: {
   icon: React.ReactNode;
   label: string;
   value: string;
-  accent?: boolean;
+  isLast?: boolean;
 }) => (
-  <View className="flex-row items-center gap-3 px-4 py-3 border-b border-slate-700/30 last:border-b-0">
-    <View className={`w-[28px] h-[28px] rounded-lg items-center justify-center ${accent ? 'bg-cyan-500/15' : 'bg-cyan-500/8'}`}>{icon}</View>
-    <View className="flex-1">
-      <Text className="text-slate-600 text-xs mb-0.5 font-medium">{label}</Text>
-      <Text className={`text-sm font-semibold ${accent ? 'text-cyan-400' : 'text-slate-100'}`}>{value}</Text>
+  <TouchableOpacity
+    className={`flex-row items-center px-5 py-4 ${!isLast ? 'border-b border-slate-800' : ''}`}
+    activeOpacity={0.75}
+  >
+    <View className="w-10 items-start">{icon}</View>
+    <View className="flex-1 pr-2">
+      <Text className="text-slate-300 text-[13px] mb-0.5">{label}</Text>
+      <Text className="text-white text-[15px] font-medium leading-5" numberOfLines={1}>{value}</Text>
     </View>
-  </View>
+    <Ionicons name="chevron-forward" size={20} color="#cbd5e1" />
+  </TouchableOpacity>
 );
 
-const ToggleRow = ({
+const ToggleSettingRow = ({
   icon,
   label,
-  sub,
+  subtitle,
   value,
   onChange,
   isLast,
 }: {
   icon: React.ReactNode;
   label: string;
-  sub: string;
+  subtitle: string;
   value: boolean;
-  onChange: (v: boolean) => void;
+  onChange: (value: boolean) => void;
   isLast?: boolean;
 }) => (
-  <View className={`flex-row items-center gap-3 px-4 py-3 ${!isLast ? 'border-b border-slate-700/30' : ''}`}>
-    <View className="w-[28px] h-[28px] rounded-lg bg-cyan-500/8 items-center justify-center flex-shrink-0">{icon}</View>
+  <View className={`flex-row items-center px-5 py-4 ${!isLast ? 'border-b border-slate-800' : ''}`}>
+    <View className="w-10 items-start">{icon}</View>
     <View className="flex-1">
-      <Text className="text-sm font-semibold text-slate-100">{label}</Text>
-      <Text className="text-xs text-slate-600 mt-0.5">{sub}</Text>
+      <Text className="text-white text-[16px] font-medium leading-5">{label}</Text>
+      <Text className="text-slate-400 text-[14px] mt-0.5">{subtitle}</Text>
     </View>
     <Switch
       value={value}
       onValueChange={onChange}
-      trackColor={{ false: '#334155', true: '#00babc' }}
-      thumbColor={value ? '#ffffff' : '#64748b'}
+      trackColor={{ false: '#475569', true: '#00babc' }}
+      thumbColor="#ffffff"
+      ios_backgroundColor="#475569"
     />
   </View>
 );
 
-const ActionRow = ({
+const ActionSettingRow = ({
   icon,
   label,
+  subtitle,
   onPress,
   isLast,
 }: {
   icon: React.ReactNode;
   label: string;
+  subtitle: string;
   onPress: () => void;
   isLast?: boolean;
 }) => (
   <TouchableOpacity
-    className={`flex-row items-center gap-3 px-4 py-3 ${!isLast ? 'border-b border-slate-700/30' : ''}`}
+    className={`flex-row items-center px-5 py-4 ${!isLast ? 'border-b border-slate-800' : ''}`}
     onPress={onPress}
-    activeOpacity={0.6}
+    activeOpacity={0.75}
   >
-    <View className="w-[28px] h-[28px] rounded-lg bg-cyan-500/8 items-center justify-center flex-shrink-0">{icon}</View>
-    <Text className="flex-1 text-sm font-semibold text-slate-100">{label}</Text>
-    <Ionicons name="chevron-forward" size={16} color="#64748b" />
+    <View className="w-10 items-start">{icon}</View>
+    <View className="flex-1">
+      <Text className="text-white text-[16px] font-medium leading-5">{label}</Text>
+      <Text className="text-slate-400 text-[14px] mt-0.5">{subtitle}</Text>
+    </View>
+    <Ionicons name="chevron-forward" size={20} color="#cbd5e1" />
   </TouchableOpacity>
 );
-
-// ── Styles ──────────────────────────────────────────────────────────────────
-const ACCENT = '#00babc';
-const BG = '#0f172a';
-const CARD = '#1e293b';
-const BORDER = '#334155';
-const MUTED = '#64748b';

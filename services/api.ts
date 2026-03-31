@@ -1,8 +1,8 @@
 import axios, { AxiosInstance, AxiosError } from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { API_BASE_URL as ENV_API_BASE_URL } from '@env';
 
-
-const API_BASE_URL = process.env.API_BASE_URL || 'http://localhost:3000';
+const API_BASE_URL = ENV_API_BASE_URL?.trim() || 'http://localhost:3000';
 
 // Create axios instance with base configuration
 const api: AxiosInstance = axios.create({
@@ -55,7 +55,7 @@ api.interceptors.response.use(
       }
     } else if (error.request) {
       console.error('Network Error:', error.message);
-      console.error('No response received from server. Check your internet connection.');
+      // console.error('No response received from server. Check your internet connection, and ensure the server is running at', API_BASE_URL);
     } else {
       console.error('Error:', error.message);
     }

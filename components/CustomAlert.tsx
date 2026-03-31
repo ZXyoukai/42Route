@@ -48,7 +48,7 @@ const getAlertConfig = (type: AlertType) => {
       };
     case 'warning':
       return {
-        icon: 'warning',
+        icon: 'notifications',
         iconColor: '#fbbf24',
         alertBorder: 'border-amber-500/30',
         iconBg: 'bg-amber-500/10',

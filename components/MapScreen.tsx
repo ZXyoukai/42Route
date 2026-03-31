@@ -31,6 +31,8 @@ function haversineKm(
 
 type LatLng = { latitude: number; longitude: number };
 
+const LAST_BUS_COORDS_KEY = 'last_bus_coords';
+
 function decodePolyline(encoded: string): LatLng[] {
   const points: LatLng[] = [];
   let index = 0;
@@ -121,16 +123,21 @@ export const MapScreen = ({ studentName = 'Utilizador', role = 'cadete', onBack 
   // ── Cadete: ouvir localização do motorista via WebSocket ──────────────────
   useEffect(() => {
     if (isDriver) return;
-    /*
-    id_driver: number;
-  lat: number;
-  long: number;
-  routeId: number;
-  driverName: string | null;
-    */
+    const persistLastBusCoords = async (coords: LatLng) => {
+      try {
+        await AsyncStorage.setItem(
+          LAST_BUS_COORDS_KEY,
+          JSON.stringify({ ...coords, updatedAt: Date.now() })
+        );
+      } catch (err) {
+        console.warn('Falha ao guardar ultima localizacao do autocarro:', err);
+      }
+    };
+
     const onDriverLoc = (payload: DriverLocationPayload) => {
       const coords: LatLng = { latitude: payload.lat, longitude: payload.long };
       setLiveDriverCoords(coords);
+      void persistLastBusCoords(coords);
       mapRef.current?.animateToRegion(
         { ...coords, latitudeDelta: 0.04, longitudeDelta: 0.04 },
         800
@@ -140,26 +147,49 @@ export const MapScreen = ({ studentName = 'Utilizador', role = 'cadete', onBack 
     const onTransportLoc =  (payload: TransportLocationPayload) => {
       const coords: LatLng = { latitude: payload.lat, longitude: payload.long };
       setLiveDriverCoords(coords);
+      void persistLastBusCoords(coords);
     };
 
     // Entrar na sala via cadete id guardado
 
-      const  getUser = async () => await AsyncStorage.getItem('user').then((raw) => {
-      if (raw) {
-        const user = JSON.parse(raw);
-        if (user?.id) socketService.cadeteJoinRoute(user.id);
+    const restoreLastBusCoords = async () => {
+      try {
+        const raw = await AsyncStorage.getItem(LAST_BUS_COORDS_KEY);
+        if (!raw) return;
+        const parsed = JSON.parse(raw);
+        if (typeof parsed?.latitude === 'number' && typeof parsed?.longitude === 'number') {
+          setLiveDriverCoords({ latitude: parsed.latitude, longitude: parsed.longitude });
+        }
+      } catch (err) {
+        console.warn('Falha ao restaurar ultima localizacao do autocarro:', err);
       }
-    }
-  );
+    };
+
+      const  getUser = async () => await AsyncStorage.getItem('user').then((raw) => {
+        if (raw) {
+          const user = JSON.parse(raw);
+          if (user?.id) socketService.cadeteJoinRoute(user.id);
+        }
+      }
+    );
+    restoreLastBusCoords();
     getUser();
     socketService.onDriverLocation(onDriverLoc);
     socketService.onTransportLocation(onTransportLoc);
 
-    return () => {
-      socketService.offDriverLocation(onDriverLoc);
-      socketService.offTransportLocation(onTransportLoc);
-    };
+    // return () => {
+    //   socketService.offDriverLocation(onDriverLoc);
+    //   socketService.offTransportLocation(onTransportLoc);
+    // };
   }, [isDriver]);
+
+  useEffect(() => {
+    if (isDriver || !mapReady || !liveDriverCoords) return;
+    mapRef.current?.animateToRegion(
+      { ...liveDriverCoords, latitudeDelta: 0.04, longitudeDelta: 0.04 },
+      800
+    );
+  }, [isDriver, liveDriverCoords, mapReady]);
 
   useEffect(() => {
     if (!isDriver) return;

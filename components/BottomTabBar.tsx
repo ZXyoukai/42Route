@@ -17,6 +17,10 @@ export const BottomTabBar = ({ activeTab, onTabPress, role, onLogout }: BottomTa
   const isDriver = role === 'driver';
 
   const navigateByTab = (tab: TabName) => {
+    if (tab === activeTab) {
+      return;
+    }
+
     if (onTabPress) {
       onTabPress(tab);
       return;
@@ -100,7 +104,10 @@ export const BottomTabBar = ({ activeTab, onTabPress, role, onLogout }: BottomTa
             onPress={() => navigateByTab(tab.name)}
             activeOpacity={0.7}
           >
-            <View className={`absolute top-0 h-1 w-full rounded-xl ${isActive ? 'bg-[#00babc]' : ''}`} />
+            <View
+              className={`absolute h-1 w-full rounded-xl ${isActive ? 'bg-[#00babc]' : ''}`}
+              style={{ top: -8 }}
+            />
             <View className="rounded-lg p-1">
               {renderIcon(tab.iconType, tab.icon, isActive)}
             </View>
