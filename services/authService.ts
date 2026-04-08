@@ -88,7 +88,8 @@ export const authService = {
 
       return driver!;
     } catch (err: any) {
-      console.error('Erro no driverLogin:', err?.response?.data ?? err.message ?? err);
+      
+      console.log('Erro no driverLogin:',  err.message ?? err);
       throw err;
     }
   },

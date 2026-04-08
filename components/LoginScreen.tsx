@@ -44,10 +44,11 @@ export const LoginScreen = ({ onLogin }: LoginScreenProps) => {
       await onLogin({ name: driver.full_name ?? driver.username ?? 'Motorista', email: driver.email ?? username });
     } catch (err: any) {
       const msg =
+        err?.message == "Network Error" ? "Erro de conexão. Verifique sua internet e tente novamente." : 
         err?.response?.data?.message ??
         err?.response?.data?.error ??
         'Credenciais inválidas. Verifique os dados e tente novamente.';
-      showError('Acesso Negado', msg);
+        showError('Acesso Negado', msg);
     } finally {
       setIsLoading(false);
     }
