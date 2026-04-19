@@ -71,7 +71,7 @@ export const LoginScreen = ({ onLogin }: LoginScreenProps) => {
         >
           {/* ── Logo / Brand ─────────────────────────────────── */}
           <View className="items-center pt-20 pb-4 px-6">
-            <View className="rounded-3xl px-6 py-4 mb-5 shadow-lg shadow-[#00babc]/50">
+            <View className="rounded-3xl px-6 py-4 mb-5">
               <Image source={logoWhite} style={{ width: 120, height: 56 }} resizeMode="contain" />
             </View>
             <Text className="text-white text-2xl font-bold mb-1.5 tracking-wide">Bem-vindo de volta</Text>
