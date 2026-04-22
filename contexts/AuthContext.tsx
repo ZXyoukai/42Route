@@ -65,11 +65,33 @@ export function needsCadeteOnboarding(user: UserData): boolean {
 }
 
 export function getHomeRouteForUser(user: UserData): string {
+  if (!user) {
+    console.warn('[getHomeRouteForUser] User é nulo');
+    return '/login';
+  }
+
+  console.log('[getHomeRouteForUser] Calculando rota para user:', { id: user.id, role: user.role });
+
   if (user.role === 'driver') {
+    console.log('[getHomeRouteForUser] → driver → /(protected)/dashboard');
     return '/(protected)/dashboard';
   }
 
-  return needsCadeteOnboarding(user) ? '/(protected)/cadete-onboarding' : '/(protected)/dashboard';
+  if (user.role === 'cadete') {
+    const needsOnboarding = needsCadeteOnboarding(user);
+    console.log('[getHomeRouteForUser] → cadete → needsOnboarding:', needsOnboarding, { isDBUser: user.isDBUser, stop: user.stop_id, course: user.course, grade: user.grade, level: user.level });
+    
+    if (needsOnboarding) {
+      console.log('[getHomeRouteForUser] → /(protected)/cadete-onboarding');
+      return '/(protected)/cadete-onboarding';
+    }
+    
+    console.log('[getHomeRouteForUser] → /(protected)/dashboard');
+    return '/(protected)/dashboard';
+  }
+
+  console.warn('[getHomeRouteForUser] Role desconhecida:', user.role);
+  return '/(protected)/dashboard';
 }
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -85,7 +107,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         AsyncStorage.getItem('user_role'),
       ]);
 
+      console.log('[AuthContext] refreshSession:', {
+        authValue,
+        hasUserData: !!userDataString,
+        hasDriverData: !!driverDataString,
+        savedRole,
+      });
+
       if (authValue !== 'true') {
+        console.log('[AuthContext] Não autenticado (authValue !== true)');
         setUser(null);
         return null;
       }
@@ -100,15 +130,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           : null;
 
       if (!parsedUser) {
+        console.log('[AuthContext] parsedUser é nulo');
         setUser(null);
         return null;
       }
 
       const nextUser = toUserData(parsedUser, isDriver ? 'driver' : 'cadete');
+      console.log('[AuthContext] Utilizador carregado:', { id: nextUser.id, role: nextUser.role, name: nextUser.name });
       setUser(nextUser);
       return nextUser;
     } catch (err) {
-      console.warn('Erro ao carregar sessao:', err);
+      console.warn('[AuthContext] Erro ao carregar sessao:', err);
       setUser(null);
       return null;
     }

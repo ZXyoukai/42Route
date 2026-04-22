@@ -1,12 +1,13 @@
 /**
- * Configuração de Ambiente - Alternativa ao react-native-dotenv
+ * Configuração de Ambiente - Carrega variáveis via react-native-dotenv
  * Este ficheiro é a fonte única de verdade para as variáveis de ambiente
  */
 
+import { API_BASE_URL as ENV_API_BASE_URL } from '@env';
 
-// MODIFICAR AQUI DIRETAMENTE SE NECESSÁRIO
+// Carregar do .env via @env (injetado pelo Babel em tempo de build)
 export const ENV_CONFIG = {
-  API_BASE_URL: process.env.API_BASE_URL,
+  API_BASE_URL: ENV_API_BASE_URL || 'https://four2routeapi.onrender.com',
   API_TIMEOUT: 30000,
   DEBUG_MODE: true,
 } as const;
