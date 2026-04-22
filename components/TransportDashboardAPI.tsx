@@ -13,9 +13,11 @@ interface RouteStatusCardProps {
 }
 
 const RouteStatusCard = ({ route, onPress }: RouteStatusCardProps) => {
-  const totalDrivers = route.drivers?.length || 0;
   const totalStops = route.stops?.length || 0;
-  const isActive = totalDrivers > 0;
+  // Uma rota está ATIVA se há um driver com current_route_id = route.id
+  const activeDriver = route.drivers?.find(d => d.current_route?.id === route.id);
+  const isActive = !!activeDriver;
+  const totalDrivers = activeDriver ? 1 : 0;
   
   return (
     <TouchableOpacity 
@@ -81,6 +83,7 @@ export const TransportDashboardAPI = ({ studentName = "Estudante", onRouteSelect
     setRefreshing(false);
   };
 
+  // Uma rota está ATIVA se há um driver com current_route_id === route.id
   const activeRoutes = routes.filter(r => 
     r.drivers?.some(d => d.current_route?.id === r.id)
   );
