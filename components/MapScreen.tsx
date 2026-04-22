@@ -135,6 +135,15 @@ export const MapScreen = ({ studentName = 'Utilizador', role = 'cadete', onBack 
     };
 
     const onDriverLoc = (payload: DriverLocationPayload) => {
+      console.log(`[MapScreen] 🚗 Driver location update:`, {
+        driverId: payload.id_driver,
+        latitude: payload.lat,
+        longitude: payload.long,
+        driverName: payload.driverName,
+        routeId: payload.routeId,
+        timestamp: new Date().toISOString()
+      });
+      
       const coords: LatLng = { latitude: payload.lat, longitude: payload.long };
       setLiveDriverCoords(coords);
       void persistLastBusCoords(coords);
@@ -144,13 +153,20 @@ export const MapScreen = ({ studentName = 'Utilizador', role = 'cadete', onBack 
       );
     };
 
-    const onTransportLoc =  (payload: TransportLocationPayload) => {
+    const onTransportLoc = (payload: TransportLocationPayload) => {
+      console.log(`[MapScreen] 🚌 Transport location update:`, {
+        cadeteId: payload.cadeteId,
+        latitude: payload.lat,
+        longitude: payload.long,
+        cadeteName: payload.cadeteName,
+        routeId: payload.routeId,
+        timestamp: new Date().toISOString()
+      });
+      
       const coords: LatLng = { latitude: payload.lat, longitude: payload.long };
       setLiveDriverCoords(coords);
       void persistLastBusCoords(coords);
     };
-
-    // Entrar na sala via cadete id guardado
 
     const restoreLastBusCoords = async () => {
       try {
@@ -159,28 +175,44 @@ export const MapScreen = ({ studentName = 'Utilizador', role = 'cadete', onBack 
         const parsed = JSON.parse(raw);
         if (typeof parsed?.latitude === 'number' && typeof parsed?.longitude === 'number') {
           setLiveDriverCoords({ latitude: parsed.latitude, longitude: parsed.longitude });
+          console.log(`[MapScreen] Restored last bus coords from cache`);
         }
       } catch (err) {
         console.warn('Falha ao restaurar ultima localizacao do autocarro:', err);
       }
     };
 
-      const  getUser = async () => await AsyncStorage.getItem('user').then((raw) => {
+    const getUser = async () => {
+      try {
+        const raw = await AsyncStorage.getItem('user');
         if (raw) {
           const user = JSON.parse(raw);
-          if (user?.id) socketService.cadeteJoinRoute(user.id);
+          if (user?.id) {
+            socketService.cadeteJoinRoute(user.id);
+            console.log(`[MapScreen] Cadete ${user.id} joined route`);
+          }
         }
+      } catch (err) {
+        console.error(`[MapScreen] Error loading user:`, err);
       }
-    );
+    };
+
+    // Setup: restore cache and join route
     restoreLastBusCoords();
     getUser();
+    
+    // Add Socket.IO listeners
     socketService.onDriverLocation(onDriverLoc);
     socketService.onTransportLocation(onTransportLoc);
+    
+    console.log(`[MapScreen] 📡 Socket listeners added for cadete mode`);
 
-    // return () => {
-    //   socketService.offDriverLocation(onDriverLoc);
-    //   socketService.offTransportLocation(onTransportLoc);
-    // };
+    //  CRITICAL: Cleanup - Remove listeners when component unmounts
+    return () => {
+      console.log(`[MapScreen] 🧹 Cleaning up Socket listeners`);
+      socketService.offDriverLocation(onDriverLoc);
+      socketService.offTransportLocation(onTransportLoc);
+    };
   }, [isDriver]);
 
   useEffect(() => {
