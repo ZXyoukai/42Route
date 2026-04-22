@@ -1,6 +1,6 @@
 import * as WebBrowser from 'expo-web-browser';
 import { makeRedirectUri } from 'expo-auth-session';
-import { API_BASE_URL } from '@env';
+import { ENV_CONFIG } from '../config/environment';
 import { jwtDecode } from 'jwt-decode';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
@@ -47,7 +47,7 @@ export const authService = {
     try {
       // Some environments return only { token } — handle both shapes
       const response = await axios.post<any>(
-        `${API_BASE_URL}/api/auth/42/driver/login`,
+        `${ENV_CONFIG.API_BASE_URL}/api/auth/42/driver/login`,
         credentials,
         { headers: { 'Content-Type': 'application/json' } }
       );
@@ -102,7 +102,7 @@ export const authService = {
       path: '/auth/42/callback'
     });
     const response = (await WebBrowser.openAuthSessionAsync(
-      `${API_BASE_URL}/api/auth/42/login?redirect=${redirectUri}`,
+      `${ENV_CONFIG.API_BASE_URL}/api/auth/42/login?redirect=${redirectUri}`,
       redirectUri
     )) as loginIntraResponse;
 

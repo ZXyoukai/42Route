@@ -1,17 +1,20 @@
 import axios, { AxiosInstance, AxiosError } from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { API_BASE_URL as ENV_API_BASE_URL } from '@env';
+import { ENV_CONFIG, API_FULL_URL } from '../config/environment';
 
-const API_BASE_URL = ENV_API_BASE_URL?.trim() || 'http://localhost:3000';
+// Use a configuração centralizada
+const API_BASE_URL = ENV_CONFIG.API_BASE_URL;
 
 // Create axios instance with base configuration
 const api: AxiosInstance = axios.create({
-  baseURL: `${API_BASE_URL}/api`,
-  timeout: 30000,
+  baseURL: API_FULL_URL,
+  timeout: ENV_CONFIG.API_TIMEOUT,
   headers: {
     'Content-Type': 'application/json',
   },
 });
+
+console.log('[API] Configurado com baseURL:', API_FULL_URL);
 
 api.interceptors.request.use(
   async (config) => {
