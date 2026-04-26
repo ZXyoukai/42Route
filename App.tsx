@@ -139,7 +139,7 @@ export default function App() {
       setCurrentScreen(shouldGoToOnboarding ? 'cadeteOnboarding' : 'dashboard');
     }
     } catch (e: any) {
-      console.error('Erro em handleLogin:', e?.message ?? e);
+      console.log('Erro em handleLogin:', e?.message ?? e);
       // Re-throw so LoginScreen's catch block can handle it and clear the spinner
       throw e;
     }

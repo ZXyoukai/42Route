@@ -102,6 +102,7 @@ export const MapScreen = ({ studentName = 'Utilizador', role = 'cadete', onBack 
   // UI-04: Driver info received via socket
   const [liveDriverName, setLiveDriverName] = useState<string | null>(null);
   const [driverOffline, setDriverOffline] = useState(false);
+  const [currentStopId, setCurrentStopId] = useState<number | null>(null);
   // Recenter state
   const [userPanned, setUserPanned] = useState(false);
 
@@ -206,6 +207,11 @@ export const MapScreen = ({ studentName = 'Utilizador', role = 'cadete', onBack 
       setEta(null);
     };
 
+    const onCurrentStop = (payload: { stopId: number }) => {
+      console.log(`[MapScreen] Motorista marcou paragem ${payload.stopId}`);
+      setCurrentStopId(payload.stopId);
+    };
+
     const restoreLastBusCoords = async () => {
       try {
         const raw = await AsyncStorage.getItem(LAST_BUS_COORDS_KEY);
@@ -231,7 +237,7 @@ export const MapScreen = ({ studentName = 'Utilizador', role = 'cadete', onBack 
           }
         }
       } catch (err) {
-        console.error(`[MapScreen] Error loading user:`, err);
+        console.log(`[MapScreen] Error loading user:`, err);
       }
     };
 
@@ -243,11 +249,13 @@ export const MapScreen = ({ studentName = 'Utilizador', role = 'cadete', onBack 
     socketService.onDriverLocation(onDriverLoc);
     socketService.onTransportLocation(onTransportLoc);
     socketService.onDriverOffline(onOffline);
+    socketService.onCurrentStopUpdate(onCurrentStop);
 
     return () => {
       socketService.offDriverLocation(onDriverLoc);
       socketService.offTransportLocation(onTransportLoc);
       socketService.offDriverOffline(onOffline);
+      socketService.offCurrentStopUpdate(onCurrentStop);
     };
   }, [isDriver, userPanned]);
 
@@ -499,22 +507,34 @@ export const MapScreen = ({ studentName = 'Utilizador', role = 'cadete', onBack 
 
         {/* UI-04: Driver info card for cadete mode */}
         {!isDriver && liveDriverCoords && !driverOffline && (
-          <View className="absolute top-3 left-4 right-4 bg-slate-900/95 rounded-[16px] px-4 py-3 border border-slate-700 flex-row items-center gap-3">
-            <View className="w-10 h-10 rounded-full bg-[#00babc]/20 border border-[#00babc]/40 items-center justify-center">
-              <FontAwesome5 name="bus" size={16} color="#00babc" />
+          <View className="absolute top-3 left-4 right-4 bg-slate-900/95 rounded-[16px] px-4 py-3 border border-slate-700 flex-col gap-2 shadow-lg shadow-black/40">
+            <View className="flex-row items-center gap-3">
+              <View className="w-10 h-10 rounded-full bg-[#00babc]/20 border border-[#00babc]/40 items-center justify-center">
+                <FontAwesome5 name="bus" size={16} color="#00babc" />
+              </View>
+              <View className="flex-1">
+                <Text className="text-white text-[14px] font-bold">
+                  {liveDriverName ? `Motorista: ${liveDriverName}` : 'Autocarro 42'}
+                </Text>
+                <Text className="text-slate-400 text-[12px] mt-0.5">
+                  {eta !== null ? `Chegada à 42: ~${eta} min` : 'Em rota'}
+                </Text>
+              </View>
+              <View className="flex-row items-center gap-1 px-2 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/30">
+                <View className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                <Text className="text-emerald-500 text-[10px] font-bold">LIVE</Text>
+              </View>
             </View>
-            <View className="flex-1">
-              <Text className="text-white text-[14px] font-bold">
-                {liveDriverName ? `Motorista: ${liveDriverName}` : 'Autocarro 42'}
-              </Text>
-              <Text className="text-slate-400 text-[12px] mt-0.5">
-                {eta !== null ? `Chegada estimada: ~${eta} min` : 'Em rota'}
-              </Text>
-            </View>
-            <View className="flex-row items-center gap-1 px-2 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/30">
-              <View className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-              <Text className="text-emerald-500 text-[10px] font-bold">LIVE</Text>
-            </View>
+
+            {currentStopId !== null && (
+              <View className="mt-1 flex-row items-center gap-2 bg-[#00babc]/10 p-2.5 rounded-xl border border-[#00babc]/30">
+                <Ionicons name="location" size={16} color="#00babc" />
+                <View className="flex-1">
+                  <Text className="text-slate-400 text-[10px] uppercase tracking-wider font-bold">Paragem Atual</Text>
+                  <Text className="text-[#00babc] text-[13px] font-medium leading-tight">Paragem {currentStopId}</Text>
+                </View>
+              </View>
+            )}
           </View>
         )}
 

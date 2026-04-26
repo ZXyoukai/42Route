@@ -112,7 +112,7 @@ function getSocket(): Socket {
     });
 
     _socket.io.on('reconnect_failed', () => {
-      console.error(`[SocketService] ❌ Falha na reconexão`);
+      console.warn(`[SocketService] ❌ Falha na reconexão`);
       _notifyConnectionState('disconnected');
     });
 
@@ -235,6 +235,12 @@ function driverUpdateLocation(id_driver: number, lat: number, long_: number) {
   getSocket().emit('driver:updateLocation', { id_driver, lat, long: long_ });
 }
 
+/** Motorista envia atualização de paragem atual */
+function driverSetCurrentStop(driverId: number, stopId: number) {
+  console.log(`[SocketService] 📍 Motorista ${driverId} marcou paragem ${stopId}`);
+  getSocket().emit('driver:setCurrentStop', { driverId, stopId });
+}
+
 /** Cadete emite a sua localização (fallback quando motorista inativo) */
 function cadeteUpdateLocation(cadeteId: number, lat: number, long_: number) {
   console.log(`[SocketService] 📍 Cadete location: ${lat}, ${long_}`);
@@ -258,6 +264,20 @@ function onTransportLocation(cb: (payload: TransportLocationPayload) => void) {
 function onDriverOffline(cb: (payload: { routeId: number }) => void) {
   getSocket().on('driver:offline', cb);
   console.log(`[SocketService] 📡 Listener added: driver:offline`);
+}
+
+/** Ouve atualização de paragem atual */
+function onCurrentStopUpdate(cb: (payload: { routeId: number; stopId: number; driverId: number; timestamp: number }) => void) {
+  getSocket().on('route:currentStop', cb);
+  console.log(`[SocketService] 📡 Listener added: route:currentStop`);
+}
+
+function offCurrentStopUpdate(cb?: (payload: { routeId: number; stopId: number; driverId: number; timestamp: number }) => void) {
+  if (cb) {
+    getSocket().off('route:currentStop', cb);
+  } else {
+    getSocket().off('route:currentStop');
+  }
 }
 
 function offDriverLocation(cb?: (payload: DriverLocationPayload) => void) {
@@ -350,13 +370,16 @@ export const socketService = {
   cadeteJoinRoute,
   cadeteLeaveRoute,
   driverUpdateLocation,
+  driverSetCurrentStop,
   cadeteUpdateLocation,
   onDriverLocation,
   onTransportLocation,
   onDriverOffline,
+  onCurrentStopUpdate,
   offDriverLocation,
   offTransportLocation,
   offDriverOffline,
+  offCurrentStopUpdate,
   // Chat
   joinChat,
   sendChatMessage,

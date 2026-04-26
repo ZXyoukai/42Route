@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, ActivityIndicator, ScrollView, TouchableOpacity, RefreshControl } from 'react-native';
 import { BusLoadingScreen } from './BusLoadingScreen';
+import { TimeoutErrorScreen } from './TimeoutErrorScreen';
 import { Ionicons, MaterialIcons, FontAwesome5 } from '@expo/vector-icons';
 import { useRoutes } from '../hooks/useRoutes';
 import { useDrivers } from '../hooks/useDrivers';
@@ -73,7 +74,7 @@ interface DashboardProps {
 }
 
 export const TransportDashboardAPI = ({ studentName = "Estudante", onRouteSelect }: DashboardProps) => {
-  const { routes, loading, error, fetchRoutes } = useRoutes();
+  const { routes, loading, error, apiError, fetchRoutes } = useRoutes();
   const { drivers } = useDrivers();
   const [refreshing, setRefreshing] = useState(false);
 
@@ -92,6 +93,18 @@ export const TransportDashboardAPI = ({ studentName = "Estudante", onRouteSelect
     return <BusLoadingScreen msg="Carregando rotas..." />;
   }
 
+  // Timeout/Network errors get the full-screen error experience
+  if (apiError && (apiError.isTimeout || apiError.isNetworkError)) {
+    return (
+      <TimeoutErrorScreen
+        error={apiError}
+        onRetry={fetchRoutes}
+        context="ao carregar rotas"
+      />
+    );
+  }
+
+  // Other errors use the inline error view
   if (error) {
     return (
       <View className="flex-1 bg-slate-900 justify-center items-center px-6">
@@ -108,6 +121,7 @@ export const TransportDashboardAPI = ({ studentName = "Estudante", onRouteSelect
       </View>
     );
   }
+
 
   return (
     <View className="flex-1 bg-slate-900">

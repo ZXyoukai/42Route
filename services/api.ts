@@ -1,6 +1,7 @@
 import axios, { AxiosInstance, AxiosError } from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ENV_CONFIG, API_FULL_URL } from '../config/environment';
+import { classifyError, ApiError } from '../types/api';
 
 // Use a configuração centralizada
 const API_BASE_URL = ENV_CONFIG.API_BASE_URL;
@@ -14,7 +15,9 @@ const api: AxiosInstance = axios.create({
   },
 });
 
-console.log('[API] Configurado com baseURL:', API_FULL_URL);
+if (ENV_CONFIG.DEBUG_MODE) {
+  console.log('[API] Configurado com baseURL:', API_FULL_URL);
+}
 
 api.interceptors.request.use(
   async (config) => {
@@ -23,47 +26,47 @@ api.interceptors.request.use(
       config.headers.Authorization = `Bearer ${token}`;
     }
 
-    console.log(`API Request: ${config.method?.toUpperCase()} ${config.url}`);
+    if (ENV_CONFIG.DEBUG_MODE) {
+      console.log(`[API] → ${config.method?.toUpperCase()} ${config.url}`);
+    }
     return config;
   },
   (error) => {
-    console.error('Request Error:', error);
+    // Silent — no console.error to avoid Expo crashes
     return Promise.reject(error);
   }
 );
 
-// Response interceptor for error handling
+// Response interceptor — silent error handling (no console.error)
 api.interceptors.response.use(
   (response) => {
-    console.log(`API Response: ${response.config.method?.toUpperCase()} ${response.config.url}`, response.status);
+    if (ENV_CONFIG.DEBUG_MODE) {
+      console.log(`[API] ← ${response.status} ${response.config.method?.toUpperCase()} ${response.config.url}`);
+    }
     return response;
   },
   (error: AxiosError) => {
-    if (error.response) {
-      console.error('API Error:', error.response.status, error.response.data);
-      
-      // Handle specific error codes
-      switch (error.response.status) {
-        case 401:
-          console.error('Unauthorized - Please login again');
-          break;
-        case 404:
-          console.error('Resource not found');
-          break;
-        case 500:
-          console.error('Server error - Please try again later');
-          break;
-        default:
-          console.error('An error occurred');
-      }
-    } else if (error.request) {
-      console.error('Network Error:', error.message);
-      // console.error('No response received from server. Check your internet connection, and ensure the server is running at', API_BASE_URL);
-    } else {
-      console.error('Error:', error.message);
+    // Classify the error into a typed ApiError for upstream consumers
+    const apiError = classifyError(error);
+
+    // Attach the classified error to the Axios error for hooks to consume
+    (error as any)._apiError = apiError;
+
+    // Silent debug log instead of console.error (prevents Expo crashes)
+    if (ENV_CONFIG.DEBUG_MODE) {
+      console.log(`[API] ✗ ${apiError.type}: ${apiError.technicalMessage}`);
     }
+
     return Promise.reject(error);
   }
 );
+
+/**
+ * Extract the classified ApiError from a caught Axios error.
+ * Falls back to classifyError() if the interceptor didn't attach one.
+ */
+export function extractApiError(err: any): ApiError {
+  return err?._apiError ?? classifyError(err);
+}
 
 export default api;

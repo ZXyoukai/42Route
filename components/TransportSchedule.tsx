@@ -2,40 +2,57 @@ import {
   useState,
 } from 'react';
 import { BusLoadingScreen } from './BusLoadingScreen';
+import { TimeoutErrorScreen } from './TimeoutErrorScreen';
 import { Text, View, ScrollView, TouchableOpacity, RefreshControl } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { useCustomAlert } from './CustomAlert';
+import { useSchedules } from '../hooks/useSchedules';
 import { useRoutes } from '../hooks/useRoutes';
-import { Route } from '../types/api';
 import { ScheduleInfo } from './interfaces';
 import { SCREEN_SUBTITLE } from './screenCopy';
+import { ScheduleResponse } from '../services/scheduleService';
 
 
 interface TransportScheduleProps {
   onBack?: () => void;
 }
 
-/** Converte uma Route da API num ScheduleInfo para a UI */
-function routeToScheduleInfo(route: Route): ScheduleInfo {
-  const hasDriver = (route.drivers?.length ?? 0) > 0;
+/** Converts a schedule API response to the UI ScheduleInfo format */
+function scheduleToScheduleInfo(schedule: ScheduleResponse, routeStopCount: number, hasDriver: boolean): ScheduleInfo {
   return {
-    routeName: route.route_name,
-    routeId: `RT${String(route.id).padStart(3, '0')}`,
-    departureTime: '--:--',
-    arrivalTime: '--:--',
-    duration: '--',
-    stops: route.stops?.length ?? 0,
-    frequency: hasDriver ? 'Em rota' : 'Sem motorista',
-    isActive: hasDriver,
+    routeName: schedule.routeName,
+    routeId: `RT${String(schedule.routeId).padStart(3, '0')}`,
+    departureTime: schedule.departureTime,
+    arrivalTime: schedule.arrivalTime,
+    duration: `${schedule.durationMin} min`,
+    stops: routeStopCount,
+    frequency: hasDriver ? 'Em rota' : schedule.shift === 'morning' ? 'Turno 06h' : 'Turno 11h',
+    isActive: schedule.isActive,
   };
 }
 
 export const TransportSchedule = ({ onBack }: TransportScheduleProps) => {
   const { AlertComponent, showSuccess, showError, showWarning, showInfo } = useCustomAlert();
-  const { routes, loading, error, fetchRoutes } = useRoutes();
+  const { schedules, loading: schedulesLoading, error: schedulesError, apiError: schedulesApiError, fetchSchedules } = useSchedules();
+  const { routes, loading: routesLoading, apiError: routesApiError, fetchRoutes } = useRoutes();
 
-  const weekdays: ScheduleInfo[] = routes.map(routeToScheduleInfo);
+  const loading = schedulesLoading || routesLoading;
+  const apiError = schedulesApiError || routesApiError;
+  const error = schedulesError;
+
+  // Build schedule cards using real data, with route stop counts from routes
+  const weekdays: ScheduleInfo[] = schedules.map((schedule) => {
+    const route = routes.find(r => r.id === schedule.routeId);
+    const stopCount = route?.stops?.length ?? 0;
+    const hasDriver = route?.drivers?.some(d => d.current_route?.id === schedule.routeId) ?? false;
+    return scheduleToScheduleInfo(schedule, stopCount, hasDriver);
+  });
+
+  const handleRefreshAll = async () => {
+    await Promise.all([fetchSchedules(), fetchRoutes()]);
+  };
+
 
   const handleRoutePress = (route: ScheduleInfo) => {
     if (!route.isActive) {
@@ -176,9 +193,21 @@ export const TransportSchedule = ({ onBack }: TransportScheduleProps) => {
   const [refreshing, setRefreshing] = useState(false);
   const onRefresh = async () => {
     setRefreshing(true);
-    await fetchRoutes();
+    await handleRefreshAll();
     setRefreshing(false);
   };
+
+  // Timeout/Network errors get the full-screen error experience
+  if (apiError && (apiError.isTimeout || apiError.isNetworkError)) {
+    return (
+      <TimeoutErrorScreen
+        error={apiError}
+        onRetry={handleRefreshAll}
+        onBack={onBack}
+        context="ao carregar horários"
+      />
+    );
+  }
 
   return (
     <View className="flex-1 bg-slate-900">
@@ -226,7 +255,7 @@ export const TransportSchedule = ({ onBack }: TransportScheduleProps) => {
               <Text className="text-red-400 font-bold mb-1">Erro ao carregar horários</Text>
               <Text className="text-red-300 text-sm">{error}</Text>
               <TouchableOpacity
-                onPress={fetchRoutes}
+                onPress={handleRefreshAll}
                 className="mt-3 px-4 py-2 rounded-xl"
                 style={{ backgroundColor: '#00babc', alignSelf: 'flex-start' }}
               >

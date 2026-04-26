@@ -20,6 +20,7 @@ import { tripStateService } from '../services/tripStateService';
 import { Driver, Route } from '../types/api';
 import { BusLoadingScreen } from './BusLoadingScreen';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { getDistance } from '../utils/location';
 
 const ACCENT = '#00babc';
 const BG = '#0f172a';
@@ -42,6 +43,10 @@ export const DriverDashboard = ({ driverId, driverName }: DriverDashboardProps) 
   const [lastCoords, setLastCoords] = useState<{ lat: number; long: number } | null>(null);
   const [locationError, setLocationError] = useState<string | null>(null);
   const [updateCount, setUpdateCount] = useState(0);
+  
+  /* ── Current Stop ────────────────────────────────────────────── */
+  const [currentStopId, setCurrentStopId] = useState<number | null>(null);
+  const [nearestStop, setNearestStop] = useState<any>(null);
 
   /* ── Sonar / Estado da Conexão (FUNC-01) ──────────────────── */
   const [connectionState, setConnectionState] = useState<ConnectionState>(socketService.getConnectionState());
@@ -170,8 +175,9 @@ export const DriverDashboard = ({ driverId, driverName }: DriverDashboardProps) 
           console.log('Dados do motorista carregados:', data);
           setDriver(data);
         }
-      } catch (err) {
-        console.error('Erro ao carregar dados do motorista:', err);
+      } catch (err: any) {
+        // Silent — UI shows fallback. Avoid console.error to prevent Expo crashes.
+        console.log('[DriverDashboard] Erro ao carregar dados:', err?.message ?? err);
         /* silent – UI shows fallback */
       } finally {
         setLoading(false);
@@ -203,6 +209,30 @@ export const DriverDashboard = ({ driverId, driverName }: DriverDashboardProps) 
           const { latitude, longitude } = loc.coords;
           setLastCoords({ lat: latitude, long: longitude });
           setUpdateCount((c) => c + 1);
+          
+          // Calcular paragem mais próxima se tiver rota ativa
+          if (activeRoute?.stops) {
+            let minDistance = Infinity;
+            let nearest = null;
+            
+            for (const stop of activeRoute.stops) {
+              if (stop.latitude && stop.longitude) {
+                const distance = getDistance(latitude, longitude, stop.latitude, stop.longitude);
+                // Considerar paragem próxima se < 300 metros
+                if (distance < minDistance) {
+                  minDistance = distance;
+                  nearest = { ...stop, distance };
+                }
+              }
+            }
+            
+            if (nearest && nearest.distance < 300) {
+              setNearestStop(nearest);
+            } else {
+              setNearestStop(null);
+            }
+          }
+
           try {
             // REST API – persiste coordenadas no DB
             await driverService.updateLocation(driverId, { lat: latitude, long: longitude });
@@ -253,6 +283,8 @@ export const DriverDashboard = ({ driverId, driverName }: DriverDashboardProps) 
     setActiveRoute(route);
     setTripActive(true);
     setIsTracking(true);
+    setCurrentStopId(null);
+    setNearestStop(null);
     setUpdateCount(0);
   };
 
@@ -286,6 +318,8 @@ export const DriverDashboard = ({ driverId, driverName }: DriverDashboardProps) 
               setLastCoords(null);
               setUpdateCount(0);
               setActiveRoute(null);
+              setCurrentStopId(null);
+              setNearestStop(null);
             },
           },
         ]
@@ -509,25 +543,61 @@ export const DriverDashboard = ({ driverId, driverName }: DriverDashboardProps) 
               </View>
             </View>
 
+            {/* Fazer Paragem */}
+            {tripActive && (
+              <View className="mt-4 p-4 rounded-xl border border-emerald-500/30 bg-emerald-500/10">
+                <Text className="text-white font-bold mb-1">Ponto de Situação</Text>
+                {nearestStop ? (
+                  <View>
+                    <Text className="text-slate-300 text-[13px] mb-3">
+                      Estás perto de <Text className="font-bold text-white">{nearestStop.stop_name}</Text> ({Math.round(nearestStop.distance)}m)
+                    </Text>
+                    <TouchableOpacity
+                      className={`py-3 rounded-xl items-center justify-center ${currentStopId === nearestStop.id ? 'bg-slate-700' : 'bg-emerald-500'}`}
+                      disabled={currentStopId === nearestStop.id}
+                      onPress={() => {
+                        setCurrentStopId(nearestStop.id);
+                        socketService.driverSetCurrentStop(driverId, nearestStop.id);
+                        Alert.alert('Sucesso', 'Cadetes foram notificados da tua chegada à paragem.');
+                      }}
+                    >
+                      <Text className={`font-bold ${currentStopId === nearestStop.id ? 'text-slate-400' : 'text-white'}`}>
+                        {currentStopId === nearestStop.id ? 'Paragem Registada' : 'Confirmar Paragem Aqui'}
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+                ) : (
+                  <Text className="text-slate-400 text-[13px]">
+                    Nenhuma paragem próxima (raio de 300m).
+                  </Text>
+                )}
+              </View>
+            )}
+
             {/* Lista de paragens */}
             {activeRoute.stops && activeRoute.stops.length > 0 && (
-              <View className="mt-3">
+              <View className="mt-5">
                 <Text className="text-slate-400 text-[12px] font-semibold uppercase tracking-widest mb-2">Paragens</Text>
-                {activeRoute.stops.map((stop, i) => (
-                  <View key={stop.id} className="flex-row items-center gap-2.5 py-2 border-b border-slate-700/40">
-                    <View className="w-6 h-6 rounded-full bg-[#00babc]/20 items-center justify-center">
-                      <Text className="text-[#00babc] text-[11px] font-bold">{i + 1}</Text>
+                {activeRoute.stops.map((stop, i) => {
+                  const isCurrentStop = stop.id === currentStopId;
+                  return (
+                    <View key={stop.id} className={`flex-row items-center gap-2.5 py-3 border-b border-slate-700/40 ${isCurrentStop ? 'bg-emerald-500/10 px-2 rounded-lg' : ''}`}>
+                      <View className={`w-7 h-7 rounded-full items-center justify-center ${isCurrentStop ? 'bg-emerald-500' : 'bg-[#00babc]/20'}`}>
+                        <Text className={`text-[12px] font-bold ${isCurrentStop ? 'text-white' : 'text-[#00babc]'}`}>{i + 1}</Text>
+                      </View>
+                      <View className="flex-1">
+                        <Text className={`text-[14px] font-medium ${isCurrentStop ? 'text-emerald-400' : 'text-white'}`}>{stop.stop_name ?? 'Paragem'}</Text>
+                        {stop.distrit && <Text className="text-slate-400 text-[12px] mt-px">{stop.distrit}</Text>}
+                      </View>
+                      {isCurrentStop && (
+                        <View className="flex-row items-center gap-1">
+                          <Ionicons name="checkmark-circle" size={16} color="#10b981" />
+                          <Text className="text-emerald-500 text-[11px] font-bold">AQUI</Text>
+                        </View>
+                      )}
                     </View>
-                    <View className="flex-1">
-                      <Text className="text-white text-[13px] font-medium">{stop.stop_name ?? 'Paragem'}</Text>
-                      {stop.distrit && <Text className="text-slate-400 text-[11px] mt-px">{stop.distrit}</Text>}
-                    </View>
-                    {/* <View className="flex-row items-center gap-1 px-2 py-[3px] rounded-[12px] bg-[#00babc]/10 border border-[#00babc]/30">
-                      <Ionicons name="people" size={12} color={ACCENT} />
-                      <Text className="text-[#00babc] text-[11px] font-semibold">{stop.cadetes?.length ?? 0}</Text>
-                    </View> */}
-                  </View>
-                ))}
+                  );
+                })}
               </View>
             )}
           </View>

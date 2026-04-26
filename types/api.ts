@@ -176,3 +176,87 @@ export interface DriverLocation {
   long: number;
   timestamp?: string;
 }
+
+// ─── Structured Error Handling ─────────────────────────────────────────────
+
+export type ApiErrorType = 'timeout' | 'network' | 'server' | 'auth' | 'not_found' | 'unknown';
+
+export interface ApiError {
+  type: ApiErrorType;
+  isTimeout: boolean;
+  isNetworkError: boolean;
+  statusCode: number | null;
+  userMessage: string;
+  technicalMessage: string;
+}
+
+/** Build a typed ApiError from a raw Axios/fetch error */
+export function classifyError(err: any): ApiError {
+  // Axios timeout
+  if (err?.code === 'ECONNABORTED' || err?.message?.includes('timeout')) {
+    return {
+      type: 'timeout',
+      isTimeout: true,
+      isNetworkError: false,
+      statusCode: null,
+      userMessage: 'O servidor demorou demasiado a responder. Verifique a sua conexão e tente novamente.',
+      technicalMessage: err?.message ?? 'Request timeout',
+    };
+  }
+
+  // Network error (no response at all)
+  if (err?.message === 'Network Error' || !err?.response) {
+    return {
+      type: 'network',
+      isTimeout: false,
+      isNetworkError: true,
+      statusCode: null,
+      userMessage: 'Sem conexão à internet. Verifique a sua rede e tente novamente.',
+      technicalMessage: err?.message ?? 'Network error',
+    };
+  }
+
+  const status = err?.response?.status;
+
+  if (status === 401 || status === 403) {
+    return {
+      type: 'auth',
+      isTimeout: false,
+      isNetworkError: false,
+      statusCode: status,
+      userMessage: 'Sessão expirada. Por favor, faça login novamente.',
+      technicalMessage: `HTTP ${status}: ${err?.response?.data?.message ?? 'Unauthorized'}`,
+    };
+  }
+
+  if (status === 404) {
+    return {
+      type: 'not_found',
+      isTimeout: false,
+      isNetworkError: false,
+      statusCode: 404,
+      userMessage: 'O recurso solicitado não foi encontrado.',
+      technicalMessage: `HTTP 404: ${err?.response?.data?.message ?? 'Not found'}`,
+    };
+  }
+
+  if (status && status >= 500) {
+    return {
+      type: 'server',
+      isTimeout: false,
+      isNetworkError: false,
+      statusCode: status,
+      userMessage: 'Erro no servidor. Tente novamente mais tarde.',
+      technicalMessage: `HTTP ${status}: ${err?.response?.data?.message ?? 'Server error'}`,
+    };
+  }
+
+  return {
+    type: 'unknown',
+    isTimeout: false,
+    isNetworkError: false,
+    statusCode: status ?? null,
+    userMessage: 'Ocorreu um erro inesperado. Tente novamente.',
+    technicalMessage: err?.message ?? 'Unknown error',
+  };
+}
