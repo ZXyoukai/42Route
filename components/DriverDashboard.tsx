@@ -15,7 +15,7 @@ import { Ionicons, MaterialIcons, FontAwesome5 } from '@expo/vector-icons';
 import * as Location from 'expo-location';
 import { driverService } from '../services/driverService';
 import { routeService } from '../services/routeService';
-import { socketService } from '../services/socketService';
+import { socketService, ConnectionState, BroadcastAck } from '../services/socketService';
 import { tripStateService } from '../services/tripStateService';
 import { Driver, Route } from '../types/api';
 import { BusLoadingScreen } from './BusLoadingScreen';
@@ -42,6 +42,11 @@ export const DriverDashboard = ({ driverId, driverName }: DriverDashboardProps) 
   const [lastCoords, setLastCoords] = useState<{ lat: number; long: number } | null>(null);
   const [locationError, setLocationError] = useState<string | null>(null);
   const [updateCount, setUpdateCount] = useState(0);
+
+  /* ── Sonar / Estado da Conexão (FUNC-01) ──────────────────── */
+  const [connectionState, setConnectionState] = useState<ConnectionState>(socketService.getConnectionState());
+  const [listenersCount, setListenersCount] = useState<number>(0);
+  const [lastUpdateAgo, setLastUpdateAgo] = useState<string>('');
 
   /* ── Seleção de Rota ─────────────────────────────────────────── */
   const [showRouteModal, setShowRouteModal] = useState(false);
@@ -83,6 +88,34 @@ export const DriverDashboard = ({ driverId, driverName }: DriverDashboardProps) 
 
     return unsubscribe;
   }, [driverId]);
+
+  /* ── FUNC-01: Sonar — rastrear estado da conexão socket ────── */
+  useEffect(() => {
+    const handleState = (state: ConnectionState) => setConnectionState(state);
+    const handleAck = (ack: BroadcastAck) => setListenersCount(ack.listenersCount);
+
+    socketService.onConnectionStateChange(handleState);
+    socketService.onBroadcastAck(handleAck);
+
+    // Update "last update ago" every second
+    const intervalId = setInterval(() => {
+      const ts = socketService.getLastUpdateTimestamp();
+      if (ts === 0 || !isTracking) {
+        setLastUpdateAgo('');
+        return;
+      }
+      const secs = Math.floor((Date.now() - ts) / 1000);
+      if (secs < 5) setLastUpdateAgo('agora');
+      else if (secs < 60) setLastUpdateAgo(`há ${secs}s`);
+      else setLastUpdateAgo(`há ${Math.floor(secs / 60)}min`);
+    }, 1000);
+
+    return () => {
+      socketService.offConnectionStateChange(handleState);
+      socketService.offBroadcastAck(handleAck);
+      clearInterval(intervalId);
+    };
+  }, [isTracking]);
 
   /* ── Pulso quando viagem ativa ──────────────────────────────── */
   useEffect(() => {
@@ -164,7 +197,8 @@ export const DriverDashboard = ({ driverId, driverName }: DriverDashboardProps) 
       }
       setLocationError(null);
       locationSubRef.current = await Location.watchPositionAsync(
-        { accuracy: Location.Accuracy.High, timeInterval: 10000, distanceInterval: 30 },
+        // BUG-05 FIX: Reduced distanceInterval from 30m to 5m for smoother tracking
+        { accuracy: Location.Accuracy.Balanced, timeInterval: 4000, distanceInterval: 5 },
         async (loc) => {
           const { latitude, longitude } = loc.coords;
           setLastCoords({ lat: latitude, long: longitude });
@@ -368,15 +402,43 @@ export const DriverDashboard = ({ driverId, driverName }: DriverDashboardProps) 
           </TouchableOpacity>
         </View>
 
-        {/* ── GPS / Localização ───────────────────────────────── */}
+        {/* ── GPS / Localização + Sonar (FUNC-01, FUNC-02) ──── */}
         <View className="mx-4 mb-3.5  rounded-[20px] p-[18px]">
           <View className="flex-row items-center gap-2 mb-3.5">
             <Ionicons name="location" size={20} color={ACCENT} />
             <Text className="text-white text-[16px] font-bold flex-1">Partilha de Localização</Text>
-            <Animated.View
-              style={{ opacity: isTracking ? dotAnim : 1 }}
-              className={`w-2 h-2 rounded-full ${tripActive ? 'bg-emerald-500' : 'bg-slate-400'}`}
-            />
+            {/* FUNC-01: Sonar with 3 states */}
+            <View className={`flex-row items-center gap-1.5 px-2.5 py-1 rounded-[20px] border ${
+              connectionState === 'connected' && isTracking
+                ? 'border-emerald-500 bg-emerald-500/10'
+                : connectionState === 'reconnecting'
+                  ? 'border-amber-500 bg-amber-500/10'
+                  : 'border-slate-600 bg-slate-700/30'
+            }`}>
+              <Animated.View
+                style={{ opacity: isTracking ? dotAnim : 1 }}
+                className={`w-2 h-2 rounded-full ${
+                  connectionState === 'connected' && isTracking
+                    ? 'bg-emerald-500'
+                    : connectionState === 'reconnecting'
+                      ? 'bg-amber-500'
+                      : 'bg-slate-400'
+                }`}
+              />
+              <Text className={`text-[11px] font-semibold ${
+                connectionState === 'connected' && isTracking
+                  ? 'text-emerald-500'
+                  : connectionState === 'reconnecting'
+                    ? 'text-amber-500'
+                    : 'text-slate-400'
+              }`}>
+                {connectionState === 'connected' && isTracking
+                  ? 'Online'
+                  : connectionState === 'reconnecting'
+                    ? 'Reconectando...'
+                    : 'Offline'}
+              </Text>
+            </View>
           </View>
 
           {locationError ? (
@@ -391,6 +453,19 @@ export const DriverDashboard = ({ driverId, driverName }: DriverDashboardProps) 
                 <Text className="text-slate-400 text-[13px] flex-1">Estado</Text>
                 <Text className="text-emerald-500 text-[13px] font-medium shrink text-right">GPS Ativo · A enviar posição</Text>
               </View>
+              {/* FUNC-01: Listeners count + last update */}
+              <View className="flex-row items-center gap-2 py-1.5 border-b border-slate-700/50">
+                <Ionicons name="people" size={16} color={ACCENT} />
+                <Text className="text-slate-400 text-[13px] flex-1">A acompanhar</Text>
+                <Text className="text-[#00babc] text-[13px] font-medium">{listenersCount} cadete{listenersCount !== 1 ? 's' : ''}</Text>
+              </View>
+              {lastUpdateAgo ? (
+                <View className="flex-row items-center gap-2 py-1.5 border-b border-slate-700/50">
+                  <MaterialIcons name="update" size={16} color={ACCENT} />
+                  <Text className="text-slate-400 text-[13px] flex-1">Último envio</Text>
+                  <Text className="text-[#00babc] text-[13px] font-medium">{lastUpdateAgo}</Text>
+                </View>
+              ) : null}
               {lastCoords && (
                 <View className="mt-2.5 bg-[#00babc]/10 rounded-[10px] p-2.5 border border-[#00babc]/25">
                   <Text className="text-slate-400 text-[11px] mb-0.5">Última posição</Text>

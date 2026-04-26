@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { View, Text, StyleSheet, Platform, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, Platform, TouchableOpacity, Animated, Easing } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
-import MapView, { Marker, Polyline, PROVIDER_GOOGLE, Region } from 'react-native-maps';
+import MapView, { Marker, Polyline, PROVIDER_GOOGLE, Region, AnimatedRegion } from 'react-native-maps';
 import * as Location from 'expo-location';
 import { FontAwesome5, Ionicons, MaterialIcons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -97,9 +97,31 @@ export const MapScreen = ({ studentName = 'Utilizador', role = 'cadete', onBack 
   const [distance, setDistance] = useState<number | null>(null);
   const [routeStatus, setRouteStatus] = useState<'idle' | 'loading' | 'ok' | 'error'>('idle');
 
+  // UI-02: ETA calculation for cadete mode
+  const [eta, setEta] = useState<number | null>(null); // minutes
+  // UI-04: Driver info received via socket
+  const [liveDriverName, setLiveDriverName] = useState<string | null>(null);
+  const [driverOffline, setDriverOffline] = useState(false);
+  // Recenter state
+  const [userPanned, setUserPanned] = useState(false);
+
   const mapRef = useRef<MapView>(null);
   const locationSubRef = useRef<Location.LocationSubscription | null>(null);
   const lastFetchOriginRef = useRef<LatLng | null>(null);
+
+  // UI-01: AnimatedRegion for smooth marker interpolation (cadete mode)
+  const animatedBusCoord = useRef(
+    new AnimatedRegion({
+      latitude: LUANDA_42.latitude,
+      longitude: LUANDA_42.longitude,
+      latitudeDelta: 0.04,
+      longitudeDelta: 0.04,
+    })
+  ).current;
+  const busMarkerRef = useRef<any>(null);
+
+  // Pulse animation for live bus marker
+  const pulseAnim = useRef(new Animated.Value(0)).current;
   const isFetchingRef = useRef(false);
 
   const calcRoute = useCallback(async (origin: LatLng) => {
@@ -135,37 +157,53 @@ export const MapScreen = ({ studentName = 'Utilizador', role = 'cadete', onBack 
     };
 
     const onDriverLoc = (payload: DriverLocationPayload) => {
-      console.log(`[MapScreen] 🚗 Driver location update:`, {
-        driverId: payload.id_driver,
-        latitude: payload.lat,
-        longitude: payload.long,
-        driverName: payload.driverName,
-        routeId: payload.routeId,
-        timestamp: new Date().toISOString()
-      });
-      
       const coords: LatLng = { latitude: payload.lat, longitude: payload.long };
       setLiveDriverCoords(coords);
+      setLiveDriverName(payload.driverName ?? null);
+      setDriverOffline(false);
       void persistLastBusCoords(coords);
-      mapRef.current?.animateToRegion(
-        { ...coords, latitudeDelta: 0.04, longitudeDelta: 0.04 },
-        800
-      );
+
+      // UI-01: Smooth marker interpolation using AnimatedRegion.timing()
+      if (Platform.OS === 'android') {
+        // On Android, use animateMarkerToCoordinate for native performance
+        busMarkerRef.current?.animateMarkerToCoordinate(coords, 1500);
+      } else {
+        // On iOS, use AnimatedRegion.timing()
+        animatedBusCoord.timing({
+          latitude: coords.latitude,
+          longitude: coords.longitude,
+          latitudeDelta: 0.04,
+          longitudeDelta: 0.04,
+          duration: 1500,
+          useNativeDriver: false,
+        }).start();
+      }
+
+      // UI-02: Calculate ETA based on distance to campus (avg 30km/h in Luanda traffic)
+      const distKm = haversineKm(coords.latitude, coords.longitude, LUANDA_42.latitude, LUANDA_42.longitude);
+      const avgSpeedKmH = 30;
+      const etaMinutes = Math.round((distKm / avgSpeedKmH) * 60);
+      setEta(etaMinutes > 0 ? etaMinutes : 1);
+
+      if (!userPanned) {
+        mapRef.current?.animateToRegion(
+          { ...coords, latitudeDelta: 0.04, longitudeDelta: 0.04 },
+          800
+        );
+      }
     };
 
     const onTransportLoc = (payload: TransportLocationPayload) => {
-      console.log(`[MapScreen] 🚌 Transport location update:`, {
-        cadeteId: payload.cadeteId,
-        latitude: payload.lat,
-        longitude: payload.long,
-        cadeteName: payload.cadeteName,
-        routeId: payload.routeId,
-        timestamp: new Date().toISOString()
-      });
-      
       const coords: LatLng = { latitude: payload.lat, longitude: payload.long };
       setLiveDriverCoords(coords);
+      setDriverOffline(false);
       void persistLastBusCoords(coords);
+    };
+
+    // Listen for driver going offline
+    const onOffline = () => {
+      setDriverOffline(true);
+      setEta(null);
     };
 
     const restoreLastBusCoords = async () => {
@@ -204,16 +242,37 @@ export const MapScreen = ({ studentName = 'Utilizador', role = 'cadete', onBack 
     // Add Socket.IO listeners
     socketService.onDriverLocation(onDriverLoc);
     socketService.onTransportLocation(onTransportLoc);
-    
-    console.log(`[MapScreen] 📡 Socket listeners added for cadete mode`);
+    socketService.onDriverOffline(onOffline);
 
-    //  CRITICAL: Cleanup - Remove listeners when component unmounts
     return () => {
-      console.log(`[MapScreen] 🧹 Cleaning up Socket listeners`);
       socketService.offDriverLocation(onDriverLoc);
       socketService.offTransportLocation(onTransportLoc);
+      socketService.offDriverOffline(onOffline);
     };
-  }, [isDriver]);
+  }, [isDriver, userPanned]);
+
+  // UI-01: Pulse animation for the live bus marker
+  useEffect(() => {
+    if (isDriver || !liveDriverCoords || driverOffline) return;
+    const loop = Animated.loop(
+      Animated.sequence([
+        Animated.timing(pulseAnim, {
+          toValue: 1,
+          duration: 1200,
+          easing: Easing.out(Easing.ease),
+          useNativeDriver: true,
+        }),
+        Animated.timing(pulseAnim, {
+          toValue: 0,
+          duration: 800,
+          easing: Easing.in(Easing.ease),
+          useNativeDriver: true,
+        }),
+      ])
+    );
+    loop.start();
+    return () => loop.stop();
+  }, [isDriver, !!liveDriverCoords, driverOffline]);
 
   useEffect(() => {
     if (isDriver || !mapReady || !liveDriverCoords) return;
@@ -272,6 +331,18 @@ export const MapScreen = ({ studentName = 'Utilizador', role = 'cadete', onBack 
     longitudeDelta: 0.04,
   };
 
+  // FUNC-05: Recenter handler
+  const handleRecenter = () => {
+    setUserPanned(false);
+    const target = isDriver ? driverCoords : liveDriverCoords;
+    if (target) {
+      mapRef.current?.animateToRegion(
+        { ...target, latitudeDelta: 0.025, longitudeDelta: 0.025 },
+        600
+      );
+    }
+  };
+
   return (
     <View className="flex-1 bg-slate-900">
       <StatusBar style="light" backgroundColor="#0f172a" />
@@ -294,7 +365,9 @@ export const MapScreen = ({ studentName = 'Utilizador', role = 'cadete', onBack 
         {isDriver && distance !== null && (
           <View className="flex-row items-center gap-1.5 bg-[#00babc]/10 border border-[#00babc]/30 rounded-[20px] px-3 py-1.5">
             <MaterialIcons name="directions" size={14} color="#00babc" />
-           
+            <Text className="text-[#00babc] text-[12px] font-bold">
+              {distance < 1 ? `${Math.round(distance * 1000)}m` : `${distance.toFixed(1)}km`}
+            </Text>
           </View>
         )}
       </View>
@@ -312,6 +385,7 @@ export const MapScreen = ({ studentName = 'Utilizador', role = 'cadete', onBack 
           loadingEnabled
           loadingIndicatorColor="#00babc"
           onMapReady={() => setMapReady(true)}
+          onPanDrag={() => setUserPanned(true)}
         >
           {/* ── MODO MOTORISTA ── */}
           {isDriver && mapReady && (
@@ -346,49 +420,131 @@ export const MapScreen = ({ studentName = 'Utilizador', role = 'cadete', onBack 
           {/* ── MODO ESTUDANTE ── */}
           {!isDriver && mapReady && (
             <>
+              {/* Marcador fixo campus */}
+              <Marker coordinate={LUANDA_42} title="Campus 42 Luanda">
+                <View className="bg-slate-900 rounded-[10px] border-2 border-[#00babc] px-2 py-1">
+                  <Text className="text-[#00babc] font-black text-[14px]">42</Text>
+                </View>
+              </Marker>
+
               {/* Linha da rota OSRM se disponível */}
               {routeCoords.length >= 2 && (
                 <Polyline coordinates={routeCoords} strokeColor="#00babc" fillColor="#00babc" strokeWidth={4} />
               )}
-              {/* Posição do autocarro recebida via WebSocket */}
-              {liveDriverCoords ? (
-                <Marker coordinate={liveDriverCoords} title="Autocarro 42" description="Localização em tempo real">
-                  <View className="bg-[#00babc] rounded-[20px] w-10 h-10 items-center justify-center border-2 border-white">
-                    <FontAwesome5 name="bus" size={16} color="white" />
+              {/* Posição do autocarro recebida via WebSocket — UI-01: Animated Marker */}
+              {liveDriverCoords && (
+                <Marker.Animated
+                  ref={busMarkerRef}
+                  coordinate={animatedBusCoord}
+                  title="Autocarro 42"
+                  description="Localização em tempo real"
+                  anchor={{ x: 0.5, y: 0.5 }}
+                >
+                  <View style={{ alignItems: 'center', justifyContent: 'center', width: 56, height: 56 }}>
+                    {/* Pulse ring */}
+                    <Animated.View
+                      style={{
+                        position: 'absolute',
+                        width: 52,
+                        height: 52,
+                        borderRadius: 26,
+                        borderWidth: 2,
+                        borderColor: '#00babc',
+                        opacity: pulseAnim.interpolate({
+                          inputRange: [0, 1],
+                          outputRange: [0.6, 0],
+                        }),
+                        transform: [{
+                          scale: pulseAnim.interpolate({
+                            inputRange: [0, 1],
+                            outputRange: [1, 1.8],
+                          }),
+                        }],
+                      }}
+                    />
+                    {/* Bus icon */}
+                    <View className="bg-[#00babc] rounded-[20px] w-10 h-10 items-center justify-center border-2 border-white">
+                      <FontAwesome5 name="bus" size={16} color="white" />
+                    </View>
                   </View>
-                </Marker>
-              ) : (
-                /* Marcador fixo na 42 enquanto sem sinal */
-                <Marker coordinate={LUANDA_42} title="Campus 42 Luanda" description="Aguardando localização do autocarro">
-                  <View className="bg-slate-900 rounded-[10px] border-2 border-[#00babc] px-2 py-1">
-                    <Text className="text-[#00babc] font-black text-[14px]">42</Text>
-                  </View>
-                </Marker>
+                </Marker.Animated>
               )}
             </>
           )}
         </MapView>
 
+        {/* FUNC-05: Recenter FAB button */}
+        <TouchableOpacity
+          onPress={handleRecenter}
+          className="absolute bottom-4 right-4 w-11 h-11 rounded-full bg-slate-900/90 border border-slate-700 items-center justify-center shadow-lg"
+          activeOpacity={0.7}
+        >
+          <MaterialIcons name="my-location" size={22} color="#00babc" />
+        </TouchableOpacity>
+
         {/* Overlay: aguardar GPS */}
         {isDriver && !driverCoords && (
-          <View className="absolute bottom-4 self-center flex-row items-center gap-2 bg-slate-900/90 rounded-[20px] px-4 py-2.5 border border-[#00babc]/30">
+          <View className="absolute bottom-20 self-center flex-row items-center gap-2 bg-slate-900/90 rounded-[20px] px-4 py-2.5 border border-[#00babc]/30">
             <Ionicons name="locate" size={22} color="#00babc" />
             <Text className="text-[#00babc] text-[13px] font-medium">A obter localização GPS...</Text>
           </View>
         )}
         {/* Overlay: a calcular rota OSRM */}
         {isDriver && driverCoords && routeStatus === 'loading' && routeCoords.length === 0 && (
-          <View className="absolute bottom-4 self-center flex-row items-center gap-2 bg-slate-900/90 rounded-[20px] px-4 py-2.5 border border-[#00babc]/30">
+          <View className="absolute bottom-20 self-center flex-row items-center gap-2 bg-slate-900/90 rounded-[20px] px-4 py-2.5 border border-[#00babc]/30">
             <MaterialIcons name="directions" size={20} color="#00babc" />
             <Text className="text-[#00babc] text-[13px] font-medium">A calcular rota...</Text>
           </View>
         )}
+
+        {/* UI-04: Driver info card for cadete mode */}
+        {!isDriver && liveDriverCoords && !driverOffline && (
+          <View className="absolute top-3 left-4 right-4 bg-slate-900/95 rounded-[16px] px-4 py-3 border border-slate-700 flex-row items-center gap-3">
+            <View className="w-10 h-10 rounded-full bg-[#00babc]/20 border border-[#00babc]/40 items-center justify-center">
+              <FontAwesome5 name="bus" size={16} color="#00babc" />
+            </View>
+            <View className="flex-1">
+              <Text className="text-white text-[14px] font-bold">
+                {liveDriverName ? `Motorista: ${liveDriverName}` : 'Autocarro 42'}
+              </Text>
+              <Text className="text-slate-400 text-[12px] mt-0.5">
+                {eta !== null ? `Chegada estimada: ~${eta} min` : 'Em rota'}
+              </Text>
+            </View>
+            <View className="flex-row items-center gap-1 px-2 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/30">
+              <View className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+              <Text className="text-emerald-500 text-[10px] font-bold">LIVE</Text>
+            </View>
+          </View>
+        )}
+
+        {/* Cadete: Driver offline warning */}
+        {!isDriver && driverOffline && (
+          <View className="absolute top-3 left-4 right-4 bg-slate-900/95 rounded-[16px] px-4 py-3 border border-amber-500/40 flex-row items-center gap-3">
+            <View className="w-10 h-10 rounded-full bg-amber-500/20 border border-amber-500/40 items-center justify-center">
+              <Ionicons name="warning" size={20} color="#f59e0b" />
+            </View>
+            <View className="flex-1">
+              <Text className="text-amber-400 text-[14px] font-bold">Motorista offline</Text>
+              <Text className="text-slate-400 text-[12px] mt-0.5">Última posição conhecida no mapa</Text>
+            </View>
+          </View>
+        )}
       </View>
 
-      {/* Footer */}
-      <View className="flex-row justify-between items-center px-5 py-2 border-t border-slate-700 bg-slate-800">
-        <View className="flex-row items-center gap-1 flex-1">
-          <Ionicons name="radio" size={12} color="#10b981" />
+      {/* Footer — UI-03: Improved with ETA */}
+      <View className="flex-row justify-between items-center px-5 py-2.5 border-t border-slate-700 bg-slate-800">
+        <View className="flex-row items-center gap-1.5 flex-1">
+          <Ionicons
+            name="radio"
+            size={12}
+            color={isDriver
+              ? '#10b981'
+              : liveDriverCoords && !driverOffline
+                ? '#10b981'
+                : '#f59e0b'
+            }
+          />
           <Text className="text-slate-300 text-[12px] flex-1" numberOfLines={1}>
             {isDriver
               ? routeStatus === 'loading'
@@ -396,9 +552,11 @@ export const MapScreen = ({ studentName = 'Utilizador', role = 'cadete', onBack 
                 : routeStatus === 'error'
                   ? 'Sem rede'
                   : 'GPS ativo'
-              : liveDriverCoords
-                ? 'Autocarro em rota'
-                : 'Aguardando localização...'}
+              : driverOffline
+                ? 'Motorista offline'
+                : liveDriverCoords
+                  ? `Autocarro em rota${eta !== null ? ` · ~${eta} min` : ''}`
+                  : 'Aguardando localização...'}
           </Text>
         </View>
         {isDriver && distance !== null && (
@@ -408,14 +566,16 @@ export const MapScreen = ({ studentName = 'Utilizador', role = 'cadete', onBack 
               : `${distance.toFixed(1)}km`}
           </Text>
         )}
-        {!isDriver && (
-          <Text className="text-[#00babc] font-bold text-[12px] ml-2">
-            {liveDriverCoords ? 'Em rota' : 'Offline'}
-          </Text>
+        {!isDriver && eta !== null && !driverOffline && (
+          <View className="flex-row items-center gap-1 bg-[#00babc]/10 rounded-full px-2.5 py-1 border border-[#00babc]/30">
+            <Ionicons name="time" size={12} color="#00babc" />
+            <Text className="text-[#00babc] font-bold text-[12px]">~{eta} min</Text>
+          </View>
+        )}
+        {!isDriver && !liveDriverCoords && (
+          <Text className="text-slate-400 font-bold text-[12px] ml-2">Offline</Text>
         )}
       </View>
     </View>
   );
 };
-
-
