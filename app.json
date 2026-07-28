@@ -19,9 +19,9 @@
         }
       ],
       [
-        "expo-maps",
+        "expo-camera",
         {
-          "googleMapsApiKey": "AIzaSyA_eu9qzXQVqqSGaT3e2uj63uwb0XIlrEI"
+          "cameraPermission": "Permitir que $(PRODUCT_NAME) use a câmara para ler o QR code de presença."
         }
       ],
       "expo-font",
@@ -41,9 +41,6 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.domingos-franco.x42Routes",
-      "config": {
-        "googleMapsApiKey": "AIzaSyAlm3Es35ecfHTp4-gb7MjAfoqEcWuKXX0"
-      },
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
       }
@@ -59,12 +56,7 @@
         "android.permission.INTERNET",
         "android.permission.ACCESS_NETWORK_STATE"
       ],
-      "package": "com.domingos_franco.x42Routes",
-      "config": {
-        "googleMaps": {
-          "apiKey": "AIzaSyA_eu9qzXQVqqSGaT3e2uj63uwb0XIlrEI"
-        }
-      }
+      "package": "com.domingos_franco.x42Routes"
     },
     "extra": {
       "eas": {

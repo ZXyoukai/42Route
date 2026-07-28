@@ -1,18 +1,19 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { View, Text, StyleSheet, Platform, TouchableOpacity, Animated, Easing } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
-import MapView, { Marker, Polyline, PROVIDER_GOOGLE, Region, AnimatedRegion } from 'react-native-maps';
+import MapView, { Marker, Polyline, Region, AnimatedRegion, UrlTile } from 'react-native-maps';
 import * as Location from 'expo-location';
 import { FontAwesome5, Ionicons, MaterialIcons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { socketService, DriverLocationPayload, TransportLocationPayload } from '../services/socketService';
+import { ENV_CONFIG } from '../config/environment';
 import { SCREEN_SUBTITLE } from './screenCopy';
 
 // Coordenadas da 42 Luanda
 const LUANDA_42 = { latitude: -8.838333, longitude: 13.234444 };
 
 // Recalcular rota quando o motorista se afasta mais de 50 m do ponto de origem
-const RECALC_THRESHOLD_M = 1;
+const RECALC_THRESHOLD_M = 50;
 
 function haversineKm(
   lat1: number, lon1: number,
@@ -384,7 +385,6 @@ export const MapScreen = ({ studentName = 'Utilizador', role = 'cadete', onBack 
       <View className="flex-1" style={{ width: '100%', height: '100%' }}>
         <MapView
           ref={mapRef}
-          provider={PROVIDER_GOOGLE}
           style={{ flex: 1, width: '100%', height: '100%' }}
           initialRegion={initialRegion}
           showsUserLocation={false}
@@ -395,6 +395,7 @@ export const MapScreen = ({ studentName = 'Utilizador', role = 'cadete', onBack 
           onMapReady={() => setMapReady(true)}
           onPanDrag={() => setUserPanned(true)}
         >
+          <UrlTile urlTemplate={ENV_CONFIG.TILE_URL} maximumZ={19} shouldReplaceMapContent />
           {/* ── MODO MOTORISTA ── */}
           {isDriver && mapReady && (
             <>
@@ -480,6 +481,11 @@ export const MapScreen = ({ studentName = 'Utilizador', role = 'cadete', onBack 
             </>
           )}
         </MapView>
+
+        {/* Atribuição obrigatória OSM (licença ODbL) */}
+        <View className="absolute bottom-1 left-1 bg-slate-900/70 rounded px-1.5 py-0.5">
+          <Text className="text-slate-300 text-[9px]">© OpenStreetMap contributors</Text>
+        </View>
 
         {/* FUNC-05: Recenter FAB button */}
         <TouchableOpacity

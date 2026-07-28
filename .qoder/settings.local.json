@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls -la /home/dfranco/pessoal/42Route && cat /home/dfranco/pessoal/42Route/package.json 2>/dev/null | head -60)"
+    ]
+  }
+}

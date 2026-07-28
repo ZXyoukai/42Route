@@ -1,5 +1,6 @@
 declare module '@env' {
   export const API_BASE_URL: string;
+  export const TILE_URL: string;
 }
 
 declare module '*.png' {

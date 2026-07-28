@@ -19,6 +19,7 @@ import { socketService, ConnectionState, BroadcastAck } from '../services/socket
 import { tripStateService } from '../services/tripStateService';
 import { Driver, Route } from '../types/api';
 import { BusLoadingScreen } from './BusLoadingScreen';
+import { AttendanceQRDisplay } from './AttendanceQRDisplay';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getDistance } from '../utils/location';
 
@@ -60,6 +61,10 @@ export const DriverDashboard = ({ driverId, driverName }: DriverDashboardProps) 
   const [activeRoute, setActiveRoute] = useState<Route | null>(null);
   const [tripLoading, setTripLoading] = useState(false);
 
+  /* ── Presença por QR ─────────────────────────────────────────── */
+  const [showQrModal, setShowQrModal] = useState(false);
+  const [tripId, setTripId] = useState<string | null>(tripStateService.getState().tripId);
+
   /* ── Animações ──────────────────────────────────────────────── */
   const pulseAnim = useRef(new Animated.Value(1)).current;
   const pulseOpacity = useRef(new Animated.Value(0.6)).current;
@@ -75,6 +80,7 @@ export const DriverDashboard = ({ driverId, driverName }: DriverDashboardProps) 
       setTripActive(true);
       setActiveRoute(globalState.activeRoute);
       setIsTracking(globalState.isTracking);
+      setTripId(globalState.tripId);
     }
 
     // Inscrever-se a mudanças no estado global
@@ -83,11 +89,13 @@ export const DriverDashboard = ({ driverId, driverName }: DriverDashboardProps) 
         setTripActive(state.tripActive);
         setActiveRoute(state.activeRoute);
         setIsTracking(state.isTracking);
+        setTripId(state.tripId);
       } else if (!state.tripActive) {
         // Se outro motorista ou ninguém tem viagem ativa, limpar
         setTripActive(false);
         setActiveRoute(null);
         setIsTracking(false);
+        setTripId(null);
       }
     });
 
@@ -392,6 +400,18 @@ export const DriverDashboard = ({ driverId, driverName }: DriverDashboardProps) 
         </View>
       </Modal>
 
+      {/* ── Modal QR de Presença ───────────────────────────────── */}
+      {tripActive && tripId && activeRoute && (
+        <AttendanceQRDisplay
+          visible={showQrModal}
+          tripId={tripId}
+          driverId={driverId}
+          routeId={activeRoute.id}
+          routeName={activeRoute.route_name}
+          onClose={() => setShowQrModal(false)}
+        />
+      )}
+
       <ScrollView className="flex-1 pb-7" showsVerticalScrollIndicator={false}>
 
         {/* ── Header ──────────────────────────────────────────── */}
@@ -542,6 +562,18 @@ export const DriverDashboard = ({ driverId, driverName }: DriverDashboardProps) 
                 </View>
               </View>
             </View>
+
+            {/* QR de Presença */}
+            {tripActive && tripId && (
+              <TouchableOpacity
+                className="mt-4 flex-row items-center justify-center gap-2 py-3 rounded-xl border border-[#00babc]/40 bg-[#00babc]/10"
+                onPress={() => setShowQrModal(true)}
+                activeOpacity={0.8}
+              >
+                <MaterialIcons name="qr-code-2" size={20} color={ACCENT} />
+                <Text className="text-[#00babc] font-bold">Mostrar QR de Presença</Text>
+              </TouchableOpacity>
+            )}
 
             {/* Fazer Paragem */}
             {tripActive && (

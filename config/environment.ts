@@ -3,11 +3,14 @@
  * Este ficheiro é a fonte única de verdade para as variáveis de ambiente
  */
 
-import { API_BASE_URL as ENV_API_BASE_URL } from '@env';
+import { API_BASE_URL as ENV_API_BASE_URL, TILE_URL as ENV_TILE_URL } from '@env';
 
 // Carregar do .env via @env (injetado pelo Babel em tempo de build)
 export const ENV_CONFIG = {
   API_BASE_URL: ENV_API_BASE_URL || 'https://four2routeapi.onrender.com',
+  // Tiles OSM: em produção usar um fornecedor (MapTiler/Stadia/Thunderforest) via .env —
+  // o servidor público da OSMF não permite tráfego de apps em produção
+  TILE_URL: ENV_TILE_URL || 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
   API_TIMEOUT: 30000,
   DEBUG_MODE: true,
 } as const;

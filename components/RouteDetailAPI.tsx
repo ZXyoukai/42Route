@@ -2,9 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
 import { Ionicons, FontAwesome5, MaterialIcons } from '@expo/vector-icons';
 import { StatusBar } from 'expo-status-bar';
-import MapView, { Marker, Polyline, PROVIDER_GOOGLE } from 'react-native-maps';
+import MapView, { Marker, Polyline, UrlTile } from 'react-native-maps';
 import { Route, MiniBusStop } from '../types/api';
 import { routeService } from '../services/routeService';
+import { ENV_CONFIG } from '../config/environment';
 import polyline from '@mapbox/polyline';
 import { BusLoadingScreen } from './BusLoadingScreen';
 
@@ -153,10 +154,10 @@ useEffect(() => {
       {/* ── Map (full top half) ── */}
       <View style={{ height: '52%' }}>
         <MapView
-          provider={PROVIDER_GOOGLE}
           style={{ flex: 1 }}
           initialRegion={initialRegion}
         >
+          <UrlTile urlTemplate={ENV_CONFIG.TILE_URL} maximumZ={19} shouldReplaceMapContent />
           {routeCoords.length > 1 && (
             <Polyline coordinates={routeCoords} strokeColor="#00babc" fillColor='#00babc' strokeWidth={5} />
           )}
@@ -184,6 +185,11 @@ useEffect(() => {
             </Marker>
           ))}
         </MapView>
+
+        {/* Atribuição obrigatória OSM (licença ODbL) */}
+        <View className="absolute bottom-6 left-1 bg-slate-900/70 rounded px-1.5 py-0.5">
+          <Text className="text-slate-300 text-[9px]">© OpenStreetMap contributors</Text>
+        </View>
 
         {/* Floating back + refresh */}
         <View className="absolute top-14 left-4 right-4 flex-row justify-between">

@@ -177,6 +177,32 @@ export interface DriverLocation {
   timestamp?: string;
 }
 
+// ─── Presença (QR Code) ────────────────────────────────────────────────────
+
+export interface Attendance {
+  id: number;
+  cadete_id: number;
+  route_id: number;
+  trip_id: string;
+  stop_id: number | null;
+  scanned_at: string;
+  lat: number | null;
+  lng: number | null;
+  cadete?: Cadete;
+}
+
+export interface TripQrResponse {
+  trip_token: string;
+  expires_in: number; // segundos
+}
+
+export interface MarkAttendanceRequest {
+  trip_token: string;
+  cadete_id: number;
+  lat?: number;
+  lng?: number;
+}
+
 // ─── Structured Error Handling ─────────────────────────────────────────────
 
 export type ApiErrorType = 'timeout' | 'network' | 'server' | 'auth' | 'not_found' | 'unknown';

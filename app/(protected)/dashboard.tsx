@@ -30,6 +30,9 @@ export default function DashboardPage() {
         onRouteSelect={(route) => {
           router.push(`/(protected)/route/${route.id}` as any);
         }}
+        onMarkAttendance={() => {
+          router.push('/(protected)/attendance-scan' as any);
+        }}
       />
       <BottomTabBar activeTab="dashboard" role="cadete" />
     </View>

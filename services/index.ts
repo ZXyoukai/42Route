@@ -5,6 +5,7 @@ export { driverService } from './driverService';
 export { routeService } from './routeService';
 export { miniBusStopService } from './miniBusStopService';
 export { authService } from './authService';
+export { attendanceService } from './attendanceService';
 export { chatService } from './chatService';
 export { socketService } from './socketService';
 export { tripStateService } from './tripStateService';

@@ -71,9 +71,10 @@ const RouteStatusCard = ({ route, onPress }: RouteStatusCardProps) => {
 interface DashboardProps {
   studentName?: string;
   onRouteSelect?: (route: Route) => void;
+  onMarkAttendance?: () => void;
 }
 
-export const TransportDashboardAPI = ({ studentName = "Estudante", onRouteSelect }: DashboardProps) => {
+export const TransportDashboardAPI = ({ studentName = "Estudante", onRouteSelect, onMarkAttendance }: DashboardProps) => {
   const { routes, loading, error, apiError, fetchRoutes } = useRoutes();
   const { drivers } = useDrivers();
   const [refreshing, setRefreshing] = useState(false);
@@ -157,6 +158,18 @@ export const TransportDashboardAPI = ({ studentName = "Estudante", onRouteSelect
             <Text className="text-slate-400 text-[11px] font-medium uppercase mt-1">Veículos Movendo</Text>
           </View>
         </View>
+
+        {onMarkAttendance && (
+          <TouchableOpacity
+            onPress={onMarkAttendance}
+            activeOpacity={0.85}
+            className="mt-4 flex-row items-center justify-center gap-2 py-3.5 rounded-2xl"
+            style={{ backgroundColor: '#00babc' }}
+          >
+            <MaterialIcons name="qr-code-scanner" size={20} color="#fff" />
+            <Text className="text-white font-bold text-[15px]">Marcar Presença</Text>
+          </TouchableOpacity>
+        )}
       </View>
 
       {/* Routes List */}

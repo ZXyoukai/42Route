@@ -1,3 +1,4 @@
+import * as Crypto from 'expo-crypto';
 import { Route } from '../types/api';
 
 interface TripState {
@@ -5,6 +6,7 @@ interface TripState {
   activeRoute: Route | null;
   isTracking: boolean;
   driverId: number;
+  tripId: string | null;
 }
 
 let tripState: TripState = {
@@ -12,6 +14,7 @@ let tripState: TripState = {
   activeRoute: null,
   isTracking: false,
   driverId: 0,
+  tripId: null,
 };
 
 // Listeners para mudanças de estado
@@ -28,6 +31,7 @@ export const tripStateService = {
       activeRoute: route,
       isTracking: true,
       driverId,
+      tripId: Crypto.randomUUID(),
     };
     tripStateService.notify();
   },
@@ -39,6 +43,7 @@ export const tripStateService = {
       activeRoute: null,
       isTracking: false,
       driverId: tripState.driverId,
+      tripId: null,
     };
     tripStateService.notify();
   },
@@ -69,6 +74,7 @@ export const tripStateService = {
       activeRoute: null,
       isTracking: false,
       driverId: 0,
+      tripId: null,
     };
     tripStateService.notify();
   },
